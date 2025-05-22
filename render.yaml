@@ -1,0 +1,10 @@
+services:
+  - type: web
+    name: suno-discord-bot
+    env: node
+    buildCommand: npm install
+    startCommand: node manual_trigger.js
+    plan: free
+    envVars:
+      - key: NODE_ENV
+        value: production
