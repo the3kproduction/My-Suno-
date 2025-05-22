@@ -46,6 +46,38 @@ class ManualSunoBot {
         this.client.on('error', (error) => {
             logger.error('Discord client error:', error);
         });
+
+        // Simple command to get the posting link
+        this.client.on('messageCreate', async (message) => {
+            if (message.author.bot) return;
+            
+            // Respond to !post or !suno commands
+            if (message.content.toLowerCase() === '!post' || message.content.toLowerCase() === '!suno') {
+                const embed = {
+                    color: 0x5865F2,
+                    title: '🎵 Post New Suno Song',
+                    description: 'Click the link below to post your latest Suno song to this channel!',
+                    fields: [
+                        {
+                            name: '📝 How to use:',
+                            value: '1. Create your song on Suno\n2. Click the link below\n3. Fill in song title and URL\n4. Hit "Post to Discord" - done! 🎉'
+                        }
+                    ],
+                    footer: {
+                        text: 'Your songs will appear here automatically!'
+                    }
+                };
+
+                // Get the current domain (this will be your Replit app URL)
+                const domain = process.env.REPLIT_DOMAIN || 'your-replit-app';
+                const postUrl = `https://${domain}.replit.app/`;
+
+                await message.reply({ 
+                    content: `🚀 **Post your Suno song here:** ${postUrl}`,
+                    embeds: [embed]
+                });
+            }
+        });
     }
 
     setupWebServer() {
