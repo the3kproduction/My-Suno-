@@ -1,5 +1,5 @@
 const express = require('express');
-const { Client, GatewayIntentBits } = require('discord.js');
+const { Client, GatewayIntentBits, SlashCommandBuilder, REST, Routes } = require('discord.js');
 const config = require('./config/config');
 const DiscordService = require('./services/discordService');
 const Storage = require('./utils/storage');
