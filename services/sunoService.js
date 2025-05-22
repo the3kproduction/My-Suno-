@@ -35,13 +35,27 @@ class SunoService {
                     const url = `${this.apiUrl}${endpoint}`;
                     logger.debug(`Trying endpoint: ${url}`);
                     
-                    const response = await this.httpClient.get(url, {
-                        params: {
-                            limit: limit,
-                            sort: 'created_at',
-                            order: 'desc'
+                    // Try different parameter combinations to get newest songs (not top songs)
+                    const paramSets = [
+                        { limit: limit, sort: 'created_at', order: 'desc', filter: 'newest' },
+                        { limit: limit, sort: 'date', order: 'desc', type: 'recent' },
+                        { limit: limit, orderBy: 'created_at', order: 'desc', view: 'chronological' },
+                        { limit: limit, sort: 'timestamp', order: 'desc', mode: 'newest' },
+                        { limit: limit, sort: 'created_at', order: 'desc', tab: 'recent' },
+                        { limit: limit, sort: 'created_at', order: 'desc' }
+                    ];
+
+                    let response = null;
+                    for (const params of paramSets) {
+                        try {
+                            response = await this.httpClient.get(url, { params });
+                            if (response.data && (Array.isArray(response.data) || response.data.songs || response.data.data)) {
+                                break;
+                            }
+                        } catch (paramError) {
+                            continue; // Try next parameter set
                         }
-                    });
+                    }
 
                     if (response.data && response.data.length > 0) {
                         songs = response.data;
