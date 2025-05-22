@@ -13,19 +13,11 @@ author = "agent"
 
 [[workflows.workflow.tasks]]
 task = "workflow.run"
-args = "Discord Bot"
+args = "discord-bot-test"
 
 [[workflows.workflow.tasks]]
 task = "workflow.run"
-args = "discord-bot-test"
-
-[[workflows.workflow]]
-name = "Discord Bot"
-author = "agent"
-
-[[workflows.workflow.tasks]]
-task = "shell.exec"
-args = "npm install discord.js axios dotenv && node index.js"
+args = "Manual Trigger Bot"
 
 [[workflows.workflow]]
 name = "discord-bot-test"
@@ -35,5 +27,18 @@ author = "agent"
 task = "shell.exec"
 args = "npm install discord.js axios dotenv && echo \"Dependencies installed successfully\""
 
+[[workflows.workflow]]
+name = "Manual Trigger Bot"
+author = "agent"
+
+[[workflows.workflow.tasks]]
+task = "shell.exec"
+args = "node manual_trigger.js"
+waitForPort = 5000
+
 [deployment]
 run = ["sh", "-c", "npm install discord.js axios dotenv && node index.js"]
+
+[[ports]]
+localPort = 5000
+externalPort = 80
