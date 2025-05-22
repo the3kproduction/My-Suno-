@@ -3,7 +3,7 @@ require('dotenv').config();
 const config = {
     discord: {
         token: process.env.DISCORD_TOKEN || '',
-        channelId: process.env.DISCORD_CHANNEL_ID || ''
+        channelId: process.env.DISCORD_CHANNEL_ID || '1375178931312787457'
     },
     suno: {
         profileId: process.env.SUNO_PROFILE_ID || '',

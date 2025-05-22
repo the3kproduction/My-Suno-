@@ -173,8 +173,9 @@ class ManualSunoBot {
                     ));
                 }
 
-                // Post to Discord
-                await this.discordService.postSong(config.discord.channelId, song);
+                // Post to Discord (use correct channel ID)
+                const channelId = '1375178931312787457'; // Fixed channel ID
+                await this.discordService.postSong(channelId, song);
                 await this.storage.addPostedSong(song);
 
                 logger.info(`Successfully posted song: ${song.title}`);
