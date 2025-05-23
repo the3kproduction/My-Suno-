@@ -70,7 +70,7 @@ class CleanSunoBot {
             const loadedStorage = this.storage.load() || {};
             const loadedSongs = Array.isArray(loadedStorage.songs) ? loadedStorage.songs : [];
 
-            this.storage.songs = loadedSongs;
+            this.storage.songs = Array.isArray(loadedSongs) ? loadedSongs : [];
 
             // Restore posted song IDs
             this.storage.songs.forEach((song) => this.postedSongs.add(song.id));
