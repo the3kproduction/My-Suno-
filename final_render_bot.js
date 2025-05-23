@@ -25,6 +25,7 @@ class EnhancedMusicBot {
         this.token = process.env.DISCORD_TOKEN;
         this.clientId = this.client.user?.id;
         this.sunoChannelId = process.env.DISCORD_CHANNEL_ID;
+        this.botHelperChannelId = '1375615201990283304'; // Hidden channel for smart song extraction
         
         // Single music queue (simplified)
         this.musicQueue = [];
@@ -152,6 +153,14 @@ class EnhancedMusicBot {
             await this.registerSlashCommands();
         });
 
+        // Smart channel monitoring for automatic song extraction
+        this.client.on('messageCreate', async (message) => {
+            // Only monitor the bot-helper channel
+            if (message.channel.id === this.botHelperChannelId && !message.author.bot) {
+                await this.handleBotHelperMessage(message);
+            }
+        });
+
         this.client.on('interactionCreate', async interaction => {
             try {
                 if (interaction.isChatInputCommand()) {
@@ -196,6 +205,119 @@ class EnhancedMusicBot {
                 }
             }
         });
+    }
+
+    async handleBotHelperMessage(message) {
+        try {
+            // Check if the message contains a Suno link
+            const sunoUrlMatch = message.content.match(/https:\/\/suno\.com\/s\/[\w-]+/);
+            
+            if (sunoUrlMatch) {
+                const sunoUrl = sunoUrlMatch[0];
+                console.log(`🔍 Found Suno link in bot-helper: ${sunoUrl}`);
+                
+                // Wait a moment for Discord to generate the embed
+                setTimeout(async () => {
+                    try {
+                        // Fetch the message again to get the embed
+                        const updatedMessage = await message.fetch();
+                        
+                        if (updatedMessage.embeds && updatedMessage.embeds.length > 0) {
+                            const embed = updatedMessage.embeds[0];
+                            
+                            // Extract song data from Discord's embed
+                            const songTitle = embed.title || 'Unknown Song';
+                            const songDescription = embed.description || 'Fresh beats from Suno AI!';
+                            const songImage = embed.image?.url || embed.thumbnail?.url;
+                            
+                            console.log(`🎵 Extracted from Discord embed: ${songTitle}`);
+                            
+                            // Post to main channel with extracted data
+                            await this.postSmartSunoToDiscord(songTitle, sunoUrl, songDescription, songImage);
+                            
+                            // React to the helper message to show it was processed
+                            await message.react('✅');
+                            
+                        } else {
+                            console.log('⚠️ No embed found, falling back to manual extraction');
+                            // Fallback to our manual extraction
+                            await this.postSunoToDiscord('Unknown Song', sunoUrl, 'Posted via bot-helper');
+                            await message.react('❓');
+                        }
+                    } catch (error) {
+                        console.error('❌ Error processing bot-helper message:', error);
+                        await message.react('❌');
+                    }
+                }, 3000); // Wait 3 seconds for Discord to generate embed
+            }
+        } catch (error) {
+            console.error('❌ Error handling bot-helper message:', error);
+        }
+    }
+
+    async postSmartSunoToDiscord(title, url, description, imageUrl) {
+        try {
+            const channel = await this.client.channels.fetch(this.sunoChannelId);
+            
+            // Create premium embed with extracted data
+            const embed = new EmbedBuilder()
+                .setAuthor({ 
+                    name: '🎵 Suno AI Music', 
+                    iconURL: 'https://images.crunchbase.com/image/upload/c_lpad,h_170,w_170,f_auto,b_white,q_auto:eco,dpr_1/erkxwhl1gd48xfhe2yld' 
+                })
+                .setTitle(`🔥 ${title}`)
+                .setURL(url)
+                .setColor(0x7C3AED) // Premium purple color
+                .setTimestamp()
+                .setFooter({ 
+                    text: '3AM VERIFIED • Smart Auto-Post' 
+                });
+
+            // Add description
+            embed.setDescription(`🎶 **${description}**\n\n🔗 [Listen on Suno](${url})`);
+
+            // Add artwork (from Discord embed or fallback)
+            if (imageUrl) {
+                embed.setImage(imageUrl);
+                embed.setThumbnail(imageUrl);
+            } else {
+                const defaultArtwork = 'https://images.unsplash.com/photo-1493225457124-a3eb161ffa5f?w=800&h=800&fit=crop&crop=center';
+                embed.setImage(defaultArtwork);
+                embed.setThumbnail('https://images.crunchbase.com/image/upload/c_lpad,h_170,w_170,f_auto,b_white,q_auto:eco,dpr_1/erkxwhl1gd48xfhe2yld');
+            }
+
+            // Add premium fields
+            embed.addFields([
+                { 
+                    name: '🎤 Song Title', 
+                    value: title, 
+                    inline: false 
+                },
+                { 
+                    name: '🌟 Status', 
+                    value: '🤖 Smart Auto-Posted', 
+                    inline: true 
+                },
+                { 
+                    name: '⚡ Source', 
+                    value: '3AM VERIFIED Bot', 
+                    inline: true 
+                }
+            ]);
+
+            // Send with reactions
+            const message = await channel.send({ embeds: [embed] });
+            
+            // Add premium reactions
+            await message.react('🔥');
+            await message.react('💎');
+            await message.react('🎯');
+            
+            console.log(`✅ Smart-posted Suno song to Discord: ${title}`);
+        } catch (error) {
+            console.error('❌ Smart Discord posting error:', error);
+            throw error;
+        }
     }
 
     async handleLoadAndPlay(interaction, url) {
