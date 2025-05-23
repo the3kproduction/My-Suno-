@@ -871,10 +871,8 @@ class EnhancedMusicBot {
                     });
                 }
 
-                // Auto-start playing if not already playing
-                if (!this.channels[channelType].isPlaying) {
-                    setTimeout(() => this.playCurrentSong(channelType), 1000);
-                }
+                // Note: Voice channel connection requires Discord slash commands
+                // Web interface loads videos for display only
 
             } catch (error) {
                 console.error('❌ YouTube loading error:', error);
