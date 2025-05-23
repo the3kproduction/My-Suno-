@@ -188,6 +188,8 @@ class UltimateMusicBot {
         const PORT = process.env.PORT || 5000;
         this.app.listen(PORT, '0.0.0.0', () => {
             logger.info(`🌟 Web server running on port ${PORT}`);
+        }).on('error', (err) => {
+            logger.error('Server failed to start', err);
         });
     }
 
