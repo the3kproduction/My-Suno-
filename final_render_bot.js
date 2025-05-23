@@ -81,8 +81,12 @@ class EnhancedMusicBot {
             
             for (const song of songs) {
                 if (!this.postedSongs.has(song.id)) {
-                    console.log(`🆕 New song found: ${song.title}`);
-                    await this.postSunoToDiscord(song.title, song.url, song.description);
+                    console.log(`🆕 New song found: ${song.title} - Auto-posting via clever system`);
+                    
+                    // Use the clever hidden channel system instead of direct posting
+                    const botHelperChannel = await this.client.channels.fetch(this.botHelperChannelId);
+                    await botHelperChannel.send(song.url);
+                    
                     this.postedSongs.add(song.id);
                 }
             }
