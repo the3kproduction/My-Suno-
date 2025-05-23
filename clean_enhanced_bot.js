@@ -475,16 +475,16 @@ class EnhancedMusicBot {
         
         .header h1 { 
             font-size: 5rem; margin-bottom: 20px; 
-            background: linear-gradient(45deg, #ff6b6b, #4ecdc4, #667eea, #764ba2, #ff6b6b, #ff1493, #00ff7f);
-            background-size: 600% 600%;
-            animation: gentleGradient 6s ease infinite, textExplosion 8s ease infinite;
+            background: linear-gradient(45deg, #ff6b6b, #4ecdc4, #667eea, #764ba2, #ff6b6b);
+            background-size: 400% 400%;
+            animation: gentleGradient 8s ease infinite;
             -webkit-background-clip: text;
             -webkit-text-fill-color: transparent;
             background-clip: text;
-            filter: drop-shadow(0 10px 25px rgba(255,255,255,0.6)) drop-shadow(0 20px 40px rgba(0,0,0,0.4));
-            font-weight: 900;
-            letter-spacing: 3px;
-            transform: perspective(800px) rotateX(10deg) rotateY(5deg);
+            filter: drop-shadow(0 8px 20px rgba(255,255,255,0.4)) drop-shadow(0 15px 30px rgba(0,0,0,0.3));
+            font-weight: 800;
+            letter-spacing: 2px;
+            text-shadow: 0 0 20px rgba(255,255,255,0.3);
         }
         
         .header p {
