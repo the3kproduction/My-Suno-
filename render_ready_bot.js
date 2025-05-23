@@ -195,10 +195,11 @@ class EnhancedMusicBot {
                 return;
             }
             await rest.put(
-                Routes.applicationCommands(this.client.application.id),
+              Routes.applicationCommands(this.client.application.id),
+              { body: commands }
             );
-                { body: commands }
-            );
+
+
             console.log('🎯 Slash commands registered successfully!');
         } catch (error) {
             console.error('Error registering slash commands:', error);
