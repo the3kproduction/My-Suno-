@@ -34,8 +34,8 @@ class EnhancedMusicBot {
         // Connection status for dashboard
         this.connectionStatus = {
             connected: false,
-            muted: true,
-            deafened: true,
+            muted: 'unknown',
+            deafened: 'unknown', 
             channelName: null,
             playing: false
         };
@@ -1034,8 +1034,12 @@ class EnhancedMusicBot {
                         </span>
                     </div>
                     <div class="status-item">
-                        <span class="status-label">Bot Mute Status:</span>
-                        <span class="status-value warning">⚠️ Check Discord - Unmute bot manually</span>
+                        <span class="status-label">Bot Audio:</span>
+                        <span class="status-value ${this.connectionStatus.connected ? (this.connectionStatus.playing ? 'connected' : 'warning') : 'disconnected'}">
+                            ${this.connectionStatus.connected ? 
+                                (this.connectionStatus.playing ? '🔊 Audio Active' : '🔇 Check if unmuted in Discord') : 
+                                '❌ Not Connected'}
+                        </span>
                     </div>
                 </div>
             </div>
