@@ -176,26 +176,29 @@ class EnhancedMusicBot {
         await interaction.deferReply();
         
         try {
-            // Try to join user's voice channel, or find a music channel
-            let voiceChannel = interaction.member.voice.channel;
+            // Find voice channel to join
+            let voiceChannel = interaction.member?.voice?.channel;
             
             if (!voiceChannel) {
-                // Auto-join a music channel if user isn't in voice
-                const musicChannels = interaction.guild.channels.cache.filter(
-                    channel => channel.type === ChannelType.GuildVoice && 
+                // Auto-find music channels
+                const guild = interaction.guild;
+                const musicChannels = guild.channels.cache.filter(
+                    channel => channel.type === 2 && // Voice channel type
                     (channel.name.toLowerCase().includes('music') || 
                      channel.name.toLowerCase().includes('general'))
                 );
                 
                 if (musicChannels.size > 0) {
                     voiceChannel = musicChannels.first();
-                    await interaction.editReply(`🎵 Auto-joining ${voiceChannel.name} since you're not in a voice channel`);
+                    console.log(`🎵 Auto-joining ${voiceChannel.name}`);
                 } else {
-                    await interaction.editReply('❌ Please join a voice channel or create a "Music" voice channel for auto-join!');
+                    await interaction.editReply('❌ Please join a voice channel or create a "Music" voice channel!');
                     return;
                 }
             }
 
+            // Join the voice channel
+            console.log(`🎵 Attempting to join voice channel: ${voiceChannel.name}`);
             await this.joinVoiceChannelById(voiceChannel.id, interaction.guild);
             
             if (url.includes('playlist')) {
