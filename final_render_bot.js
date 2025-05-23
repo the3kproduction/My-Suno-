@@ -112,23 +112,11 @@ class EnhancedMusicBot {
         const commands = [
             new SlashCommandBuilder()
                 .setName('load')
-                .setDescription('Load YouTube video or playlist')
+                .setDescription('Load and play YouTube video or playlist')
                 .addStringOption(option =>
                     option.setName('url')
                         .setDescription('YouTube URL')
-                        .setRequired(true)),
-            
-            new SlashCommandBuilder()
-                .setName('play')
-                .setDescription('Play current queue'),
-                        
-            new SlashCommandBuilder()
-                .setName('skip')
-                .setDescription('Skip current song'),
-                        
-            new SlashCommandBuilder()
-                .setName('stop')
-                .setDescription('Stop playback and clear queue')
+                        .setRequired(true))
         ];
 
         const rest = new REST({ version: '10' }).setToken(this.token);
@@ -163,16 +151,7 @@ class EnhancedMusicBot {
                 switch (commandName) {
                     case 'load':
                         const url = options.getString('url');
-                        await this.handleLoad(interaction, url);
-                        break;
-                    case 'play':
-                        await this.handlePlay(interaction);
-                        break;
-                    case 'skip':
-                        await this.handleSkip(interaction);
-                        break;
-                    case 'stop':
-                        await this.handleStop(interaction);
+                        await this.handleLoadAndPlay(interaction, url);
                         break;
                 }
             } catch (error) {
@@ -184,15 +163,24 @@ class EnhancedMusicBot {
         });
     }
 
-    async handleLoad(interaction, url) {
+    async handleLoadAndPlay(interaction, url) {
         await interaction.deferReply();
         
         try {
+            // Join voice channel first
+            const voiceChannel = interaction.member.voice.channel;
+            if (!voiceChannel) {
+                await interaction.editReply('❌ You need to be in a voice channel to play music!');
+                return;
+            }
+
+            await this.joinVoiceChannel(interaction);
+            
             if (url.includes('playlist')) {
                 const songs = await this.getPlaylistSongs(url);
                 this.musicQueue.push(...songs);
                 
-                await interaction.editReply(`✅ Added ${songs.length} songs to music queue!`);
+                await interaction.editReply(`✅ Added ${songs.length} songs to queue and started playing!`);
             } else {
                 const videoId = this.extractVideoId(url);
                 if (!videoId) {
@@ -203,10 +191,15 @@ class EnhancedMusicBot {
                 this.musicQueue.push({ title: 'YouTube Video', videoId, url });
                 this.currentVideoId = videoId;
                 
-                await interaction.editReply(`✅ Added video to music queue!`);
+                await interaction.editReply(`✅ Added video to queue and started playing!`);
             }
+            
+            // Start playing immediately
+            await this.playCurrentSong();
+            
         } catch (error) {
-            await interaction.editReply('❌ Failed to load content');
+            console.error('❌ Load and play error:', error);
+            await interaction.editReply('❌ Failed to load and play content. Make sure you\'re in a voice channel!');
         }
     }
 
@@ -247,38 +240,22 @@ class EnhancedMusicBot {
         return match ? match[1] : null;
     }
 
-    async handlePlay(interaction) {
-        await interaction.deferReply();
-        
-        try {
-            await this.joinVoiceChannel(interaction);
-            await this.playCurrentSong();
-            await interaction.editReply(`▶️ Playing music queue!`);
-        } catch (error) {
-            await interaction.editReply('❌ Failed to start playback');
+    // Admin-only functions (not exposed as slash commands)
+    async adminSkip() {
+        if (this.player) {
+            this.player.stop();
         }
     }
 
-    async handleSkip(interaction) {
-        await interaction.deferReply();
+    async adminStop() {
+        if (this.player) this.player.stop();
+        if (this.connection) this.connection.destroy();
         
-        try {
-            await this.skipSong();
-            await interaction.editReply(`⏭️ Skipped song!`);
-        } catch (error) {
-            await interaction.editReply('❌ Failed to skip song');
-        }
-    }
-
-    async handleStop(interaction) {
-        await interaction.deferReply();
-        
-        try {
-            this.stopPlayback();
-            await interaction.editReply(`⏹️ Stopped playback!`);
-        } catch (error) {
-            await interaction.editReply('❌ Failed to stop playback');
-        }
+        this.musicQueue.length = 0;
+        this.currentSong = null;
+        this.connection = null;
+        this.player = null;
+        this.currentVideoId = null;
     }
 
     async joinVoiceChannel(interaction) {
@@ -324,22 +301,7 @@ class EnhancedMusicBot {
         }
     }
 
-    async skipSong() {
-        if (this.player) {
-            this.player.stop();
-        }
-    }
 
-    stopPlayback() {
-        if (this.player) this.player.stop();
-        if (this.connection) this.connection.destroy();
-        
-        this.musicQueue.length = 0;
-        this.currentSong = null;
-        this.connection = null;
-        this.player = null;
-        this.currentVideoId = null;
-    }
 
     setupWebServer() {
         this.app.get('/', (req, res) => {
