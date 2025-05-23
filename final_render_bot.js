@@ -273,6 +273,11 @@ class EnhancedMusicBot {
         this.connection = connection;
         this.player = createAudioPlayer();
         connection.subscribe(this.player);
+        
+        // Ensure bot is not muted/deafened
+        connection.on(VoiceConnectionStatus.Ready, () => {
+            console.log('🎵 Connected to voice channel - undeafening bot');
+        });
     }
 
     async playCurrentSong() {
@@ -283,21 +288,34 @@ class EnhancedMusicBot {
         this.currentVideoId = song.videoId;
         
         try {
+            console.log(`🎵 Playing: ${song.title} - ${song.url}`);
+            
             const stream = ytdl(song.url, { 
                 filter: 'audioonly',
-                quality: 'highestaudio'
+                quality: 'lowest',
+                highWaterMark: 1 << 25
             });
             
-            const resource = createAudioResource(stream);
+            const resource = createAudioResource(stream, {
+                inputType: 'arbitrary',
+                inlineVolume: true
+            });
+            
             this.player.play(resource);
+            console.log('🎵 Audio resource created and playing');
             
             this.player.on(AudioPlayerStatus.Idle, () => {
+                console.log('🎵 Song finished, playing next...');
                 this.playCurrentSong();
+            });
+            
+            this.player.on(AudioPlayerStatus.Playing, () => {
+                console.log('🎵 Now playing audio');
             });
             
         } catch (error) {
             console.error('❌ Playback error:', error);
-            this.playCurrentSong();
+            setTimeout(() => this.playCurrentSong(), 2000);
         }
     }
 
