@@ -56,6 +56,9 @@ class EnhancedMusicBot {
         // Track posted songs to avoid duplicates
         this.postedSongs = new Set();
         
+        // Pending profile submissions for admin approval
+        this.pendingProfiles = [];
+        
         // Start monitoring all profiles
         this.startProfileMonitoring();
     }
@@ -845,6 +848,10 @@ class EnhancedMusicBot {
         <!-- Suno Profile Monitoring -->
         <div class="section">
             <h2>👥 Suno Profile Monitoring</h2>
+            <div class="admin-controls" style="margin-bottom: 30px;">
+                <button onclick="testMonitoring()" class="btn" style="background: linear-gradient(135deg, #667eea, #764ba2);">🔍 Test Monitoring</button>
+                <button onclick="checkNow()" class="btn" style="background: linear-gradient(135deg, #4ecdc4, #44a08d);">⚡ Check Now</button>
+            </div>
             <div class="grid">
                 ${this.sunoProfiles.map(profile => `
                     <div class="profile-card">
@@ -852,20 +859,56 @@ class EnhancedMusicBot {
                         <p><strong>Profile ID:</strong> ${profile.id}</p>
                         <p><strong>Last Checked:</strong> ${profile.lastChecked.toLocaleTimeString()}</p>
                         <p><strong>Status:</strong> <span style="color: #4ecdc4;">✅ Active</span></p>
+                        <button onclick="removeProfile('${profile.id}')" class="btn-small" style="background: #ff6b6b; color: white; border: none; padding: 5px 10px; border-radius: 5px; margin-top: 10px;">Remove</button>
                     </div>
                 `).join('')}
             </div>
-            <form id="addProfileForm">
-                <div class="form-group">
-                    <label>Add New Suno Profile</label>
-                    <input type="text" id="profileId" placeholder="Suno Profile ID" required>
+            
+            <!-- Admin Approval Section -->
+            ${this.pendingProfiles.length > 0 ? `
+                <div style="margin-top: 40px;">
+                    <h3>📋 Pending Profile Requests</h3>
+                    <div class="grid">
+                        ${this.pendingProfiles.map((request, index) => `
+                            <div class="profile-card" style="border: 2px solid #ff6b6b;">
+                                <h4>${request.profileName}</h4>
+                                <p><strong>Profile ID:</strong> ${request.profileId}</p>
+                                <p><strong>Submitted by:</strong> ${request.submittedBy || 'Anonymous'}</p>
+                                <p><strong>Reason:</strong> ${request.reason || 'No reason provided'}</p>
+                                <div style="margin-top: 15px;">
+                                    <button onclick="approveProfile(${index})" class="btn-small" style="background: #4ecdc4; color: white; border: none; padding: 8px 15px; border-radius: 5px; margin-right: 10px;">✅ Approve</button>
+                                    <button onclick="rejectProfile(${index})" class="btn-small" style="background: #ff6b6b; color: white; border: none; padding: 8px 15px; border-radius: 5px;">❌ Reject</button>
+                                </div>
+                            </div>
+                        `).join('')}
+                    </div>
                 </div>
-                <div class="form-group">
-                    <input type="text" id="profileName" placeholder="Profile Name" required>
-                </div>
-                <button type="submit" class="btn">➕ Add Profile</button>
-            </form>
-            <div id="profileStatus" style="margin-top: 15px;"></div>
+            ` : ''}
+            
+            <!-- User Submission Form -->
+            <div style="margin-top: 40px;">
+                <h3>📝 Request Profile Monitoring</h3>
+                <form id="requestProfileForm">
+                    <div class="form-group">
+                        <label>Suno Profile ID</label>
+                        <input type="text" id="requestProfileId" placeholder="Enter Suno Profile ID" required>
+                    </div>
+                    <div class="form-group">
+                        <label>Artist/Profile Name</label>
+                        <input type="text" id="requestProfileName" placeholder="Artist or profile name" required>
+                    </div>
+                    <div class="form-group">
+                        <label>Your Name (Optional)</label>
+                        <input type="text" id="submitterName" placeholder="Your name">
+                    </div>
+                    <div class="form-group">
+                        <label>Reason for Request (Optional)</label>
+                        <textarea id="requestReason" placeholder="Why should this profile be monitored?"></textarea>
+                    </div>
+                    <button type="submit" class="btn">📋 Submit Request</button>
+                </form>
+                <div id="requestStatus" style="margin-top: 15px;"></div>
+            </div>
         </div>
 
         <!-- Suno Song Posting -->
@@ -910,6 +953,105 @@ class EnhancedMusicBot {
     </div>
 
     <script>
+        // Admin control functions
+        async function testMonitoring() {
+            try {
+                const response = await fetch('/admin/test-monitoring');
+                const result = await response.json();
+                alert(result.message);
+            } catch (error) {
+                alert('❌ Test failed');
+            }
+        }
+
+        async function checkNow() {
+            try {
+                const response = await fetch('/admin/check-now');
+                const result = await response.json();
+                alert(result.message);
+                setTimeout(() => location.reload(), 2000);
+            } catch (error) {
+                alert('❌ Check failed');
+            }
+        }
+
+        async function removeProfile(profileId) {
+            if (!confirm('Are you sure you want to remove this profile?')) return;
+            
+            try {
+                const response = await fetch('/admin/remove-profile', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ profileId })
+                });
+                const result = await response.json();
+                alert(result.message);
+                location.reload();
+            } catch (error) {
+                alert('❌ Remove failed');
+            }
+        }
+
+        async function approveProfile(index) {
+            try {
+                const response = await fetch('/admin/approve-profile', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ index })
+                });
+                const result = await response.json();
+                alert(result.message);
+                location.reload();
+            } catch (error) {
+                alert('❌ Approval failed');
+            }
+        }
+
+        async function rejectProfile(index) {
+            try {
+                const response = await fetch('/admin/reject-profile', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ index })
+                });
+                const result = await response.json();
+                alert(result.message);
+                location.reload();
+            } catch (error) {
+                alert('❌ Rejection failed');
+            }
+        }
+
+        // Request profile form submission
+        document.getElementById('requestProfileForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const status = document.getElementById('requestStatus');
+            
+            try {
+                const response = await fetch('/request-profile', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        profileId: document.getElementById('requestProfileId').value,
+                        profileName: document.getElementById('requestProfileName').value,
+                        submittedBy: document.getElementById('submitterName').value,
+                        reason: document.getElementById('requestReason').value
+                    })
+                });
+                
+                const result = await response.json();
+                
+                if (result.success) {
+                    status.innerHTML = '<p style="color: #4ecdc4;">✅ ' + result.message + '</p>';
+                    document.getElementById('requestProfileForm').reset();
+                } else {
+                    status.innerHTML = '<p style="color: #ff6b6b;">❌ ' + result.error + '</p>';
+                }
+            } catch (error) {
+                status.innerHTML = '<p style="color: #ff6b6b;">❌ Failed to submit request</p>';
+            }
+        });
+
         // Add profile form submission
         document.getElementById('addProfileForm').addEventListener('submit', async (e) => {
             e.preventDefault();
@@ -1053,7 +1195,163 @@ class EnhancedMusicBot {
             }
         });
 
-        // Add Suno profile endpoint
+        // Admin testing endpoint
+        this.app.get('/admin/test-monitoring', async (req, res) => {
+            try {
+                console.log('🔍 Testing monitoring system...');
+                
+                // Test message to Discord
+                await this.postSunoToDiscord('Test Song', 'https://suno.com/song/test', 'Monitoring system test - this is working correctly!');
+                
+                res.json({ 
+                    success: true, 
+                    message: `✅ Test completed! Check Discord for test message. Monitoring ${this.sunoProfiles.length} profiles.` 
+                });
+            } catch (error) {
+                console.error('❌ Test error:', error);
+                res.json({ success: false, message: '❌ Test failed: ' + error.message });
+            }
+        });
+
+        // Admin manual check endpoint
+        this.app.get('/admin/check-now', async (req, res) => {
+            try {
+                console.log('⚡ Manual check initiated...');
+                await this.checkAllProfilesForNewSongs();
+                
+                res.json({ 
+                    success: true, 
+                    message: `✅ Manual check completed for ${this.sunoProfiles.length} profiles!` 
+                });
+            } catch (error) {
+                console.error('❌ Manual check error:', error);
+                res.json({ success: false, message: '❌ Check failed: ' + error.message });
+            }
+        });
+
+        // Admin remove profile endpoint
+        this.app.post('/admin/remove-profile', async (req, res) => {
+            try {
+                const { profileId } = req.body;
+                const index = this.sunoProfiles.findIndex(p => p.id === profileId);
+                
+                if (index === -1) {
+                    return res.json({ success: false, message: 'Profile not found' });
+                }
+                
+                const removed = this.sunoProfiles.splice(index, 1)[0];
+                console.log(`✅ Removed profile: ${removed.name}`);
+                
+                res.json({ 
+                    success: true, 
+                    message: `Removed profile: ${removed.name}` 
+                });
+            } catch (error) {
+                console.error('❌ Remove error:', error);
+                res.json({ success: false, message: 'Failed to remove profile' });
+            }
+        });
+
+        // Admin approve profile endpoint
+        this.app.post('/admin/approve-profile', async (req, res) => {
+            try {
+                const { index } = req.body;
+                const request = this.pendingProfiles[index];
+                
+                if (!request) {
+                    return res.json({ success: false, message: 'Request not found' });
+                }
+                
+                // Add to monitoring
+                this.sunoProfiles.push({
+                    id: request.profileId,
+                    name: request.profileName,
+                    lastChecked: new Date()
+                });
+                
+                // Remove from pending
+                this.pendingProfiles.splice(index, 1);
+                
+                console.log(`✅ Approved profile: ${request.profileName}`);
+                
+                res.json({ 
+                    success: true, 
+                    message: `Approved and added: ${request.profileName}` 
+                });
+            } catch (error) {
+                console.error('❌ Approve error:', error);
+                res.json({ success: false, message: 'Failed to approve profile' });
+            }
+        });
+
+        // Admin reject profile endpoint
+        this.app.post('/admin/reject-profile', async (req, res) => {
+            try {
+                const { index } = req.body;
+                const request = this.pendingProfiles[index];
+                
+                if (!request) {
+                    return res.json({ success: false, message: 'Request not found' });
+                }
+                
+                // Remove from pending
+                this.pendingProfiles.splice(index, 1);
+                
+                console.log(`❌ Rejected profile request: ${request.profileName}`);
+                
+                res.json({ 
+                    success: true, 
+                    message: `Rejected request for: ${request.profileName}` 
+                });
+            } catch (error) {
+                console.error('❌ Reject error:', error);
+                res.json({ success: false, message: 'Failed to reject profile' });
+            }
+        });
+
+        // User request profile endpoint
+        this.app.post('/request-profile', async (req, res) => {
+            try {
+                const { profileId, profileName, submittedBy, reason } = req.body;
+                
+                if (!profileId || !profileName) {
+                    return res.json({ success: false, error: 'Profile ID and name are required' });
+                }
+
+                // Check if already exists or pending
+                const exists = this.sunoProfiles.find(p => p.id === profileId);
+                const pending = this.pendingProfiles.find(p => p.profileId === profileId);
+                
+                if (exists) {
+                    return res.json({ success: false, error: 'Profile is already being monitored' });
+                }
+                
+                if (pending) {
+                    return res.json({ success: false, error: 'Profile request is already pending approval' });
+                }
+
+                // Add to pending requests
+                this.pendingProfiles.push({
+                    profileId,
+                    profileName,
+                    submittedBy: submittedBy || 'Anonymous',
+                    reason: reason || 'No reason provided',
+                    submittedAt: new Date()
+                });
+
+                console.log(`📋 New profile request: ${profileName} by ${submittedBy || 'Anonymous'}`);
+                
+                res.json({ 
+                    success: true, 
+                    message: 'Request submitted for admin approval!' 
+                });
+            } catch (error) {
+                console.error('❌ Request error:', error);
+                res.json({ success: false, error: 'Failed to submit request' });
+            }
+        });
+
+        // Add Suno profile endpoint (admin only)
         this.app.post('/add-profile', async (req, res) => {
             try {
                 const { profileId, profileName } = req.body;
