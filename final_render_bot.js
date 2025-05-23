@@ -1359,33 +1359,69 @@ class EnhancedMusicBot {
                 }
             });
 
-            // Suno form submission
-            document.getElementById('sunoForm').addEventListener('submit', async (e) => {
-                e.preventDefault();
-                const status = document.getElementById('sunoStatus');
-                
-                try {
-                    const response = await fetch('/post-suno', {
-                        method: 'POST',
-                        headers: { 'Content-Type': 'application/json' },
-                        body: JSON.stringify({
-                            sunoUrl: document.getElementById('sunoUrl').value
-                        })
+            // Suno form submission with enhanced error handling
+            document.addEventListener('DOMContentLoaded', function() {
+                const sunoForm = document.getElementById('sunoForm');
+                if (sunoForm) {
+                    sunoForm.addEventListener('submit', async (e) => {
+                        e.preventDefault();
+                        e.stopPropagation();
+                        
+                        const status = document.getElementById('sunoStatus');
+                        const submitBtn = e.target.querySelector('button[type="submit"]');
+                        const urlInput = document.getElementById('sunoUrl');
+                        
+                        // Disable submit button during processing
+                        submitBtn.disabled = true;
+                        submitBtn.textContent = '🔄 Posting...';
+                        status.innerHTML = '<p style="color: #4ecdc4;">🔄 Posting song to Discord...</p>';
+                        
+                        try {
+                            const sunoUrl = urlInput.value.trim();
+                            
+                            if (!sunoUrl) {
+                                throw new Error('Please enter a Suno URL');
+                            }
+                            
+                            console.log('Posting Suno URL:', sunoUrl);
+                            
+                            const response = await fetch('/post-suno', {
+                                method: 'POST',
+                                headers: { 
+                                    'Content-Type': 'application/json',
+                                    'Accept': 'application/json'
+                                },
+                                body: JSON.stringify({
+                                    sunoUrl: sunoUrl
+                                })
+                            });
+                            
+                            if (!response.ok) {
+                                throw new Error(\`Server error: \${response.status}\`);
+                            }
+                            
+                            const result = await response.json();
+                            console.log('Server response:', result);
+                            
+                            if (result.success) {
+                                status.innerHTML = '<p style="color: #4ecdc4;">✅ ' + result.message + '</p>';
+                                sunoForm.reset();
+                            } else {
+                                status.innerHTML = '<p style="color: #ff6b6b;">❌ ' + (result.error || 'Unknown error') + '</p>';
+                            }
+                        } catch (error) {
+                            console.error('Form submission error:', error);
+                            status.innerHTML = '<p style="color: #ff6b6b;">❌ Failed to post song: ' + error.message + '</p>';
+                        } finally {
+                            // Re-enable submit button
+                            submitBtn.disabled = false;
+                            submitBtn.textContent = '🎵 Post to Discord';
+                        }
+                        
+                        return false;
                     });
-                    
-                    const result = await response.json();
-                    
-                    if (result.success) {
-                        status.innerHTML = '<p style="color: #4ecdc4;">✅ ' + result.message + '</p>';
-                        document.getElementById('sunoForm').reset();
-                    } else {
-                        status.innerHTML = '<p style="color: #ff6b6b;">❌ ' + result.error + '</p>';
-                    }
-                } catch (error) {
-                    status.innerHTML = '<p style="color: #ff6b6b;">❌ Failed to post song</p>';
                 }
-            });
-
+            
             document.getElementById('requestProfileForm').addEventListener('submit', async (e) => {
                 e.preventDefault();
                 const status = document.getElementById('requestStatus');
