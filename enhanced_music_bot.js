@@ -241,6 +241,22 @@ class EnhancedMusicBot {
                         ]
                     }
                 ]
+            },
+            {
+                name: 'shuffle',
+                description: 'Shuffle the playlist for variety',
+                options: [
+                    {
+                        name: 'channel',
+                        description: 'Choose music or lyric channel',
+                        type: 3,
+                        required: true,
+                        choices: [
+                            { name: 'Music Videos', value: 'music' },
+                            { name: 'Lyric Videos', value: 'lyric' }
+                        ]
+                    }
+                ]
             }
         ];
 
@@ -359,6 +375,23 @@ class EnhancedMusicBot {
                     this.stopPlayback(channelType);
                     
                     await interaction.reply(`✅ Cleared ${channelType} playlist`);
+                    break;
+
+                case 'shuffle':
+                    const shufflePlaylist = this.currentPlaylists[channelType];
+                    if (shufflePlaylist.songs.length === 0) {
+                        await interaction.reply(`❌ No songs to shuffle in ${channelType} channel`);
+                        return;
+                    }
+
+                    // Shuffle the playlist using Fisher-Yates algorithm
+                    for (let i = shufflePlaylist.songs.length - 1; i > 0; i--) {
+                        const j = Math.floor(Math.random() * (i + 1));
+                        [shufflePlaylist.songs[i], shufflePlaylist.songs[j]] = [shufflePlaylist.songs[j], shufflePlaylist.songs[i]];
+                    }
+
+                    shufflePlaylist.currentIndex = 0; // Reset to beginning of shuffled playlist
+                    await interaction.reply(`🔀 Shuffled ${shufflePlaylist.songs.length} songs in ${channelType} channel! 24/7 loop continues with new order.`);
                     break;
             }
         } catch (error) {
@@ -702,9 +735,16 @@ class EnhancedMusicBot {
                 inlineVolume: true
             });
             
-            // Auto-skip when song ends
+            // Auto-skip when song ends for 24/7 continuous play
             playlist.player.on(AudioPlayerStatus.Idle, () => {
+                logger.info(`🎵 Song ended in ${channelType}, auto-skipping to next...`);
                 setTimeout(() => this.skipSong(channelType), 1000);
+            });
+
+            // Auto-restart on errors for 24/7 reliability
+            playlist.player.on('error', (error) => {
+                logger.error(`Audio player error in ${channelType}:`, error);
+                setTimeout(() => this.skipSong(channelType), 2000);
             });
             
             playlist.player.play(resource);
@@ -727,7 +767,12 @@ class EnhancedMusicBot {
 
     async skipSong(channelType) {
         const playlist = this.currentPlaylists[channelType];
+        if (playlist.songs.length === 0) return;
+        
+        // Loop back to beginning when reaching the end (24/7 endless loop)
         playlist.currentIndex = (playlist.currentIndex + 1) % playlist.songs.length;
+        
+        logger.info(`🔄 Looping to song ${playlist.currentIndex + 1}/${playlist.songs.length} in ${channelType} channel`);
         await this.playCurrentSong(channelType);
     }
 
