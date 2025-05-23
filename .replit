@@ -44,6 +44,10 @@ args = "Enhanced Music Bot"
 task = "workflow.run"
 args = "Final Music Bot"
 
+[[workflows.workflow.tasks]]
+task = "workflow.run"
+args = "Working Music Bot"
+
 [[workflows.workflow]]
 name = "discord-bot-test"
 author = "agent"
@@ -113,6 +117,15 @@ author = "agent"
 [[workflows.workflow.tasks]]
 task = "shell.exec"
 args = "node final_render_bot.js"
+waitForPort = 5000
+
+[[workflows.workflow]]
+name = "Working Music Bot"
+author = "agent"
+
+[[workflows.workflow.tasks]]
+task = "shell.exec"
+args = "node working_music_bot.js"
 waitForPort = 5000
 
 [deployment]

@@ -259,7 +259,7 @@ class EnhancedMusicBot {
     extractPlaylistId(url) {
         const regex = /[&?]list=([^&]+)/;
         const match = url.match(regex);
-        return match ? match[1] : null;
+        return match ? match[1].split('&')[0] : null;
     }
 
     // Admin-only functions (not exposed as slash commands)
