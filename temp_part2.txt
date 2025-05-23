@@ -1,0 +1,137 @@
+                    </div>
+
+                    <!-- Discord Commands Info -->
+                    <div class="section">
+                        <h2>🎮 Discord Commands</h2>
+                        <div class="grid">
+                            <div>
+                                <h4>/load [url] [channel]</h4>
+                                <p>Load YouTube playlist or video and auto-start playing</p>
+                            </div>
+                            <div>
+                                <h4>/play [channel]</h4>
+                                <p>Start playing music in selected channel</p>
+                            </div>
+                            <div>
+                                <h4>/pause [channel]</h4>
+                                <p>Pause music playback</p>
+                            </div>
+                            <div>
+                                <h4>/skip [channel]</h4>
+                                <p>Skip to next song</p>
+                            </div>
+                            <div>
+                                <h4>/stop [channel]</h4>
+                                <p>Stop music and leave voice channel</p>
+                            </div>
+                            <div>
+                                <h4>/queue [channel]</h4>
+                                <p>Show current playlist</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <script>
+                // Video mute toggle functionality
+                function toggleMute(videoId) {
+                    const button = document.getElementById(videoId === 'musicVideo' ? 'musicMute' : 'lyricMute');
+                    const iframe = document.getElementById(videoId);
+                    
+                    if (button.textContent.includes('Unmute')) {
+                        // Unmute video by changing source to remove mute parameter
+                        const currentSrc = iframe.src;
+                        iframe.src = currentSrc.replace('&mute=1', '').replace('mute=1&', '').replace('mute=1', '');
+                        button.textContent = '🔇 Mute';
+                    } else {
+                        // Mute video by adding mute parameter
+                        const currentSrc = iframe.src;
+                        iframe.src = currentSrc + (currentSrc.includes('?') ? '&' : '?') + 'mute=1';
+                        button.textContent = '🔊 Unmute';
+                    }
+                }
+
+                // Load content form submission
+                document.getElementById('loadContentForm').addEventListener('submit', async (e) => {
+                    e.preventDefault();
+                    
+                    const formData = new FormData(e.target);
+                    const data = {
+                        url: formData.get('playlistUrl'),
+                        channelType: formData.get('channelType')
+                    };
+                    
+                    const statusDiv = document.getElementById('loadStatus');
+                    statusDiv.innerHTML = '<div class="status">Loading content...</div>';
+                    
+                    try {
+                        const response = await fetch('/load-content', {
+                            method: 'POST',
+                            headers: { 'Content-Type': 'application/json' },
+                            body: JSON.stringify(data)
+                        });
+                        
+                        const result = await response.json();
+                        
+                        if (result.success) {
+                            statusDiv.innerHTML = '<div class="status success">✅ ' + result.message + '</div>';
+                            setTimeout(() => location.reload(), 2000);
+                        } else {
+                            statusDiv.innerHTML = '<div class="status error">❌ ' + result.error + '</div>';
+                        }
+                    } catch (error) {
+                        statusDiv.innerHTML = '<div class="status error">❌ Failed to load content</div>';
+                    }
+                });
+
+                // Song posting form submission
+                document.getElementById('songForm').addEventListener('submit', async (e) => {
+                    e.preventDefault();
+                    
+                    const formData = new FormData(e.target);
+                    const hashtags = formData.get('hashtags').split(',').map(tag => tag.trim()).filter(tag => tag);
+                    
+                    const data = {
+                        url: formData.get('songUrl'),
+                        description: formData.get('description'),
+                        hashtags: hashtags
+                    };
+                    
+                    const statusDiv = document.getElementById('status');
+                    statusDiv.innerHTML = '<div class="status">Posting song...</div>';
+                    
+                    try {
+                        const response = await fetch('/post-song', {
+                            method: 'POST',
+                            headers: { 'Content-Type': 'application/json' },
+                            body: JSON.stringify(data)
+                        });
+                        
+                        const result = await response.json();
+                        
+                        if (result.success) {
+                            statusDiv.innerHTML = '<div class="status success">✅ Song posted successfully!</div>';
+                            e.target.reset();
+                        } else {
+                            statusDiv.innerHTML = '<div class="status error">❌ ' + result.error + '</div>';
+                        }
+                    } catch (error) {
+                        statusDiv.innerHTML = '<div class="status error">❌ Failed to post song</div>';
+                    }
+                });
+
+                // Auto-refresh every 30 seconds to update currently playing
+                setInterval(() => {
+                    location.reload();
+                }, 30000);
+            </script>
+        </body>
+        </html>
+        `;
+    }
+}
+
+// Start the bot
+const bot = new EnhancedMusicBot();
+bot.start().catch(console.error);
