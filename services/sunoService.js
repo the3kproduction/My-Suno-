@@ -97,7 +97,16 @@ class SunoService {
             return this.normalizeSongs(songs);
 
         } catch (error) {
-            logger.error('Error fetching songs from Suno:', error);
+            logger.error('Error fetching songs from Suno:', {
+                message: error.message,
+                status: error.response?.status,
+                statusText: error.response?.statusText,
+                data: error.response?.data,
+                url: error.config?.url,
+                method: error.config?.method,
+                headers: error.config?.headers,
+                fullError: error
+            });
             throw error;
         }
     }
