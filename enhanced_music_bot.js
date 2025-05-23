@@ -1,6 +1,6 @@
 const express = require('express');
 const { Client, GatewayIntentBits } = require('discord.js');
-const { joinVoiceChannel, createAudioPlayer, createAudioResource, VoiceConnectionStatus, AudioPlayerStatus } = require('@discordjs/voice');
+const { joinVoiceChannel, createAudioPlayer, createAudioResource, VoiceConnectionStatus, AudioPlayerStatus, StreamType } = require('@discordjs/voice');
 const ytdl = require('ytdl-core');
 const axios = require('axios');
 
@@ -317,6 +317,9 @@ class EnhancedMusicBot {
                     await interaction.deferReply();
                     
                     try {
+                        // Auto-join voice channel when loading content
+                        await this.joinVoiceChannel(channelType);
+                        
                         let songs = [];
                         if (this.isPlaylistUrl(url)) {
                             songs = await this.getPlaylistSongs(url);
@@ -331,8 +334,8 @@ class EnhancedMusicBot {
                         this.currentPlaylists[channelType].currentIndex = 0;
 
                         const message = songs.length === 1 ? 
-                            `✅ Loaded song: **${songs[0].title}** in ${channelType} channel` : 
-                            `✅ Loaded **${songs.length} songs** in ${channelType} channel`;
+                            `✅ Loaded song: **${songs[0].title}** in ${channelType} channel\n🎵 Bot joined voice channel and ready to play!` : 
+                            `✅ Loaded **${songs.length} songs** in ${channelType} channel\n🎵 Bot joined voice channel and ready to play!`;
 
                         await interaction.editReply(message);
                     } catch (error) {
@@ -681,23 +684,26 @@ class EnhancedMusicBot {
         const currentSong = playlist.songs[playlist.currentIndex];
         
         try {
-            const stream = ytdl(currentSong.url, { 
-                filter: 'audioonly',
-                quality: 'lowestaudio', // Use lower quality for better reliability
-                requestOptions: {
-                    headers: {
-                        'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36'
-                    }
-                }
+            // Use youtube-dl-exec for more reliable streaming
+            const youtubeDl = require('youtube-dl-exec');
+            
+            // Get direct audio URL
+            const info = await youtubeDl(currentSong.url, {
+                dumpSingleJson: true,
+                noCheckCertificates: true,
+                noWarnings: true,
+                format: 'bestaudio',
+                extractFlat: false
             });
             
-            const resource = createAudioResource(stream, {
-                inputType: StreamType.Arbitrary, // Let Discord auto-detect format
+            // Create audio resource from direct URL
+            const resource = createAudioResource(info.url, {
+                inputType: StreamType.Arbitrary,
                 inlineVolume: true
             });
             
             // Auto-skip when song ends
-            resource.playStream.on('end', () => {
+            playlist.player.on(AudioPlayerStatus.Idle, () => {
                 setTimeout(() => this.skipSong(channelType), 1000);
             });
             
