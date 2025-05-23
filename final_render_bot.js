@@ -97,7 +97,6 @@ class EnhancedMusicBot {
     }
 
     async start() {
-        await this.registerSlashCommands();
         this.setupDiscordEvents();
         this.setupWebServer();
         
@@ -136,17 +135,23 @@ class EnhancedMusicBot {
 
         try {
             console.log('🔄 Refreshing slash commands...');
-            await rest.put(Routes.applicationCommands(this.clientId), { body: commands });
-            console.log('✅ Slash commands registered and refreshed!');
+            // Only register commands after client is ready
+            if (this.clientId) {
+                await rest.put(Routes.applicationCommands(this.clientId), { body: commands });
+                console.log('✅ Slash commands registered and refreshed!');
+            }
         } catch (error) {
             console.error('❌ Error registering commands:', error);
         }
     }
 
     setupDiscordEvents() {
-        this.client.once('ready', () => {
+        this.client.once('ready', async () => {
             console.log('🎵 Bot logged in as', this.client.user.tag);
             this.clientId = this.client.user.id;
+            
+            // Register commands now that we have the client ID
+            await this.registerSlashCommands();
         });
 
         this.client.on('interactionCreate', async interaction => {
