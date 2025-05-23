@@ -3,7 +3,7 @@ services:
     name: suno-discord-bot
     env: node
     buildCommand: npm install
-    startCommand: node manual_trigger.js
+    startCommand: node render_ready_bot.js
     plan: free
     envVars:
       - key: NODE_ENV
