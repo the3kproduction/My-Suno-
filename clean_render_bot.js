@@ -1,94 +1,90 @@
-const express = require('express');
-const { Client, GatewayIntentBits } = require('discord.js');
-const axios = require('axios');
+const express = require("express");
+const { Client, GatewayIntentBits } = require("discord.js");
+const axios = require("axios");
 
 // Simple logger
 const logger = {
     info: (msg) => console.log(`[INFO] ${msg}`),
-    error: (msg, err) => console.error(`[ERROR] ${msg}`, err || ''),
-    warn: (msg) => console.warn(`[WARN] ${msg}`)
+    error: (msg, err) => console.error(`[ERROR] ${msg}`, err || ""),
+    warn: (msg) => console.warn(`[WARN] ${msg}`),
 };
 
 // Configuration with your Discord channel
 const config = {
     discord: {
         token: process.env.DISCORD_TOKEN,
-        channelId: process.env.DISCORD_CHANNEL_ID || '1375419981658849342'
-    }
+        channelId: process.env.DISCORD_CHANNEL_ID || "1375419981658849342",
+    },
 };
 
 class CleanSunoBot {
     constructor() {
         this.client = new Client({
-            intents: [GatewayIntentBits.Guilds, GatewayIntentBits.GuildMessages]
+            intents: [
+                GatewayIntentBits.Guilds,
+                GatewayIntentBits.GuildMessages,
+            ],
         });
-        
+
         this.app = express();
         this.isReady = false;
         this.postedSongs = new Set();
-        
+
         // Simple file storage
         this.storage = {
             songs: [],
             load: () => {
                 try {
-                    return JSON.parse(require('fs').readFileSync('./data/posted_songs.json', 'utf8'));
+                    return JSON.parse(
+                        require("fs").readFileSync(
+                            "./data/posted_songs.json",
+                            "utf8",
+                        ),
+                    );
                 } catch {
                     return [];
                 }
             },
             save: (songs) => {
                 try {
-                    require('fs').mkdirSync('./data', { recursive: true });
-                    require('fs').writeFileSync('./data/posted_songs.json', JSON.stringify(songs, null, 2));
+                    require("fs").mkdirSync("./data", { recursive: true });
+                    require("fs").writeFileSync(
+                        "./data/posted_songs.json",
+                        JSON.stringify(songs, null, 2),
+                    );
                 } catch (err) {
-                    logger.error('Failed to save songs', err);
+                    logger.error("Failed to save songs", err);
                 }
-            }
+            },
         };
     }
-
     async start() {
         try {
             await this.client.login(config.discord.token);
-            logger.info('Discord bot logged in successfully');
-            
+            logger.info("Discord bot logged in successfully");
+
             this.setupEventHandlers();
             this.setupWebServer();
-            
-            // Load existing songs
-            this.storage.songs = this.storage.load();
-            this.storage.songs.forEach(song => this.postedSongs.add(song.id));
-            
+
+            // Load existing data
+            const loadedStorage = this.storage.load() || {};
+            const loadedSongs = Array.isArray(loadedStorage.songs) ? loadedStorage.songs : [];
+
+            this.storage.songs = loadedSongs;
+
+            // Restore posted song IDs
+            this.storage.songs.forEach((song) => this.postedSongs.add(song.id));
+
             this.isReady = true;
-            logger.info('Bot is ready!');
+            logger.info("Bot is ready!");
+
         } catch (error) {
-            logger.error('Failed to start bot', error);
+            logger.error("Failed to start bot", error);
         }
     }
-
-    setupEventHandlers() {
-        this.client.on('ready', () => {
-            logger.info(`Logged in as ${this.client.user.tag}`);
-        });
-
-        this.client.on('error', (error) => {
-            logger.error('Discord client error', error);
-        });
-    }
-
-    setupWebServer() {
-        this.app.use(express.static('public'));
-        this.app.use(express.json());
-        this.app.use(express.urlencoded({ extended: true }));
-
-        // Main page
-        this.app.get('/', (req, res) => {
-            const stats = {
-                totalSongs: this.storage.songs.length,
-                isReady: this.isReady
+                isReady: this.isReady,
             };
-            
+
             const recentSongs = this.storage.songs
                 .sort((a, b) => new Date(b.timestamp) - new Date(a.timestamp))
                 .slice(0, 10);
@@ -97,76 +93,95 @@ class CleanSunoBot {
         });
 
         // Post song endpoint
-        this.app.post('/post-song', async (req, res) => {
+        this.app.post("/post-song", async (req, res) => {
             try {
                 const { url, title, description, useAI } = req.body;
-                
+
                 if (!url || !title) {
-                    return res.status(400).json({ error: 'URL and title are required' });
+                    return res
+                        .status(400)
+                        .json({ error: "URL and title are required" });
                 }
 
-                let finalDescription = description || '';
-                
+                let finalDescription = description || "";
+
                 if (useAI && process.env.OPENAI_API_KEY) {
                     try {
-                        finalDescription = await this.generateAIFeatures({ title, url });
+                        finalDescription = await this.generateAIFeatures({
+                            title,
+                            url,
+                        });
                     } catch (error) {
-                        logger.warn('AI enhancement failed, using manual description');
+                        logger.warn(
+                            "AI enhancement failed, using manual description",
+                        );
                     }
                 }
 
                 await this.postToDiscord(title, url, finalDescription);
-                
+
                 const song = {
                     id: this.generateSongId(url),
                     title,
                     url,
                     description: finalDescription,
-                    timestamp: new Date().toISOString()
+                    timestamp: new Date().toISOString(),
                 };
-                
+
                 this.storage.songs.unshift(song);
                 this.storage.songs = this.storage.songs.slice(0, 50);
                 this.storage.save(this.storage.songs);
                 this.postedSongs.add(song.id);
 
-                res.json({ success: true, message: 'Song posted successfully!' });
+                res.json({
+                    success: true,
+                    message: "Song posted successfully!",
+                });
             } catch (error) {
-                logger.error('Error posting song', error);
-                res.status(500).json({ error: 'Failed to post song' });
+                logger.error("Error posting song", error);
+                res.status(500).json({ error: "Failed to post song" });
             }
         });
 
         // Extract song data
-        this.app.post('/extract-song', async (req, res) => {
+        this.app.post("/extract-song", async (req, res) => {
             try {
                 const { url } = req.body;
                 const songData = await this.extractSongData(url);
                 res.json(songData);
             } catch (error) {
-                logger.error('Error extracting song data', error);
-                res.status(500).json({ error: 'Failed to extract song data' });
+                logger.error("Error extracting song data", error);
+                res.status(500).json({ error: "Failed to extract song data" });
             }
         });
 
         // Share again endpoint
-        this.app.post('/share-again/:songId', async (req, res) => {
+        this.app.post("/share-again/:songId", async (req, res) => {
             try {
-                const song = this.storage.songs.find(s => s.id === req.params.songId);
+                const song = this.storage.songs.find(
+                    (s) => s.id === req.params.songId,
+                );
                 if (!song) {
-                    return res.status(404).json({ error: 'Song not found' });
+                    return res.status(404).json({ error: "Song not found" });
                 }
 
-                await this.postToDiscord(song.title, song.url, song.description);
-                res.json({ success: true, message: 'Song shared again successfully!' });
+                await this.postToDiscord(
+                    song.title,
+                    song.url,
+                    song.description,
+                );
+                res.json({
+                    success: true,
+                    message: "Song shared again successfully!",
+                });
             } catch (error) {
-                logger.error('Error sharing song again', error);
-                res.status(500).json({ error: 'Failed to share song again' });
+                logger.error("Error sharing song again", error);
+                res.status(500).json({ error: "Failed to share song again" });
             }
         });
 
         const PORT = process.env.PORT || 5000;
-        this.app.listen(PORT, '0.0.0.0', () => {
+        this.app.listen(PORT, "0.0.0.0", () => {
             logger.info(`Web server running on port ${PORT}`);
         });
     }
@@ -175,70 +190,75 @@ class CleanSunoBot {
         try {
             const response = await axios.get(url, {
                 headers: {
-                    'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36'
-                }
+                    "User-Agent":
+                        "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36",
+                },
             });
 
             const html = response.data;
-            let title = 'Unknown Song';
+            let title = "Unknown Song";
 
             const titlePatterns = [
                 /<title[^>]*>([^<]+)/i,
                 /<meta[^>]+property="og:title"[^>]+content="([^"]+)"/i,
                 /<meta[^>]+name="title"[^>]+content="([^"]+)"/i,
-                /"title"\s*:\s*"([^"]+)"/i
+                /"title"\s*:\s*"([^"]+)"/i,
             ];
 
             for (const pattern of titlePatterns) {
                 const match = html.match(pattern);
-                if (match && match[1] && match[1].trim() !== 'Suno') {
-                    title = match[1].trim().replace(/\s*\|\s*Suno\s*$/, '');
+                if (match && match[1] && match[1].trim() !== "Suno") {
+                    title = match[1].trim().replace(/\s*\|\s*Suno\s*$/, "");
                     break;
                 }
             }
 
             return { title, url };
         } catch (error) {
-            logger.error('Error extracting song data', error);
-            return { title: 'Unknown Song', url };
+            logger.error("Error extracting song data", error);
+            return { title: "Unknown Song", url };
         }
     }
 
     async generateAIFeatures(songData) {
         if (!process.env.OPENAI_API_KEY) {
-            return 'Enhanced with AI features';
+            return "Enhanced with AI features";
         }
 
         try {
-            const { default: OpenAI } = await import('openai');
+            const { default: OpenAI } = await import("openai");
             const openai = new OpenAI({ apiKey: process.env.OPENAI_API_KEY });
 
             const response = await openai.chat.completions.create({
                 model: "gpt-4o",
-                messages: [{
-                    role: "user",
-                    content: `Create a brief, engaging description for this Suno song: "${songData.title}". Make it 1-2 sentences, focusing on the musical style and mood. Be creative but concise.`
-                }],
-                max_tokens: 100
+                messages: [
+                    {
+                        role: "user",
+                        content: `Create a brief, engaging description for this Suno song: "${songData.title}". Make it 1-2 sentences, focusing on the musical style and mood. Be creative but concise.`,
+                    },
+                ],
+                max_tokens: 100,
             });
 
             return response.choices[0].message.content.trim();
         } catch (error) {
-            logger.error('AI generation failed', error);
-            return 'Enhanced with AI features';
+            logger.error("AI generation failed", error);
+            return "Enhanced with AI features";
         }
     }
 
-    async postToDiscord(title, url, description = '') {
+    async postToDiscord(title, url, description = "") {
         try {
-            const channel = await this.client.channels.fetch(config.discord.channelId);
-            
+            const channel = await this.client.channels.fetch(
+                config.discord.channelId,
+            );
+
             if (!channel) {
-                throw new Error('Discord channel not found');
+                throw new Error("Discord channel not found");
             }
 
             let message = `🎵 **New Suno song:** ${title}\n${url}`;
-            
+
             if (description) {
                 message += `\n\n💭 ${description}`;
             }
@@ -246,13 +266,13 @@ class CleanSunoBot {
             await channel.send(message);
             logger.info(`Posted song to Discord: ${title}`);
         } catch (error) {
-            logger.error('Failed to post to Discord', error);
+            logger.error("Failed to post to Discord", error);
             throw error;
         }
     }
 
     generateSongId(url) {
-        return url.split('/').pop() || Math.random().toString(36).substr(2, 9);
+        return url.split("/").pop() || Math.random().toString(36).substr(2, 9);
     }
 
     renderDashboard(stats, recentSongs) {
@@ -488,9 +508,9 @@ class CleanSunoBot {
     <div class="container">
         <div class="header">
             <h1>🎵 Suno Discord Bot</h1>
-            <div class="status ${stats.isReady ? 'ready' : ''}">
+            <div class="status ${stats.isReady ? "ready" : ""}">
                 <span>●</span>
-                ${stats.isReady ? 'Ready' : 'Connecting...'}
+                ${stats.isReady ? "Ready" : "Connecting..."}
             </div>
         </div>
         
@@ -527,10 +547,14 @@ class CleanSunoBot {
             <div>⏳ Processing your request...</div>
         </div>
         
-        ${recentSongs.length > 0 ? `
+        ${
+            recentSongs.length > 0
+                ? `
         <div class="card history">
             <h3>🎵 Recent Songs (${stats.totalSongs} total)</h3>
-            ${recentSongs.map(song => `
+            ${recentSongs
+                .map(
+                    (song) => `
                 <div class="song-item">
                     <div class="song-title">${song.title}</div>
                     <a href="${song.url}" target="_blank" class="song-link">${song.url}</a>
@@ -539,9 +563,13 @@ class CleanSunoBot {
                         <button class="share-again" onclick="shareAgain('${song.id}')">🔄 Share Again</button>
                     </div>
                 </div>
-            `).join('')}
+            `,
+                )
+                .join("")}
         </div>
-        ` : ''}
+        `
+                : ""
+        }
     </div>
     
     <script>
@@ -657,13 +685,13 @@ class CleanSunoBot {
 
 // Start the bot
 const bot = new CleanSunoBot();
-bot.start().catch(error => {
-    logger.error('Failed to start bot', error);
+bot.start().catch((error) => {
+    logger.error("Failed to start bot", error);
     process.exit(1);
 });
 
 // Graceful shutdown
-process.on('SIGINT', () => {
-    logger.info('Shutting down bot...');
+process.on("SIGINT", () => {
+    logger.info("Shutting down bot...");
     process.exit(0);
 });
