@@ -366,12 +366,32 @@ class SunoFocusedBot {
                         
                         <div class="feature">
                             <h3>⚡ Real-time Monitoring</h3>
-                            <p>Checks for new songs every 5 minutes and posts instantly</p>
+                            <p>Checks for new songs every 3 minutes and posts instantly</p>
                         </div>
                         
-                        <p style="margin-top: 2rem; opacity: 0.8;">
-                            Posted songs: ${this.postedSongs.size} | Status: Active
-                        </p>
+                        <div class="feature">
+                            <h3>🎬 Latest Suno Preview</h3>
+                            <div id="suno-preview" style="margin: 1rem 0;">
+                                <iframe 
+                                    width="320" 
+                                    height="180" 
+                                    src="https://suno.com/song/3kloudz/embed" 
+                                    frameborder="0" 
+                                    style="border-radius: 10px; background: rgba(0,0,0,0.3);">
+                                </iframe>
+                            </div>
+                        </div>
+                        
+                        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; margin: 2rem 0;">
+                            <div style="background: rgba(0,255,0,0.2); padding: 1rem; border-radius: 10px; text-align: center;">
+                                <h3>🎵 Songs Posted</h3>
+                                <div style="font-size: 2rem; font-weight: bold;">${this.postedSongs.size}</div>
+                            </div>
+                            <div style="background: rgba(255,100,100,0.2); padding: 1rem; border-radius: 10px; text-align: center;">
+                                <h3>👥 Profiles</h3>
+                                <div style="font-size: 2rem; font-weight: bold;">${this.profiles.length}</div>
+                            </div>
+                        </div>
                     </div>
                 </body>
                 </html>
