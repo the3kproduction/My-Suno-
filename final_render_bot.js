@@ -1164,17 +1164,28 @@ class EnhancedMusicBot {
                 </div>
             </div>
 
-            <!-- YouTube Loading -->
-            <div class="section">
-                <h2>📺 Load YouTube Content</h2>
-                <form id="youtubeForm">
-                    <div class="form-group">
-                        <label>YouTube URL</label>
-                        <input type="text" id="youtubeUrl" placeholder="https://www.youtube.com/watch?v=..." required>
+            <!-- Premium Suno Monitoring Dashboard -->
+            <div class="section" style="background: linear-gradient(135deg, rgba(124, 58, 237, 0.3), rgba(79, 70, 229, 0.3)); border: 2px solid rgba(124, 58, 237, 0.5);">
+                <h2>🎵 Premium Suno Monitoring</h2>
+                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 20px; margin: 20px 0;">
+                    <div style="background: rgba(0,255,0,0.2); padding: 20px; border-radius: 15px; text-align: center; border: 1px solid rgba(0,255,0,0.3);">
+                        <h3 style="margin-top: 0; color: #4ade80;">🎵 Songs Posted</h3>
+                        <div style="font-size: 3rem; font-weight: bold; color: #4ade80; margin: 10px 0;">0</div>
+                        <p style="margin-bottom: 0; opacity: 0.8;">Auto-posted with reactions</p>
                     </div>
-                    <button type="submit" class="btn">📺 Load to Music Queue</button>
-                </form>
-                <div id="youtubeStatus" style="margin-top: 15px;"></div>
+                    <div style="background: rgba(255,100,100,0.2); padding: 20px; border-radius: 15px; text-align: center; border: 1px solid rgba(255,100,100,0.3);">
+                        <h3 style="margin-top: 0; color: #f87171;">👥 Profiles Monitored</h3>
+                        <div style="font-size: 3rem; font-weight: bold; color: #f87171; margin: 10px 0;">1</div>
+                        <p style="margin-bottom: 0; opacity: 0.8;">3kloudz actively tracked</p>
+                    </div>
+                </div>
+                <div style="background: rgba(255,255,255,0.1); padding: 20px; border-radius: 15px; margin-top: 20px; border: 1px solid rgba(255,255,255,0.2);">
+                    <h3 style="margin-top: 0;">🔗 Active Monitoring Status</h3>
+                    <p><strong>Primary Profile:</strong> 3kloudz</p>
+                    <p><strong>Check Frequency:</strong> Every 3 minutes</p>
+                    <p><strong>Status:</strong> <span style="color: #4ade80; font-weight: bold;">🟢 ACTIVE</span></p>
+                    <p><strong>Last Check:</strong> <span id="lastCheck">Checking now...</span></p>
+                </div>
             </div>
 
             <!-- Suno Song Posting -->
