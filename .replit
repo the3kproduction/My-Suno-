@@ -36,6 +36,10 @@ args = "Enhanced AI Suno Bot"
 task = "workflow.run"
 args = "Clean Enhanced Bot"
 
+[[workflows.workflow.tasks]]
+task = "workflow.run"
+args = "Final Enhanced Bot"
+
 [[workflows.workflow]]
 name = "discord-bot-test"
 author = "agent"
@@ -87,6 +91,15 @@ author = "agent"
 [[workflows.workflow.tasks]]
 task = "shell.exec"
 args = "node clean_enhanced_bot.js"
+waitForPort = 5000
+
+[[workflows.workflow]]
+name = "Final Enhanced Bot"
+author = "agent"
+
+[[workflows.workflow.tasks]]
+task = "shell.exec"
+args = "node final_render_bot.js"
 waitForPort = 5000
 
 [deployment]
