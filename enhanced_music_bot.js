@@ -1171,9 +1171,14 @@ class EnhancedMusicBot {
             top: 0;
             left: 0;
             right: 0;
-            bottom: 0;
+            bottom: 40px;
             background: transparent;
             z-index: 10;
+            pointer-events: all;
+            cursor: default;
+        }
+        
+        .video-wrapper iframe {
             pointer-events: none;
         }
 
@@ -1256,10 +1261,10 @@ class EnhancedMusicBot {
                         ${currentMusicSong ? `
                             <iframe 
                                 id="musicVideo"
-                                src="https://www.youtube.com/embed/${currentMusicSong.id}?autoplay=1&mute=1&controls=0&disablekb=1&rel=0&modestbranding=1&showinfo=0&fs=0&iv_load_policy=3"
+                                src="https://www.youtube.com/embed/${currentMusicSong.id}?autoplay=1&mute=1&controls=0&disablekb=1&rel=0&modestbranding=1&enablejsapi=0&origin=${req.get('host')}"
                                 frameborder="0" 
                                 allow="autoplay; encrypted-media"
-                                allowfullscreen>
+                                style="pointer-events: none;">
                             </iframe>
                             <div class="video-overlay"></div>
                             <div class="video-controls">
@@ -1285,10 +1290,10 @@ class EnhancedMusicBot {
                         ${currentLyricSong ? `
                             <iframe 
                                 id="lyricVideo"
-                                src="https://www.youtube.com/embed/${currentLyricSong.id}?autoplay=1&mute=1&controls=0&disablekb=1&rel=0&modestbranding=1&showinfo=0&fs=0&iv_load_policy=3"
+                                src="https://www.youtube.com/embed/${currentLyricSong.id}?autoplay=1&mute=1&controls=0&disablekb=1&rel=0&modestbranding=1&enablejsapi=0&origin=${req.get('host')}"
                                 frameborder="0" 
                                 allow="autoplay; encrypted-media"
-                                allowfullscreen>
+                                style="pointer-events: none;">
                             </iframe>
                             <div class="video-overlay"></div>
                             <div class="video-controls">
