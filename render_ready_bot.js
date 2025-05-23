@@ -1,574 +1,1137 @@
-const express = require('express');
-const { Client, GatewayIntentBits } = require('discord.js');
+const { Client, GatewayIntentBits, EmbedBuilder, REST, Routes } = require('discord.js');
+const { joinVoiceChannel, createAudioPlayer, createAudioResource, AudioPlayerStatus, VoiceConnectionStatus } = require('@discordjs/voice');
+const ytdl = require('ytdl-core');
 const axios = require('axios');
+const express = require('express');
+const path = require('path');
 
-// Simple logger
-const logger = {
-    info: (msg) => console.log(`[INFO] ${msg}`),
-    error: (msg, err) => console.error(`[ERROR] ${msg}`, err || ''),
-    warn: (msg) => console.warn(`[WARN] ${msg}`)
-};
-
-// Configuration
-const config = {
-    discord: {
-        token: process.env.DISCORD_TOKEN,
-        channelId: process.env.DISCORD_CHANNEL_ID || '1375419981658849342'
-    }
-};
-
-class RenderSunoBot {
+// Enhanced Music Bot - Render Deployment Version
+class EnhancedMusicBot {
     constructor() {
         this.client = new Client({
-            intents: [GatewayIntentBits.Guilds, GatewayIntentBits.GuildMessages]
+            intents: [
+                GatewayIntentBits.Guilds,
+                GatewayIntentBits.GuildMessages,
+                GatewayIntentBits.GuildVoiceStates,
+                GatewayIntentBits.MessageContent
+            ]
         });
-        
+
         this.app = express();
-        this.isReady = false;
-        this.postedSongs = new Set();
-        this.songHistory = []; // Simple array for history
+        this.app.use(express.json());
+        this.app.use(express.static('public'));
+
+        // Playlist management for both channels
+        this.currentPlaylists = {
+            music: {
+                songs: [],
+                currentIndex: 0,
+                connection: null,
+                player: null,
+                isPlaying: false
+            },
+            lyric: {
+                songs: [],
+                currentIndex: 0,
+                connection: null,
+                player: null,
+                isPlaying: false
+            }
+        };
+
+        this.config = {
+            discord: {
+                token: process.env.DISCORD_TOKEN,
+                musicVideoChannelId: '1375476962356887614',
+                lyricVideoChannelId: '1375476842261385289',
+                targetChannelId: process.env.DISCORD_CHANNEL_ID
+            },
+            youtube: {
+                apiKey: process.env.YOUTUBE_API_KEY
+            },
+            suno: {
+                profileId: process.env.SUNO_PROFILE_ID
+            }
+        };
     }
 
     async start() {
-        try {
-            await this.client.login(config.discord.token);
-            logger.info('Discord bot logged in successfully');
-            
-            this.setupEventHandlers();
-            this.setupWebServer();
-            
-            this.isReady = true;
-            logger.info('Bot is ready!');
-        } catch (error) {
-            logger.error('Failed to start bot', error);
-        }
+        console.log('🎵 Enhanced Music Bot starting...');
+        
+        this.setupEventHandlers();
+        await this.registerSlashCommands();
+        this.setupWebServer();
+        
+        await this.client.login(this.config.discord.token);
+        console.log('🎵 Enhanced Music Bot logged in successfully');
     }
 
     setupEventHandlers() {
-        this.client.on('ready', () => {
-            logger.info(`Logged in as ${this.client.user.tag}`);
+        this.client.once('ready', () => {
+            console.log('🚀 Enhanced Music Bot ready!');
+            console.log(`🎵 Bot logged in as ${this.client.user.tag}`);
         });
 
-        this.client.on('error', (error) => {
-            logger.error('Discord client error', error);
+        this.client.on('interactionCreate', async (interaction) => {
+            if (!interaction.isChatInputCommand()) return;
+            await this.handleSlashCommand(interaction);
         });
+
+        this.client.on('error', console.error);
+    }
+
+    async registerSlashCommands() {
+        const commands = [
+            {
+                name: 'play',
+                description: 'Start playing music',
+                options: [
+                    {
+                        name: 'channel',
+                        description: 'Choose music or lyric channel',
+                        type: 3,
+                        required: true,
+                        choices: [
+                            { name: 'Music Videos', value: 'music' },
+                            { name: 'Lyric Videos', value: 'lyric' }
+                        ]
+                    }
+                ]
+            },
+            {
+                name: 'pause',
+                description: 'Pause music playback',
+                options: [
+                    {
+                        name: 'channel',
+                        description: 'Choose music or lyric channel',
+                        type: 3,
+                        required: true,
+                        choices: [
+                            { name: 'Music Videos', value: 'music' },
+                            { name: 'Lyric Videos', value: 'lyric' }
+                        ]
+                    }
+                ]
+            },
+            {
+                name: 'skip',
+                description: 'Skip to next song',
+                options: [
+                    {
+                        name: 'channel',
+                        description: 'Choose music or lyric channel',
+                        type: 3,
+                        required: true,
+                        choices: [
+                            { name: 'Music Videos', value: 'music' },
+                            { name: 'Lyric Videos', value: 'lyric' }
+                        ]
+                    }
+                ]
+            },
+            {
+                name: 'stop',
+                description: 'Stop music and leave voice channel',
+                options: [
+                    {
+                        name: 'channel',
+                        description: 'Choose music or lyric channel',
+                        type: 3,
+                        required: true,
+                        choices: [
+                            { name: 'Music Videos', value: 'music' },
+                            { name: 'Lyric Videos', value: 'lyric' }
+                        ]
+                    }
+                ]
+            },
+            {
+                name: 'queue',
+                description: 'Show current playlist',
+                options: [
+                    {
+                        name: 'channel',
+                        description: 'Choose music or lyric channel',
+                        type: 3,
+                        required: true,
+                        choices: [
+                            { name: 'Music Videos', value: 'music' },
+                            { name: 'Lyric Videos', value: 'lyric' }
+                        ]
+                    }
+                ]
+            },
+            {
+                name: 'load',
+                description: 'Load YouTube playlist or single video',
+                options: [
+                    {
+                        name: 'url',
+                        description: 'YouTube playlist or video URL',
+                        type: 3,
+                        required: true
+                    },
+                    {
+                        name: 'channel',
+                        description: 'Choose music or lyric channel',
+                        type: 3,
+                        required: true,
+                        choices: [
+                            { name: 'Music Videos', value: 'music' },
+                            { name: 'Lyric Videos', value: 'lyric' }
+                        ]
+                    }
+                ]
+            }
+        ];
+
+        const rest = new REST({ version: '10' }).setToken(this.config.discord.token);
+
+        try {
+            await rest.put(
+                Routes.applicationCommands(this.client.application?.id || 'temp'),
+                { body: commands }
+            );
+            console.log('🎯 Slash commands registered successfully!');
+        } catch (error) {
+            console.error('Error registering slash commands:', error);
+        }
+    }
+
+    async handleSlashCommand(interaction) {
+        const { commandName, options } = interaction;
+        const channelType = options.getString('channel');
+
+        try {
+            switch (commandName) {
+                case 'play':
+                    if (this.currentPlaylists[channelType].songs.length === 0) {
+                        await interaction.reply('❌ No songs loaded. Use `/load` first!');
+                        return;
+                    }
+
+                    await this.joinVoiceChannel(channelType);
+                    await this.playCurrentSong(channelType);
+                    await interaction.reply(`▶️ Playing music in ${channelType} channel!`);
+                    break;
+
+                case 'pause':
+                    this.pausePlayback(channelType);
+                    await interaction.reply(`⏸️ Paused ${channelType} channel`);
+                    break;
+
+                case 'skip':
+                    await this.skipSong(channelType);
+                    const currentSong = this.currentPlaylists[channelType].songs[this.currentPlaylists[channelType].currentIndex];
+                    await interaction.reply(`⏭️ Skipped to: **${currentSong?.title || 'Unknown'}**`);
+                    break;
+
+                case 'stop':
+                    this.stopPlayback(channelType);
+                    this.leaveVoiceChannel(channelType);
+                    await interaction.reply(`⏹️ Stopped ${channelType} channel and left voice`);
+                    break;
+
+                case 'queue':
+                    const queue = this.currentPlaylists[channelType];
+                    if (queue.songs.length === 0) {
+                        await interaction.reply(`No songs in ${channelType} queue`);
+                    } else {
+                        const queueList = queue.songs.slice(0, 10).map((song, index) => 
+                            `${index === queue.currentIndex ? '▶️' : `${index + 1}.`} ${song.title}`
+                        ).join('\n');
+                        await interaction.reply(`🎵 **${channelType} Queue:**\n\`\`\`${queueList}\`\`\``);
+                    }
+                    break;
+
+                case 'load':
+                    const url = options.getString('url');
+                    await interaction.deferReply();
+                    
+                    try {
+                        // Auto-join voice channel when loading content
+                        await this.joinVoiceChannel(channelType);
+                        
+                        let songs = [];
+                        if (this.isPlaylistUrl(url)) {
+                            songs = await this.getPlaylistSongs(url);
+                        } else if (this.isYouTubeVideoUrl(url)) {
+                            songs = await this.getSingleVideoData(url);
+                        } else {
+                            await interaction.editReply('❌ Invalid YouTube URL');
+                            return;
+                        }
+
+                        this.currentPlaylists[channelType].songs = songs;
+                        this.currentPlaylists[channelType].currentIndex = 0;
+
+                        // Auto-start playing immediately after loading
+                        try {
+                            await this.playCurrentSong(channelType);
+                            const message = songs.length === 1 ? 
+                                `✅ Loaded song: **${songs[0].title}** and started playing! 🎵` : 
+                                `✅ Loaded **${songs.length} songs** and started playing! 🎵`;
+                            await interaction.editReply(message);
+                        } catch (playError) {
+                            const message = songs.length === 1 ? 
+                                `✅ Loaded song: **${songs[0].title}** in ${channelType} channel\n🎵 Bot joined voice channel and ready to play!` : 
+                                `✅ Loaded **${songs.length} songs** in ${channelType} channel\n🎵 Bot joined voice channel and ready to play!`;
+                            await interaction.editReply(message);
+                        }
+                    } catch (error) {
+                        await interaction.editReply(`❌ Failed to load content: ${error.message}`);
+                    }
+                    break;
+            }
+        } catch (error) {
+            console.error('Command error:', error);
+            if (!interaction.replied) {
+                await interaction.reply('❌ An error occurred while processing your command.');
+            }
+        }
     }
 
     setupWebServer() {
-        this.app.use(express.json());
-        this.app.use(express.urlencoded({ extended: true }));
-
-        // Main page with beautiful interface
+        // Enhanced dashboard route
         this.app.get('/', (req, res) => {
             res.send(this.renderDashboard());
         });
 
-        // Post song endpoint
+        // Suno posting routes
         this.app.post('/post-song', async (req, res) => {
             try {
-                const { url, title, description, useAI } = req.body;
+                const { url, description = '', hashtags = [] } = req.body;
                 
-                if (!url || !title) {
-                    return res.status(400).json({ error: 'URL and title are required' });
+                if (!url) {
+                    return res.status(400).json({ error: 'URL is required' });
                 }
 
-                let finalDescription = description || '';
+                const songData = await this.extractSongData(url);
+                await this.postToDiscord(songData.title, url, description, hashtags);
                 
-                if (useAI && process.env.OPENAI_API_KEY) {
-                    try {
-                        finalDescription = await this.generateAIFeatures({ title, url });
-                    } catch (error) {
-                        logger.warn('AI enhancement failed, using manual description');
-                    }
-                }
-
-                await this.postToDiscord(title, url, finalDescription);
-                
-                // Add to history
-                const song = {
-                    id: this.generateSongId(url),
-                    title,
-                    url,
-                    description: finalDescription,
-                    timestamp: new Date().toISOString()
-                };
-                
-                this.songHistory.unshift(song);
-                this.songHistory = this.songHistory.slice(0, 50); // Keep last 50
-
                 res.json({ success: true, message: 'Song posted successfully!' });
             } catch (error) {
-                logger.error('Error posting song', error);
+                console.error('Error posting song:', error);
                 res.status(500).json({ error: 'Failed to post song' });
             }
         });
 
-        // Extract song data
-        this.app.post('/extract-song', async (req, res) => {
+        // Load playlist or individual song
+        this.app.post('/load-content', async (req, res) => {
             try {
-                const { url } = req.body;
-                const songData = await this.extractSongData(url);
-                res.json(songData);
+                const { url, channelType } = req.body;
+                
+                if (!url || !channelType) {
+                    return res.status(400).json({ error: 'URL and channel type are required' });
+                }
+
+                let songs = [];
+                if (this.isPlaylistUrl(url)) {
+                    songs = await this.getPlaylistSongs(url);
+                } else if (this.isYouTubeVideoUrl(url)) {
+                    songs = await this.getSingleVideoData(url);
+                } else {
+                    return res.status(400).json({ error: 'Invalid YouTube URL' });
+                }
+
+                this.currentPlaylists[channelType].songs = songs;
+                this.currentPlaylists[channelType].currentIndex = 0;
+
+                const message = songs.length === 1 ? 
+                    `Loaded song: ${songs[0].title}` : 
+                    `Loaded ${songs.length} songs for ${channelType} videos`;
+
+                res.json({ 
+                    success: true, 
+                    message,
+                    songs: songs.slice(0, 10)
+                });
             } catch (error) {
-                logger.error('Error extracting song data', error);
-                res.status(500).json({ error: 'Failed to extract song data' });
+                console.error('Error loading content:', error);
+                res.status(500).json({ error: 'Failed to load content' });
             }
         });
 
         const PORT = process.env.PORT || 5000;
         this.app.listen(PORT, '0.0.0.0', () => {
-            logger.info(`Web server running on port ${PORT}`);
+            console.log(`🌟 Web server running on port ${PORT}`);
         });
+    }
+
+    isPlaylistUrl(url) {
+        return url.includes('playlist?list=') || url.includes('&list=');
+    }
+
+    isYouTubeVideoUrl(url) {
+        return url.includes('youtube.com/watch') || url.includes('youtu.be/');
+    }
+
+    async getSingleVideoData(url) {
+        try {
+            const videoId = this.extractVideoId(url);
+            const videoUrl = `https://www.googleapis.com/youtube/v3/videos?part=snippet&id=${videoId}&key=${this.config.youtube.apiKey}`;
+            
+            const response = await axios.get(videoUrl);
+            const video = response.data.items[0];
+            
+            if (!video) {
+                throw new Error('Video not found');
+            }
+
+            return [{
+                id: videoId,
+                title: video.snippet.title,
+                url: `https://www.youtube.com/watch?v=${videoId}`
+            }];
+        } catch (error) {
+            console.error('Error fetching single video:', error);
+            throw new Error('Failed to fetch video data');
+        }
+    }
+
+    extractVideoId(url) {
+        const match = url.match(/(?:youtube\.com\/watch\?v=|youtu\.be\/)([^&\n?#]+)/);
+        return match ? match[1] : null;
+    }
+
+    async getPlaylistSongs(playlistUrl) {
+        try {
+            const playlistId = this.extractPlaylistId(playlistUrl);
+            const apiUrl = `https://www.googleapis.com/youtube/v3/playlistItems?part=snippet&maxResults=50&playlistId=${playlistId}&key=${this.config.youtube.apiKey}`;
+            
+            const response = await axios.get(apiUrl);
+            const items = response.data.items;
+            
+            const songs = items
+                .filter(item => item.snippet.title !== 'Private video' && item.snippet.title !== 'Deleted video')
+                .map(item => ({
+                    id: item.snippet.resourceId.videoId,
+                    title: item.snippet.title,
+                    url: `https://www.youtube.com/watch?v=${item.snippet.resourceId.videoId}`
+                }))
+                .filter(song => this.isMusicContent(song));
+
+            console.log(`Filtered out ${items.length - songs.length} non-music videos from playlist`);
+            return songs;
+        } catch (error) {
+            console.error('Error fetching playlist:', error);
+            throw new Error('Failed to fetch playlist');
+        }
+    }
+
+    isMusicContent(video) {
+        const title = video.title.toLowerCase();
+        const description = video.description?.toLowerCase() || '';
+        
+        const musicKeywords = [
+            'music', 'song', 'audio', 'track', 'album', 'single', 'ep', 'mix', 'remix',
+            'official', 'lyric', 'instrumental', 'acoustic', 'live', 'cover', 'version',
+            'bass', 'beat', 'rap', 'hip hop', 'rock', 'pop', 'jazz', 'blues', 'classical',
+            'electronic', 'dance', 'house', 'techno', 'dubstep', 'trap', 'reggae'
+        ];
+        
+        const hasMusicKeywords = musicKeywords.some(keyword => 
+            title.includes(keyword) || description.includes(keyword)
+        );
+
+        const hasMusicPatterns = 
+            /\b(ft\.?|feat\.?|featuring)\b/i.test(title) ||
+            /\b\d{4}\b/.test(title) ||
+            /\([^)]*\)/i.test(title) ||
+            /\[[^\]]*\]/i.test(title) ||
+            /-\s*(official|music|audio|lyric)/i.test(title);
+
+        return hasMusicKeywords || hasMusicPatterns;
+    }
+
+    extractPlaylistId(url) {
+        const match = url.match(/[?&]list=([^&]+)/);
+        return match ? match[1] : null;
+    }
+
+    async joinVoiceChannel(channelType) {
+        const channelId = channelType === 'music' ? 
+            this.config.discord.musicVideoChannelId : 
+            this.config.discord.lyricVideoChannelId;
+
+        const channel = await this.client.channels.fetch(channelId);
+        if (!channel) {
+            throw new Error('Voice channel not found');
+        }
+
+        const connection = joinVoiceChannel({
+            channelId: channelId,
+            guildId: channel.guild.id,
+            adapterCreator: channel.guild.voiceAdapterCreator,
+        });
+
+        const player = createAudioPlayer();
+        connection.subscribe(player);
+
+        this.currentPlaylists[channelType].connection = connection;
+        this.currentPlaylists[channelType].player = player;
+
+        // Auto-skip to next song when current one ends
+        player.on(AudioPlayerStatus.Idle, () => {
+            console.log(`🎵 Song ended in ${channelType}, auto-skipping to next...`);
+            this.skipSong(channelType);
+        });
+
+        player.on('error', error => {
+            console.error(`Audio player error in ${channelType}:`, error);
+            this.skipSong(channelType);
+        });
+
+        connection.on(VoiceConnectionStatus.Disconnected, () => {
+            console.log(`Voice connection lost for ${channelType} channel`);
+        });
+    }
+
+    async playCurrentSong(channelType) {
+        const playlist = this.currentPlaylists[channelType];
+        
+        if (playlist.songs.length === 0) {
+            console.log(`No songs in ${channelType} playlist`);
+            return;
+        }
+
+        // Ensure we have a valid index
+        if (playlist.currentIndex >= playlist.songs.length) {
+            playlist.currentIndex = 0;
+            console.log(`🔄 Looping to song 1/${playlist.songs.length} in ${channelType} channel`);
+        } else {
+            console.log(`🔄 Looping to song ${playlist.currentIndex + 1}/${playlist.songs.length} in ${channelType} channel`);
+        }
+
+        const currentSong = playlist.songs[playlist.currentIndex];
+        if (!currentSong) {
+            console.log(`No current song found for ${channelType}`);
+            return;
+        }
+
+        try {
+            const stream = ytdl(currentSong.url, { 
+                filter: 'audioonly',
+                quality: 'lowestaudio',
+                highWaterMark: 1 << 25
+            });
+            
+            const resource = createAudioResource(stream);
+            playlist.player.play(resource);
+            playlist.isPlaying = true;
+            
+            console.log(`🎵 Playing: ${currentSong.title} in ${channelType} channel`);
+        } catch (error) {
+            console.error(`Error playing song in ${channelType}:`, error);
+            this.skipSong(channelType);
+        }
+    }
+
+    pausePlayback(channelType) {
+        const playlist = this.currentPlaylists[channelType];
+        if (playlist.player) {
+            playlist.player.pause();
+            playlist.isPlaying = false;
+        }
+    }
+
+    async skipSong(channelType) {
+        const playlist = this.currentPlaylists[channelType];
+        
+        playlist.currentIndex = (playlist.currentIndex + 1) % playlist.songs.length;
+        
+        if (playlist.connection && playlist.player) {
+            await this.playCurrentSong(channelType);
+        }
+    }
+
+    stopPlayback(channelType) {
+        const playlist = this.currentPlaylists[channelType];
+        if (playlist.player) {
+            playlist.player.stop();
+            playlist.isPlaying = false;
+        }
+    }
+
+    leaveVoiceChannel(channelType) {
+        const playlist = this.currentPlaylists[channelType];
+        if (playlist.connection) {
+            playlist.connection.destroy();
+            playlist.connection = null;
+            playlist.player = null;
+            playlist.isPlaying = false;
+        }
     }
 
     async extractSongData(url) {
         try {
-            const response = await axios.get(url, {
-                headers: {
-                    'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36'
-                }
-            });
-
+            const response = await axios.get(url);
             const html = response.data;
-            let title = 'Unknown Song';
-
-            const titlePatterns = [
-                /<title[^>]*>([^<]+)/i,
-                /<meta[^>]+property="og:title"[^>]+content="([^"]+)"/i,
-                /<meta[^>]+name="title"[^>]+content="([^"]+)"/i,
-                /"title"\s*:\s*"([^"]+)"/i
-            ];
-
-            for (const pattern of titlePatterns) {
-                const match = html.match(pattern);
-                if (match && match[1] && match[1].trim() !== 'Suno') {
-                    title = match[1].trim().replace(/\s*\|\s*Suno\s*$/, '');
-                    break;
-                }
-            }
-
-            return { title, url };
-        } catch (error) {
-            logger.error('Error extracting song data', error);
-            return { title: 'Unknown Song', url };
-        }
-    }
-
-    async generateAIFeatures(songData) {
-        if (!process.env.OPENAI_API_KEY) {
-            return 'Enhanced with AI features';
-        }
-
-        try {
-            const { default: OpenAI } = await import('openai');
-            const openai = new OpenAI({ apiKey: process.env.OPENAI_API_KEY });
-
-            const response = await openai.chat.completions.create({
-                model: "gpt-4o",
-                messages: [{
-                    role: "user",
-                    content: `Create a brief, engaging description for this Suno song: "${songData.title}". Make it 1-2 sentences, focusing on the musical style and mood. Be creative but concise.`
-                }],
-                max_tokens: 100
-            });
-
-            return response.choices[0].message.content.trim();
-        } catch (error) {
-            logger.error('AI generation failed', error);
-            return 'Enhanced with AI features';
-        }
-    }
-
-    async postToDiscord(title, url, description = '') {
-        try {
-            const channel = await this.client.channels.fetch(config.discord.channelId);
+            const titleMatch = html.match(/<title>(.*?)<\/title>/);
+            const title = titleMatch ? titleMatch[1].trim() : 'Unknown Song';
             
+            return {
+                title: title.replace(' | Suno', '').trim(),
+                url: url
+            };
+        } catch (error) {
+            console.error('Error extracting song data:', error);
+            return {
+                title: 'Unknown Song',
+                url: url
+            };
+        }
+    }
+
+    async postToDiscord(title, url, description = '', hashtags = []) {
+        try {
+            const channel = await this.client.channels.fetch(this.config.discord.targetChannelId);
             if (!channel) {
-                throw new Error('Discord channel not found');
+                throw new Error('Target Discord channel not found');
             }
 
-            let message = `🎵 **New Suno song:** ${title}\n${url}`;
-            
-            if (description) {
-                message += `\n\n💭 ${description}`;
-            }
+            const embed = new EmbedBuilder()
+                .setTitle('🎵 New Suno Song')
+                .setDescription(`**${title}**\n\n${description}\n\n[Listen Here](${url})`)
+                .setColor('#FF6B6B')
+                .setTimestamp();
 
-            await channel.send(message);
-            logger.info(`Posted song to Discord: ${title}`);
+            const hashtagText = hashtags.length > 0 ? `\n\n${hashtags.map(tag => `#${tag}`).join(' ')}` : '';
+            const message = `🎵 New Suno song: **${title}** — ${url}${hashtagText}`;
+
+            await channel.send({ content: message, embeds: [embed] });
+            console.log(`Posted song to Discord: ${title}`);
         } catch (error) {
-            logger.error('Failed to post to Discord', error);
+            console.error('Error posting to Discord:', error);
             throw error;
         }
     }
 
-    generateSongId(url) {
-        return url.split('/').pop() || Math.random().toString(36).substr(2, 9);
-    }
-
     renderDashboard() {
-        const recentSongs = this.songHistory.slice(0, 10);
-        
+        const currentMusicSong = this.currentPlaylists.music.songs[this.currentPlaylists.music.currentIndex];
+        const currentLyricSong = this.currentPlaylists.lyric.songs[this.currentPlaylists.lyric.currentIndex];
+
         return `
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>🎵 Suno Discord Bot</title>
-    <style>
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-        }
-        
-        body {
-            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            min-height: 100vh;
-            color: #333;
-        }
-        
-        .container {
-            max-width: 800px;
-            margin: 0 auto;
-            padding: 20px;
-        }
-        
-        .header {
-            text-align: center;
-            margin-bottom: 30px;
-            color: white;
-        }
-        
-        .header h1 {
-            font-size: 2.5rem;
-            margin-bottom: 10px;
-            text-shadow: 2px 2px 4px rgba(0,0,0,0.3);
-        }
-        
-        .status {
-            display: inline-flex;
-            align-items: center;
-            gap: 8px;
-            background: rgba(34, 197, 94, 0.9);
-            padding: 8px 16px;
-            border-radius: 20px;
-            font-weight: 600;
-            color: white;
-        }
-        
-        .card {
-            background: white;
-            border-radius: 16px;
-            padding: 24px;
-            margin-bottom: 20px;
-            box-shadow: 0 8px 32px rgba(0,0,0,0.1);
-        }
-        
-        .form-group {
-            margin-bottom: 20px;
-        }
-        
-        label {
-            display: block;
-            margin-bottom: 8px;
-            font-weight: 600;
-            color: #374151;
-        }
-        
-        input, textarea {
-            width: 100%;
-            padding: 12px;
-            border: 2px solid #e5e7eb;
-            border-radius: 8px;
-            font-size: 16px;
-            transition: border-color 0.3s;
-        }
-        
-        input:focus, textarea:focus {
-            outline: none;
-            border-color: #667eea;
-            box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
-        }
-        
-        .button-group {
-            display: flex;
-            gap: 12px;
-            flex-wrap: wrap;
-        }
-        
-        button {
-            flex: 1;
-            padding: 12px 24px;
-            border: none;
-            border-radius: 8px;
-            font-weight: 600;
-            font-size: 16px;
-            cursor: pointer;
-            transition: all 0.3s;
-            min-width: 140px;
-        }
-        
-        .btn-primary {
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            color: white;
-        }
-        
-        .btn-secondary {
-            background: #f3f4f6;
-            color: #374151;
-        }
-        
-        .btn-extract {
-            background: linear-gradient(135deg, #10b981 0%, #059669 100%);
-            color: white;
-        }
-        
-        button:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 4px 12px rgba(0,0,0,0.15);
-        }
-        
-        .loading {
-            display: none;
-            text-align: center;
-            padding: 20px;
-            color: #6b7280;
-        }
-        
-        .message {
-            padding: 12px;
-            border-radius: 8px;
-            margin-bottom: 20px;
-            display: none;
-        }
-        
-        .message.success {
-            background: #d1fae5;
-            color: #065f46;
-            border: 1px solid #a7f3d0;
-        }
-        
-        .message.error {
-            background: #fee2e2;
-            color: #991b1b;
-            border: 1px solid #fca5a5;
-        }
-        
-        .history {
-            margin-top: 30px;
-        }
-        
-        .history h3 {
-            margin-bottom: 20px;
-            color: #374151;
-            font-size: 1.5rem;
-        }
-        
-        .song-item {
-            background: #f9fafb;
-            border: 1px solid #e5e7eb;
-            border-radius: 12px;
-            padding: 16px;
-            margin-bottom: 12px;
-            transition: all 0.3s;
-        }
-        
-        .song-item:hover {
-            background: #f3f4f6;
-            transform: translateY(-1px);
-        }
-        
-        .song-title {
-            font-weight: 600;
-            color: #111827;
-            margin-bottom: 4px;
-        }
-        
-        .song-link {
-            color: #667eea;
-            text-decoration: none;
-            font-size: 14px;
-            word-break: break-all;
-        }
-        
-        @media (max-width: 768px) {
-            .container {
-                padding: 15px;
-            }
-            
-            .header h1 {
-                font-size: 2rem;
-            }
-            
-            .button-group {
-                flex-direction: column;
-            }
-            
-            button {
-                min-width: auto;
-            }
-        }
-    </style>
-</head>
-<body>
-    <div class="container">
-        <div class="header">
-            <h1>🎵 Suno Discord Bot</h1>
-            <div class="status">
-                <span>●</span>
-                ${this.isReady ? 'Ready' : 'Connecting...'}
+        <!DOCTYPE html>
+        <html lang="en">
+        <head>
+            <meta charset="UTF-8">
+            <meta name="viewport" content="width=device-width, initial-scale=1.0">
+            <title>🎵 Enhanced Music Bot Dashboard</title>
+            <style>
+                * {
+                    margin: 0;
+                    padding: 0;
+                    box-sizing: border-box;
+                }
+
+                body {
+                    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+                    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+                    min-height: 100vh;
+                    padding: 20px;
+                    color: #333;
+                }
+
+                .container {
+                    max-width: 1200px;
+                    margin: 0 auto;
+                    background: white;
+                    border-radius: 20px;
+                    box-shadow: 0 20px 40px rgba(0,0,0,0.1);
+                    overflow: hidden;
+                }
+
+                .header {
+                    background: linear-gradient(135deg, #FF6B6B, #4ECDC4);
+                    color: white;
+                    padding: 30px;
+                    text-align: center;
+                }
+
+                .header h1 {
+                    font-size: 2.5rem;
+                    margin-bottom: 10px;
+                    text-shadow: 2px 2px 4px rgba(0,0,0,0.3);
+                }
+
+                .content {
+                    padding: 30px;
+                }
+
+                .section {
+                    margin-bottom: 40px;
+                    background: #f8f9fa;
+                    border-radius: 15px;
+                    padding: 25px;
+                    box-shadow: 0 5px 15px rgba(0,0,0,0.08);
+                }
+
+                .section h2 {
+                    color: #2c3e50;
+                    margin-bottom: 20px;
+                    font-size: 1.8rem;
+                    border-bottom: 3px solid #3498db;
+                    padding-bottom: 10px;
+                }
+
+                .video-grid {
+                    display: grid;
+                    grid-template-columns: repeat(auto-fit, minmax(500px, 1fr));
+                    gap: 30px;
+                    margin-bottom: 30px;
+                }
+
+                .video-container {
+                    background: #2c3e50;
+                    border-radius: 15px;
+                    overflow: hidden;
+                    box-shadow: 0 10px 25px rgba(0,0,0,0.15);
+                }
+
+                .video-wrapper {
+                    position: relative;
+                    width: 100%;
+                    height: 315px;
+                    background: #34495e;
+                }
+
+                .video-wrapper iframe {
+                    width: 100%;
+                    height: 100%;
+                    border: none;
+                    pointer-events: none;
+                }
+
+                .video-overlay {
+                    position: absolute;
+                    top: 0;
+                    left: 0;
+                    right: 0;
+                    bottom: 40px;
+                    background: transparent;
+                    z-index: 10;
+                    pointer-events: all;
+                    cursor: default;
+                }
+
+                .video-controls {
+                    position: absolute;
+                    bottom: 0;
+                    left: 0;
+                    right: 0;
+                    background: linear-gradient(transparent, rgba(0,0,0,0.8));
+                    padding: 12px;
+                    display: flex;
+                    justify-content: space-between;
+                    align-items: center;
+                }
+
+                .btn-volume {
+                    background: rgba(255,255,255,0.9);
+                    color: #333;
+                    border: none;
+                    padding: 8px 16px;
+                    border-radius: 6px;
+                    font-weight: 600;
+                    cursor: pointer;
+                    transition: all 0.3s;
+                }
+
+                .btn-volume:hover {
+                    background: white;
+                    transform: scale(1.05);
+                }
+
+                .video-info {
+                    color: white;
+                    font-size: 0.9rem;
+                    opacity: 0.8;
+                    margin-top: 4px;
+                }
+
+                .no-video {
+                    display: flex;
+                    flex-direction: column;
+                    align-items: center;
+                    justify-content: center;
+                    height: 315px;
+                    color: #7f8c8d;
+                    text-align: center;
+                }
+
+                .placeholder {
+                    font-size: 4rem;
+                    margin-bottom: 15px;
+                    opacity: 0.5;
+                }
+
+                .subtitle {
+                    opacity: 0.6;
+                    font-size: 0.9rem;
+                }
+
+                .form-group {
+                    margin-bottom: 20px;
+                }
+
+                .form-group label {
+                    display: block;
+                    margin-bottom: 8px;
+                    font-weight: 600;
+                    color: #2c3e50;
+                }
+
+                .form-group input, .form-group textarea, .form-group select {
+                    width: 100%;
+                    padding: 12px;
+                    border: 2px solid #ddd;
+                    border-radius: 8px;
+                    font-size: 16px;
+                    transition: border-color 0.3s;
+                }
+
+                .form-group input:focus, .form-group textarea:focus, .form-group select:focus {
+                    outline: none;
+                    border-color: #3498db;
+                }
+
+                .btn {
+                    background: linear-gradient(135deg, #3498db, #2980b9);
+                    color: white;
+                    border: none;
+                    padding: 12px 24px;
+                    border-radius: 8px;
+                    font-size: 16px;
+                    font-weight: 600;
+                    cursor: pointer;
+                    transition: all 0.3s;
+                    margin-right: 10px;
+                }
+
+                .btn:hover {
+                    transform: translateY(-2px);
+                    box-shadow: 0 5px 15px rgba(52, 152, 219, 0.4);
+                }
+
+                .btn-success {
+                    background: linear-gradient(135deg, #2ecc71, #27ae60);
+                }
+
+                .btn-success:hover {
+                    box-shadow: 0 5px 15px rgba(46, 204, 113, 0.4);
+                }
+
+                .status {
+                    padding: 15px;
+                    border-radius: 8px;
+                    margin-bottom: 20px;
+                    font-weight: 600;
+                }
+
+                .status.success {
+                    background: #d4edda;
+                    color: #155724;
+                    border: 1px solid #c3e6cb;
+                }
+
+                .status.error {
+                    background: #f8d7da;
+                    color: #721c24;
+                    border: 1px solid #f5c6cb;
+                }
+
+                .grid {
+                    display: grid;
+                    grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+                    gap: 20px;
+                }
+
+                @media (max-width: 768px) {
+                    .video-grid {
+                        grid-template-columns: 1fr;
+                    }
+                    
+                    .header h1 {
+                        font-size: 2rem;
+                    }
+                    
+                    .content {
+                        padding: 20px;
+                    }
+                }
+            </style>
+        </head>
+        <body>
+            <div class="container">
+                <div class="header">
+                    <h1>🎵 Enhanced Music Bot Dashboard</h1>
+                    <p>Advanced Discord Music Bot with Live Video Streaming</p>
+                </div>
+
+                <div class="content">
+                    <!-- Live Video Streams -->
+                    <div class="section">
+                        <h2>🎬 Live Video Streams</h2>
+                        <div class="video-grid">
+                            <!-- Music Videos Stream -->
+                            <div class="video-container">
+                                <h3 style="color: #374151; margin-bottom: 12px;">🎬 Music Videos</h3>
+                                <div class="video-wrapper">
+                                    ${currentMusicSong ? `
+                                        <iframe 
+                                            id="musicVideo"
+                                            src="https://www.youtube.com/embed/${currentMusicSong.id}?autoplay=1&mute=1&controls=0&disablekb=1&rel=0&modestbranding=1&enablejsapi=0"
+                                            frameborder="0" 
+                                            allow="autoplay; encrypted-media"
+                                            style="pointer-events: none;">
+                                        </iframe>
+                                        <div class="video-overlay"></div>
+                                        <div class="video-controls">
+                                            <button class="btn-volume" onclick="toggleMute('musicVideo')" id="musicMute">🔊 Unmute</button>
+                                            <div class="video-info">
+                                                <strong>${currentMusicSong.title}</strong>
+                                            </div>
+                                        </div>
+                                    ` : `
+                                        <div class="no-video">
+                                            <div class="placeholder">🎬</div>
+                                            <p>No music video playing</p>
+                                            <p class="subtitle">Load a playlist to see live video</p>
+                                        </div>
+                                    `}
+                                </div>
+                            </div>
+
+                            <!-- Lyric Videos Stream -->
+                            <div class="video-container">
+                                <h3 style="color: #374151; margin-bottom: 12px;">🎤 Lyric Videos</h3>
+                                <div class="video-wrapper">
+                                    ${currentLyricSong ? `
+                                        <iframe 
+                                            id="lyricVideo"
+                                            src="https://www.youtube.com/embed/${currentLyricSong.id}?autoplay=1&mute=1&controls=0&disablekb=1&rel=0&modestbranding=1&enablejsapi=0"
+                                            frameborder="0" 
+                                            allow="autoplay; encrypted-media"
+                                            style="pointer-events: none;">
+                                        </iframe>
+                                        <div class="video-overlay"></div>
+                                        <div class="video-controls">
+                                            <button class="btn-volume" onclick="toggleMute('lyricVideo')" id="lyricMute">🔊 Unmute</button>
+                                            <div class="video-info">
+                                                <strong>${currentLyricSong.title}</strong>
+                                            </div>
+                                        </div>
+                                    ` : `
+                                        <div class="no-video">
+                                            <div class="placeholder">🎤</div>
+                                            <p>No lyric video playing</p>
+                                            <p class="subtitle">Load a playlist to see live video</p>
+                                        </div>
+                                    `}
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- YouTube Playlist Loading -->
+                    <div class="section">
+                        <h2>🎵 Load YouTube Content</h2>
+                        <form id="loadContentForm">
+                            <div class="grid">
+                                <div class="form-group">
+                                    <label for="playlistUrl">YouTube URL (Playlist or Single Video)</label>
+                                    <input type="url" id="playlistUrl" name="playlistUrl" 
+                                           placeholder="https://www.youtube.com/playlist?list=..." required>
+                                </div>
+                                <div class="form-group">
+                                    <label for="channelType">Channel Type</label>
+                                    <select id="channelType" name="channelType" required>
+                                        <option value="">Select Channel Type</option>
+                                        <option value="music">🎬 Music Videos</option>
+                                        <option value="lyric">🎤 Lyric Videos</option>
+                                    </select>
+                                </div>
+                            </div>
+                            <button type="submit" class="btn btn-success">🎵 Load Content & Auto-Play</button>
+                        </form>
+                        <div id="loadStatus"></div>
+                    </div>
+
+                    <!-- Suno Song Posting -->
+                    <div class="section">
+                        <h2>🎵 Post Suno Song</h2>
+                        <form id="songForm">
+                            <div class="form-group">
+                                <label for="songUrl">Suno Song URL</label>
+                                <input type="url" id="songUrl" name="songUrl" 
+                                       placeholder="https://suno.com/song/..." required>
+                            </div>
+                            <div class="form-group">
+                                <label for="description">Description (Optional)</label>
+                                <textarea id="description" name="description" rows="3" 
+                                          placeholder="Add a description for your song..."></textarea>
+                            </div>
+                            <div class="form-group">
+                                <label for="hashtags">Hashtags (Optional)</label>
+                                <input type="text" id="hashtags" name="hashtags" 
+                                       placeholder="music, newrelease, suno (comma separated)">
+                            </div>
+                            <button type="submit" class="btn">🎵 Post to Discord</button>
+                        </form>
+                        <div id="status"></div>
+                    </div>
+
+                    <!-- Current Playlists -->
+                    <div class="section">
+                        <h2>📋 Current Playlists</h2>
+                        <div class="grid">
+                            <div>
+                                <h3>🎬 Music Videos (${this.currentPlaylists.music.songs.length} songs)</h3>
+                                <p><strong>Currently Playing:</strong> ${currentMusicSong?.title || 'None'}</p>
+                                <p><strong>Status:</strong> ${this.currentPlaylists.music.isPlaying ? '▶️ Playing' : '⏸️ Paused'}</p>
+                            </div>
+                            <div>
+                                <h3>🎤 Lyric Videos (${this.currentPlaylists.lyric.songs.length} songs)</h3>
+                                <p><strong>Currently Playing:</strong> ${currentLyricSong?.title || 'None'}</p>
+                                <p><strong>Status:</strong> ${this.currentPlaylists.lyric.isPlaying ? '▶️ Playing' : '⏸️ Paused'}</p>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Discord Commands Info -->
+                    <div class="section">
+                        <h2>🎮 Discord Commands</h2>
+                        <div class="grid">
+                            <div>
+                                <h4>/load [url] [channel]</h4>
+                                <p>Load YouTube playlist or video and auto-start playing</p>
+                            </div>
+                            <div>
+                                <h4>/play [channel]</h4>
+                                <p>Start playing music in selected channel</p>
+                            </div>
+                            <div>
+                                <h4>/pause [channel]</h4>
+                                <p>Pause music playback</p>
+                            </div>
+                            <div>
+                                <h4>/skip [channel]</h4>
+                                <p>Skip to next song</p>
+                            </div>
+                            <div>
+                                <h4>/stop [channel]</h4>
+                                <p>Stop music and leave voice channel</p>
+                            </div>
+                            <div>
+                                <h4>/queue [channel]</h4>
+                                <p>Show current playlist</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
             </div>
-        </div>
-        
-        <div class="message" id="message"></div>
-        
-        <div class="card">
-            <h2 style="margin-bottom: 20px; color: #374151;">Post New Song</h2>
-            
-            <form id="songForm">
-                <div class="form-group">
-                    <label for="url">Suno Song URL *</label>
-                    <input type="url" id="url" name="url" placeholder="https://suno.com/song/..." required>
-                </div>
-                
-                <div class="form-group">
-                    <label for="title">Song Title *</label>
-                    <input type="text" id="title" name="title" placeholder="Enter song title or auto-extract" required>
-                </div>
-                
-                <div class="form-group">
-                    <label for="description">Description (Optional)</label>
-                    <textarea id="description" name="description" rows="3" placeholder="Add a custom description or let AI generate one"></textarea>
-                </div>
-                
-                <div class="button-group">
-                    <button type="button" class="btn-extract" onclick="extractSong()">🎯 Auto-Extract</button>
-                    <button type="submit" class="btn-primary">🚀 Post Song</button>
-                    <button type="submit" class="btn-secondary" onclick="submitWithAI(event)">✨ Post with AI</button>
-                </div>
-            </form>
-        </div>
-        
-        <div class="loading" id="loading">
-            <div>⏳ Processing your request...</div>
-        </div>
-        
-        ${recentSongs.length > 0 ? `
-        <div class="card history">
-            <h3>🎵 Recent Songs (${this.songHistory.length} total)</h3>
-            ${recentSongs.map(song => `
-                <div class="song-item">
-                    <div class="song-title">${song.title}</div>
-                    <a href="${song.url}" target="_blank" class="song-link">${song.url}</a>
-                </div>
-            `).join('')}
-        </div>
-        ` : ''}
-    </div>
-    
-    <script>
-        function showMessage(text, type) {
-            const message = document.getElementById('message');
-            message.textContent = text;
-            message.className = 'message ' + type;
-            message.style.display = 'block';
-            setTimeout(() => {
-                message.style.display = 'none';
-            }, 5000);
-        }
-        
-        function showLoading(show) {
-            document.getElementById('loading').style.display = show ? 'block' : 'none';
-        }
-        
-        async function extractSong() {
-            const url = document.getElementById('url').value;
-            if (!url) {
-                showMessage('Please enter a Suno URL first', 'error');
-                return;
-            }
-            
-            showLoading(true);
-            try {
-                const response = await fetch('/extract-song', {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ url })
-                });
-                
-                const data = await response.json();
-                if (data.title) {
-                    document.getElementById('title').value = data.title;
-                    showMessage('Song title extracted successfully!', 'success');
-                } else {
-                    showMessage('Could not extract title automatically', 'error');
+
+            <script>
+                // Video mute toggle functionality
+                function toggleMute(videoId) {
+                    const button = document.getElementById(videoId === 'musicVideo' ? 'musicMute' : 'lyricMute');
+                    const iframe = document.getElementById(videoId);
+                    
+                    if (button.textContent.includes('Unmute')) {
+                        // Unmute video by changing source to remove mute parameter
+                        const currentSrc = iframe.src;
+                        iframe.src = currentSrc.replace('&mute=1', '').replace('mute=1&', '').replace('mute=1', '');
+                        button.textContent = '🔇 Mute';
+                    } else {
+                        // Mute video by adding mute parameter
+                        const currentSrc = iframe.src;
+                        iframe.src = currentSrc + (currentSrc.includes('?') ? '&' : '?') + 'mute=1';
+                        button.textContent = '🔊 Unmute';
+                    }
                 }
-            } catch (error) {
-                showMessage('Failed to extract song data', 'error');
-            }
-            showLoading(false);
-        }
-        
-        function submitWithAI(event) {
-            event.preventDefault();
-            document.getElementById('songForm').dispatchEvent(new Event('submit'));
-            document.querySelector('input[name="useAI"]')?.remove();
-            const input = document.createElement('input');
-            input.type = 'hidden';
-            input.name = 'useAI';
-            input.value = 'true';
-            document.getElementById('songForm').appendChild(input);
-        }
-        
-        document.getElementById('songForm').addEventListener('submit', async (e) => {
-            e.preventDefault();
-            
-            const formData = new FormData(e.target);
-            const data = Object.fromEntries(formData);
-            
-            if (!data.url || !data.title) {
-                showMessage('URL and title are required', 'error');
-                return;
-            }
-            
-            showLoading(true);
-            try {
-                const response = await fetch('/post-song', {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify(data)
+
+                // Load content form submission
+                document.getElementById('loadContentForm').addEventListener('submit', async (e) => {
+                    e.preventDefault();
+                    
+                    const formData = new FormData(e.target);
+                    const data = {
+                        url: formData.get('playlistUrl'),
+                        channelType: formData.get('channelType')
+                    };
+                    
+                    const statusDiv = document.getElementById('loadStatus');
+                    statusDiv.innerHTML = '<div class="status">Loading content...</div>';
+                    
+                    try {
+                        const response = await fetch('/load-content', {
+                            method: 'POST',
+                            headers: { 'Content-Type': 'application/json' },
+                            body: JSON.stringify(data)
+                        });
+                        
+                        const result = await response.json();
+                        
+                        if (result.success) {
+                            statusDiv.innerHTML = '<div class="status success">✅ ' + result.message + '</div>';
+                            setTimeout(() => location.reload(), 2000);
+                        } else {
+                            statusDiv.innerHTML = '<div class="status error">❌ ' + result.error + '</div>';
+                        }
+                    } catch (error) {
+                        statusDiv.innerHTML = '<div class="status error">❌ Failed to load content</div>';
+                    }
                 });
-                
-                const result = await response.json();
-                if (result.success) {
-                    showMessage(result.message, 'success');
-                    setTimeout(() => location.reload(), 2000);
-                } else {
-                    showMessage(result.error || 'Failed to post song', 'error');
-                }
-            } catch (error) {
-                showMessage('Network error occurred', 'error');
-            }
-            showLoading(false);
-        });
-    </script>
-</body>
-</html>
+
+                // Song posting form submission
+                document.getElementById('songForm').addEventListener('submit', async (e) => {
+                    e.preventDefault();
+                    
+                    const formData = new FormData(e.target);
+                    const hashtags = formData.get('hashtags').split(',').map(tag => tag.trim()).filter(tag => tag);
+                    
+                    const data = {
+                        url: formData.get('songUrl'),
+                        description: formData.get('description'),
+                        hashtags: hashtags
+                    };
+                    
+                    const statusDiv = document.getElementById('status');
+                    statusDiv.innerHTML = '<div class="status">Posting song...</div>';
+                    
+                    try {
+                        const response = await fetch('/post-song', {
+                            method: 'POST',
+                            headers: { 'Content-Type': 'application/json' },
+                            body: JSON.stringify(data)
+                        });
+                        
+                        const result = await response.json();
+                        
+                        if (result.success) {
+                            statusDiv.innerHTML = '<div class="status success">✅ Song posted successfully!</div>';
+                            e.target.reset();
+                        } else {
+                            statusDiv.innerHTML = '<div class="status error">❌ ' + result.error + '</div>';
+                        }
+                    } catch (error) {
+                        statusDiv.innerHTML = '<div class="status error">❌ Failed to post song</div>';
+                    }
+                });
+
+                // Auto-refresh every 30 seconds to update currently playing
+                setInterval(() => {
+                    location.reload();
+                }, 30000);
+            </script>
+        </body>
+        </html>
         `;
     }
 }
 
 // Start the bot
-const bot = new RenderSunoBot();
-bot.start().catch(error => {
-    logger.error('Failed to start bot', error);
-    process.exit(1);
-});
-
-// Graceful shutdown
-process.on('SIGINT', () => {
-    logger.info('Shutting down bot...');
-    process.exit(0);
-});
+const bot = new EnhancedMusicBot();
+bot.start().catch(console.error);
