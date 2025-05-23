@@ -349,11 +349,19 @@ class EnhancedMusicBot {
                         this.currentPlaylists[channelType].songs = songs;
                         this.currentPlaylists[channelType].currentIndex = 0;
 
-                        const message = songs.length === 1 ? 
-                            `✅ Loaded song: **${songs[0].title}** in ${channelType} channel\n🎵 Bot joined voice channel and ready to play!` : 
-                            `✅ Loaded **${songs.length} songs** in ${channelType} channel\n🎵 Bot joined voice channel and ready to play!`;
-
-                        await interaction.editReply(message);
+                        // Auto-start playing immediately after loading
+                        try {
+                            await this.playCurrentSong(channelType);
+                            const message = songs.length === 1 ? 
+                                `✅ Loaded song: **${songs[0].title}** and started playing! 🎵` : 
+                                `✅ Loaded **${songs.length} songs** and started playing! 🎵`;
+                            await interaction.editReply(message);
+                        } catch (playError) {
+                            const message = songs.length === 1 ? 
+                                `✅ Loaded song: **${songs[0].title}** in ${channelType} channel\n🎵 Bot joined voice channel and ready to play!` : 
+                                `✅ Loaded **${songs.length} songs** in ${channelType} channel\n🎵 Bot joined voice channel and ready to play!`;
+                            await interaction.editReply(message);
+                        }
                     } catch (error) {
                         await interaction.editReply(`❌ Failed to load content: ${error.message}`);
                     }
