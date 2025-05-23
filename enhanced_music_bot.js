@@ -485,12 +485,20 @@ class EnhancedMusicBot {
             }
 
             const video = response.data.items[0];
-            return [{
+            const videoData = {
                 id: video.id,
                 title: video.snippet.title,
                 url: `https://www.youtube.com/watch?v=${video.id}`,
-                thumbnail: video.snippet.thumbnails.default.url
-            }];
+                thumbnail: video.snippet.thumbnails.default.url,
+                description: video.snippet.description || ''
+            };
+
+            // Check if content is music-related
+            if (!this.isMusicContent(videoData)) {
+                throw new Error('This content doesn\'t appear to be music-related. Only music content is allowed.');
+            }
+
+            return [videoData];
         } catch (error) {
             logger.error('Failed to fetch video data', error);
             throw error;
@@ -519,16 +527,80 @@ class EnhancedMusicBot {
                 }
             });
 
-            return response.data.items.map(item => ({
+            const allSongs = response.data.items.map(item => ({
                 id: item.snippet.resourceId.videoId,
                 title: item.snippet.title,
                 url: `https://www.youtube.com/watch?v=${item.snippet.resourceId.videoId}`,
-                thumbnail: item.snippet.thumbnails.default.url
+                thumbnail: item.snippet.thumbnails.default.url,
+                description: item.snippet.description || ''
             }));
+
+            // Filter out non-music content
+            const musicSongs = allSongs.filter(song => this.isMusicContent(song));
+            
+            if (musicSongs.length === 0) {
+                throw new Error('No music content found in this playlist. Only music content is allowed.');
+            }
+
+            if (musicSongs.length < allSongs.length) {
+                logger.info(`Filtered out ${allSongs.length - musicSongs.length} non-music videos from playlist`);
+            }
+
+            return musicSongs;
         } catch (error) {
             logger.error('Failed to fetch playlist', error);
             throw error;
         }
+    }
+
+    isMusicContent(video) {
+        const title = video.title.toLowerCase();
+        const description = video.description.toLowerCase();
+        
+        // Music-related keywords
+        const musicKeywords = [
+            'song', 'music', 'audio', 'track', 'album', 'single', 'ep', 'remix', 'cover',
+            'acoustic', 'live', 'official', 'video', 'lyric', 'lyrics', 'instrumental',
+            'beat', 'melody', 'tune', 'sound', 'artist', 'band', 'singer', 'vocal',
+            'guitar', 'piano', 'drum', 'bass', 'synth', 'electronic', 'rock', 'pop',
+            'hip hop', 'rap', 'jazz', 'classical', 'country', 'folk', 'blues', 'metal',
+            'indie', 'alternative', 'dance', 'edm', 'techno', 'house', 'dubstep',
+            'ambient', 'chill', 'lofi', 'lo-fi', 'soundtrack', 'theme', 'score'
+        ];
+
+        // Non-music content keywords (things to filter out)
+        const nonMusicKeywords = [
+            'tutorial', 'how to', 'review', 'unboxing', 'gameplay', 'gaming', 'let\'s play',
+            'vlog', 'podcast', 'interview', 'news', 'documentary', 'trailer', 'movie',
+            'tv show', 'series', 'episode', 'cooking', 'recipe', 'workout', 'fitness',
+            'comedy', 'sketch', 'prank', 'reaction', 'compilation', 'fail', 'funny',
+            'educational', 'lecture', 'presentation', 'tech', 'technology', 'science',
+            'politics', 'sports', 'football', 'basketball', 'soccer', 'baseball'
+        ];
+
+        // Check for non-music keywords first (these take priority)
+        const hasNonMusicKeywords = nonMusicKeywords.some(keyword => 
+            title.includes(keyword) || description.includes(keyword)
+        );
+
+        if (hasNonMusicKeywords) {
+            return false;
+        }
+
+        // Check for music keywords
+        const hasMusicKeywords = musicKeywords.some(keyword => 
+            title.includes(keyword) || description.includes(keyword)
+        );
+
+        // Additional checks for music-like patterns
+        const hasMusicPatterns = 
+            /\b(ft\.?|feat\.?|featuring)\b/i.test(title) || // featuring artists
+            /\b\d{4}\b/.test(title) || // years (common in music)
+            /\([^)]*\)/i.test(title) || // parentheses (common in music titles)
+            /\[[^\]]*\]/i.test(title) || // brackets (common in music titles)
+            /-\s*(official|music|audio|lyric)/i.test(title); // common music video patterns
+
+        return hasMusicKeywords || hasMusicPatterns;
     }
 
     extractPlaylistId(url) {
