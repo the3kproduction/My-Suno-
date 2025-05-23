@@ -74,7 +74,12 @@ class UltimateMusicBot {
 
         // Main dashboard
         this.app.get('/', (req, res) => {
-            res.send(this.renderDashboard());
+            try {
+                res.send(this.renderDashboard());
+            } catch (error) {
+                logger.error('Dashboard render error', error);
+                res.send('<h1>🎵 Ultimate Music Bot</h1><p>Loading amazing features...</p>');
+            }
         });
 
         // Post song endpoint (existing functionality)
