@@ -186,13 +186,17 @@ class EnhancedMusicBot {
                 const allVoiceChannels = guild.channels.cache.filter(channel => channel.type === 2);
                 console.log('🔍 Available voice channels:', allVoiceChannels.map(c => c.name).join(', '));
                 
-                // Look for your Music Video channel specifically
+                // Look for your MUSIC VIDEO channel specifically
                 voiceChannel = guild.channels.cache.find(channel => 
                     channel.type === 2 && 
-                    (channel.name.toLowerCase() === 'music video' ||
-                     channel.name.toLowerCase().includes('music') || 
-                     channel.name.toLowerCase().includes('video') ||
-                     channel.name.toLowerCase().includes('general'))
+                    channel.name.toUpperCase() === 'MUSIC VIDEO'
+                ) || guild.channels.cache.find(channel => 
+                    channel.type === 2 && 
+                    (channel.name.toLowerCase().includes('music') && 
+                     channel.name.toLowerCase().includes('video'))
+                ) || guild.channels.cache.find(channel => 
+                    channel.type === 2 && 
+                    channel.name.toLowerCase().includes('music')
                 );
                 
                 if (voiceChannel) {
