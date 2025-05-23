@@ -651,6 +651,27 @@ class EnhancedMusicBot {
             </div>
         </div>
 
+        <!-- YouTube Music Loading -->
+        <div class="section">
+            <h2>🎥 Load YouTube Music</h2>
+            <form id="youtubeForm">
+                <div class="form-group">
+                    <label>YouTube URL (Video or Playlist)</label>
+                    <input type="url" id="youtubeUrl" placeholder="https://youtube.com/watch?v=... or https://youtube.com/playlist?list=..." required>
+                </div>
+                <div class="form-group">
+                    <label>Channel Type</label>
+                    <select id="channelType" required>
+                        <option value="">Select Channel</option>
+                        <option value="music">🎬 Music Videos</option>
+                        <option value="lyric">🎤 Lyric Videos</option>
+                    </select>
+                </div>
+                <button type="submit" class="btn">🎵 Load & Start Playing</button>
+            </form>
+            <div id="youtubeStatus" style="margin-top: 15px;"></div>
+        </div>
+
         <!-- Suno Song Posting -->
         <div class="section">
             <h2>🎵 Post Suno Song</h2>
@@ -693,6 +714,34 @@ class EnhancedMusicBot {
     </div>
 
     <script>
+        // YouTube form submission
+        document.getElementById('youtubeForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const status = document.getElementById('youtubeStatus');
+            
+            try {
+                const response = await fetch('/load-youtube', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        url: document.getElementById('youtubeUrl').value,
+                        channelType: document.getElementById('channelType').value
+                    })
+                });
+                
+                const result = await response.json();
+                
+                if (result.success) {
+                    status.innerHTML = '<p style="color: #4ecdc4;">✅ ' + result.message + '</p>';
+                    document.getElementById('youtubeForm').reset();
+                } else {
+                    status.innerHTML = '<p style="color: #ff6b6b;">❌ ' + result.error + '</p>';
+                }
+            } catch (error) {
+                status.innerHTML = '<p style="color: #ff6b6b;">❌ Failed to load YouTube content</p>';
+            }
+        });
+
         // Suno form submission
         document.getElementById('sunoForm').addEventListener('submit', async (e) => {
             e.preventDefault();
@@ -727,6 +776,58 @@ class EnhancedMusicBot {
 </body>
 </html>
             `);
+        });
+
+        // YouTube loading endpoint
+        this.app.post('/load-youtube', async (req, res) => {
+            try {
+                const { url, channelType } = req.body;
+                
+                if (!url || !channelType) {
+                    return res.json({ success: false, error: 'URL and channel type are required' });
+                }
+
+                if (!url.includes('youtube.com') && !url.includes('youtu.be')) {
+                    return res.json({ success: false, error: 'Please provide a valid YouTube URL' });
+                }
+
+                // Load the content
+                if (url.includes('playlist?list=')) {
+                    // Handle playlist
+                    const songs = await this.getPlaylistSongs(url);
+                    this.channels[channelType].playlist = songs;
+                    this.channels[channelType].currentIndex = 0;
+                    
+                    res.json({ 
+                        success: true, 
+                        message: `Loaded playlist with ${songs.length} songs in ${channelType} channel!` 
+                    });
+                } else {
+                    // Handle single video
+                    const videoId = this.extractVideoId(url);
+                    const info = await ytdl.getInfo(url);
+                    const song = {
+                        title: info.videoDetails.title,
+                        url: url,
+                        id: videoId
+                    };
+
+                    this.channels[channelType].playlist.push(song);
+                    res.json({ 
+                        success: true, 
+                        message: `Loaded: ${song.title} in ${channelType} channel!` 
+                    });
+                }
+
+                // Auto-start playing if not already playing
+                if (!this.channels[channelType].isPlaying) {
+                    setTimeout(() => this.playCurrentSong(channelType), 1000);
+                }
+
+            } catch (error) {
+                console.error('❌ YouTube loading error:', error);
+                res.json({ success: false, error: 'Failed to load YouTube content. Make sure the URL is valid.' });
+            }
         });
 
         // Suno posting endpoint
