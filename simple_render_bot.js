@@ -404,30 +404,102 @@ class SimpleSunoBot {
 
     async extractSongData(url) {
         try {
+            // Enhanced extraction with multiple methods
             const response = await axios.get(url, {
-                headers: { 'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36' },
+                headers: { 
+                    'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36',
+                    'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8',
+                    'Accept-Language': 'en-US,en;q=0.5',
+                    'Accept-Encoding': 'gzip, deflate',
+                    'Connection': 'keep-alive'
+                },
                 timeout: 15000
             });
             
             const html = response.data;
+            console.log('Extracting from URL:', url);
+            
+            // Multiple extraction patterns for better success rate
             const titlePatterns = [
-                /<title[^>]*>([^<]+)/i,
-                /<meta[^>]*property="og:title"[^>]*content="([^"]+)"/i
+                // OpenGraph title
+                /<meta[^>]*property="og:title"[^>]*content="([^"]+)"/i,
+                // Twitter title
+                /<meta[^>]*name="twitter:title"[^>]*content="([^"]+)"/i,
+                // Page title
+                /<title[^>]*>([^<]+)<\/title>/i,
+                // JSON-LD structured data
+                /"name"\s*:\s*"([^"]+)"/i,
+                // Common heading patterns
+                /<h1[^>]*>([^<]+)<\/h1>/i,
+                /<h2[^>]*>([^<]+)<\/h2>/i,
+                // Fallback: look for song-like patterns in the URL
+                /\/song\/([^\/\?]+)/i
             ];
             
             for (const pattern of titlePatterns) {
                 const match = html.match(pattern);
                 if (match && match[1]) {
-                    const title = match[1].trim()
+                    let title = match[1].trim();
+                    
+                    // Clean up common suffixes and prefixes
+                    title = title
                         .replace(/\s*\|\s*Suno.*$/i, '')
-                        .replace(/\s*-\s*Suno.*$/i, '');
-                    if (title) return { title };
+                        .replace(/\s*-\s*Suno.*$/i, '')
+                        .replace(/^Suno\s*[\|\-]\s*/i, '')
+                        .replace(/\s*\|\s*.*AI.*$/i, '')
+                        .replace(/\s*-\s*.*AI.*$/i, '')
+                        .replace(/&quot;/g, '"')
+                        .replace(/&#39;/g, "'")
+                        .replace(/&amp;/g, '&')
+                        .replace(/&lt;/g, '<')
+                        .replace(/&gt;/g, '>')
+                        .trim();
+                    
+                    if (title && title.length > 0 && title.length < 200) {
+                        console.log('Successfully extracted title:', title);
+                        return { title };
+                    }
                 }
             }
 
+            // If no title found, try to extract from URL
+            const urlMatch = url.match(/\/song\/([^\/\?]+)/i);
+            if (urlMatch) {
+                const urlTitle = decodeURIComponent(urlMatch[1])
+                    .replace(/[-_]/g, ' ')
+                    .replace(/\b\w/g, l => l.toUpperCase())
+                    .trim();
+                
+                if (urlTitle && urlTitle.length > 0) {
+                    console.log('Extracted title from URL:', urlTitle);
+                    return { title: urlTitle };
+                }
+            }
+
+            console.log('No title found with any pattern');
             return { title: '' };
+            
         } catch (error) {
-            console.error('Error extracting song data:', error);
+            console.error('Error extracting song data:', error.message);
+            
+            // Fallback: try to extract something from the URL itself
+            try {
+                const urlMatch = url.match(/\/song\/([^\/\?]+)/i);
+                if (urlMatch) {
+                    const fallbackTitle = decodeURIComponent(urlMatch[1])
+                        .replace(/[-_]/g, ' ')
+                        .replace(/\b\w/g, l => l.toUpperCase())
+                        .trim();
+                    
+                    if (fallbackTitle) {
+                        console.log('Using fallback title from URL:', fallbackTitle);
+                        return { title: fallbackTitle };
+                    }
+                }
+            } catch (fallbackError) {
+                console.error('Fallback extraction also failed:', fallbackError.message);
+            }
+            
             return { title: '' };
         }
     }
