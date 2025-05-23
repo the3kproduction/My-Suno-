@@ -780,12 +780,49 @@ class EnhancedMusicBot {
         }
         
         .section { 
-            background: rgba(255, 255, 255, 0.1); 
+            background: var(--bg-secondary); 
             backdrop-filter: blur(20px);
             padding: 40px; margin-bottom: 40px; 
             border-radius: 20px; 
-            border: 1px solid rgba(255, 255, 255, 0.2);
-            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.3);
+            border: 1px solid var(--border-color);
+            box-shadow: 0 20px 40px var(--shadow);
+            transition: all 0.3s ease;
+        }
+
+        .theme-toggle {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            z-index: 1000;
+            background: var(--card-bg);
+            border-radius: 50px;
+            padding: 10px;
+            border: 2px solid var(--border-color);
+            backdrop-filter: blur(10px);
+            display: flex;
+            gap: 5px;
+        }
+
+        .theme-btn {
+            padding: 8px 12px;
+            border: none;
+            border-radius: 25px;
+            background: transparent;
+            color: var(--text-secondary);
+            cursor: pointer;
+            font-size: 14px;
+            transition: all 0.3s ease;
+        }
+
+        .theme-btn.active {
+            background: linear-gradient(135deg, #667eea, #764ba2);
+            color: white;
+            box-shadow: 0 5px 15px rgba(102, 126, 234, 0.4);
+        }
+
+        .theme-btn:hover:not(.active) {
+            color: var(--text-primary);
+            background: var(--input-bg);
         }
         
         .grid { 
@@ -795,11 +832,12 @@ class EnhancedMusicBot {
         }
         
         .profile-card {
-            background: rgba(255, 255, 255, 0.15);
+            background: var(--card-bg);
             padding: 25px;
             border-radius: 15px;
-            border: 1px solid rgba(255, 255, 255, 0.3);
+            border: 1px solid var(--border-color);
             backdrop-filter: blur(10px);
+            transition: all 0.3s ease;
         }
         
         .btn {
@@ -819,19 +857,20 @@ class EnhancedMusicBot {
         
         .form-group label { 
             display: block; margin-bottom: 10px; font-weight: bold; 
-            color: #fff; text-shadow: 0 2px 4px rgba(0,0,0,0.3);
+            color: var(--text-primary); text-shadow: 0 2px 4px var(--shadow);
         }
         
         .form-group input, .form-group select, .form-group textarea {
             width: 100%; padding: 15px; border: none; 
-            border-radius: 10px; background: rgba(255, 255, 255, 0.2);
-            color: white; font-size: 16px;
+            border-radius: 10px; background: var(--input-bg);
+            color: var(--text-primary); font-size: 16px;
             backdrop-filter: blur(10px);
+            transition: all 0.3s ease;
         }
         
         .form-group input::placeholder, 
         .form-group textarea::placeholder {
-            color: rgba(255, 255, 255, 0.7);
+            color: var(--text-secondary);
         }
         
         .video-wrapper { 
@@ -871,6 +910,13 @@ class EnhancedMusicBot {
         </style>
     </head>
     <body>
+        <!-- Theme Toggle -->
+        <div class="theme-toggle">
+            <button class="theme-btn active" onclick="setTheme('auto')" id="auto-btn">🌓 Auto</button>
+            <button class="theme-btn" onclick="setTheme('light')" id="light-btn">☀️ Light</button>
+            <button class="theme-btn" onclick="setTheme('dark')" id="dark-btn">🌙 Dark</button>
+        </div>
+
         <div class="container">
             <div class="header">
                 <div class="verified-badge">
@@ -952,6 +998,40 @@ class EnhancedMusicBot {
         </div>
 
         <script>
+            // Theme System
+            function setTheme(theme) {
+                const buttons = document.querySelectorAll('.theme-btn');
+                buttons.forEach(btn => btn.classList.remove('active'));
+                document.getElementById(theme + '-btn').classList.add('active');
+                
+                if (theme === 'auto') {
+                    // Auto theme based on time of day
+                    const hour = new Date().getHours();
+                    const autoTheme = (hour >= 6 && hour < 18) ? 'light' : 'dark';
+                    document.documentElement.setAttribute('data-theme', autoTheme);
+                    localStorage.setItem('theme', 'auto');
+                } else {
+                    document.documentElement.setAttribute('data-theme', theme);
+                    localStorage.setItem('theme', theme);
+                }
+            }
+
+            // Initialize theme on page load
+            function initTheme() {
+                const savedTheme = localStorage.getItem('theme') || 'auto';
+                setTheme(savedTheme);
+            }
+
+            // Update auto theme every minute
+            setInterval(() => {
+                if (localStorage.getItem('theme') === 'auto') {
+                    setTheme('auto');
+                }
+            }, 60000);
+
+            // Initialize theme when page loads
+            document.addEventListener('DOMContentLoaded', initTheme);
+
             async function testMonitoring() {
                 try {
                     const response = await fetch('/admin/test-monitoring');
