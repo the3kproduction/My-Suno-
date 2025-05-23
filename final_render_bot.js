@@ -644,14 +644,36 @@ class EnhancedMusicBot {
                 /<meta property="og:image" content="([^"]*)"[^>]*>/i,
                 /<meta name="twitter:image" content="([^"]*)"[^>]*>/i,
                 /"image_url":\s*"([^"]*)"[^}]*>/i,
-                /"image":\s*"([^"]*)"[^}]*>/i
+                /"image":\s*"([^"]*)"[^}]*>/i,
+                /"imageUrl":\s*"([^"]*)"[^}]*>/i,
+                /"cover_url":\s*"([^"]*)"[^}]*>/i,
+                /src="([^"]*\.(?:jpg|jpeg|png|webp|gif))"[^>]*>/gi
             ];
             
             for (const pattern of imagePatterns) {
                 const match = html.match(pattern);
                 if (match && match[1]) {
                     imageUrl = match[1];
-                    break;
+                    // Make sure it's a valid image URL
+                    if (imageUrl.includes('http') && (imageUrl.includes('.jpg') || imageUrl.includes('.png') || imageUrl.includes('.webp') || imageUrl.includes('.jpeg'))) {
+                        break;
+                    }
+                }
+            }
+            
+            // Try to extract song ID and construct image URL if no image found
+            if (!imageUrl) {
+                const songIdMatch = url.match(/\/s\/([a-zA-Z0-9]+)/);
+                if (songIdMatch) {
+                    const songId = songIdMatch[1];
+                    // Try common Suno image URL patterns
+                    const possibleUrls = [
+                        `https://cdn1.suno.ai/image_${songId}.jpeg`,
+                        `https://cdn2.suno.ai/image_${songId}.png`,
+                        `https://storage.googleapis.com/suno-ai/${songId}.jpg`
+                    ];
+                    // We'll try the first one as a fallback
+                    imageUrl = possibleUrls[0];
                 }
             }
             
@@ -736,10 +758,15 @@ class EnhancedMusicBot {
                 embed.setDescription(`🎶 **Fresh beats from Suno AI!**\n\n🔗 [Listen on Suno](${url})`);
             }
 
-            // Add large artwork if available
+            // Add large artwork - use default if no image found
             if (songData.imageUrl) {
                 embed.setImage(songData.imageUrl);
                 embed.setThumbnail(songData.imageUrl);
+            } else {
+                // Use a beautiful default Suno music artwork
+                const defaultArtwork = 'https://images.unsplash.com/photo-1493225457124-a3eb161ffa5f?w=800&h=800&fit=crop&crop=center';
+                embed.setImage(defaultArtwork);
+                embed.setThumbnail('https://images.crunchbase.com/image/upload/c_lpad,h_170,w_170,f_auto,b_white,q_auto:eco,dpr_1/erkxwhl1gd48xfhe2yld');
             }
 
             // Add premium fields
