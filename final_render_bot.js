@@ -8,7 +8,7 @@ const axios = require('axios');
 const config = {
     discord: {
         token: process.env.DISCORD_TOKEN,
-        channelId: '1375419981658849342' // Your new Discord server channel
+        channelId: process.env.DISCORD_CHANNEL_ID || '1375419981658849342' // Your new Discord server channel
     }
 };
 
