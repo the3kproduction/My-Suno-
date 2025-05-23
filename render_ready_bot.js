@@ -189,8 +189,14 @@ class EnhancedMusicBot {
         const rest = new REST({ version: '10' }).setToken(this.config.discord.token);
 
         try {
+            // Wait for client to be ready before registering commands
+            if (!this.client.application?.id) {
+                console.log('⏳ Waiting for Discord client to initialize...');
+                return;
+            }
+            
             await rest.put(
-                Routes.applicationCommands(this.client.application?.id || 'temp'),
+                Routes.applicationCommands(this.client.application.id),
                 { body: commands }
             );
             console.log('🎯 Slash commands registered successfully!');
