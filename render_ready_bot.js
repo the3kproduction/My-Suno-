@@ -300,9 +300,130 @@ class EnhancedMusicBot {
     }
 
     setupWebServer() {
-        // Enhanced dashboard route
+        // Enhanced dashboard route - FORCE ENHANCED VERSION
         this.app.get('/', (req, res) => {
-            res.send(this.renderDashboard());
+            const currentMusicSong = this.currentPlaylists.music.songs[this.currentPlaylists.music.currentIndex];
+            const currentLyricSong = this.currentPlaylists.lyric.songs[this.currentPlaylists.lyric.currentIndex];
+
+            const html = `<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>🎵 Enhanced Music Bot Dashboard</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh; padding: 20px; color: #333;
+        }
+        .container {
+            max-width: 1200px; margin: 0 auto; background: white;
+            border-radius: 20px; box-shadow: 0 20px 40px rgba(0,0,0,0.1); overflow: hidden;
+        }
+        .header {
+            background: linear-gradient(135deg, #FF6B6B, #4ECDC4); color: white;
+            padding: 30px; text-align: center;
+        }
+        .header h1 { font-size: 2.5rem; margin-bottom: 10px; text-shadow: 2px 2px 4px rgba(0,0,0,0.3); }
+        .content { padding: 30px; }
+        .section {
+            margin-bottom: 40px; background: #f8f9fa; border-radius: 15px;
+            padding: 25px; box-shadow: 0 5px 15px rgba(0,0,0,0.08);
+        }
+        .section h2 {
+            color: #2c3e50; margin-bottom: 20px; font-size: 1.8rem;
+            border-bottom: 3px solid #3498db; padding-bottom: 10px;
+        }
+        .video-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(500px, 1fr)); gap: 30px; }
+        .video-container {
+            background: #2c3e50; border-radius: 15px; overflow: hidden;
+            box-shadow: 0 10px 25px rgba(0,0,0,0.15);
+        }
+        .video-wrapper { position: relative; width: 100%; height: 315px; background: #34495e; }
+        .video-wrapper iframe { width: 100%; height: 100%; border: none; pointer-events: none; }
+        .no-video {
+            display: flex; flex-direction: column; align-items: center;
+            justify-content: center; height: 315px; color: #7f8c8d; text-align: center;
+        }
+        .placeholder { font-size: 4rem; margin-bottom: 15px; opacity: 0.5; }
+        .subtitle { opacity: 0.6; font-size: 0.9rem; }
+        .grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 20px; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>🎵 Enhanced Music Bot Dashboard</h1>
+            <p>Advanced Discord Music Bot with Live Video Streaming</p>
+        </div>
+        <div class="content">
+            <div class="section">
+                <h2>🎬 Live Video Streams</h2>
+                <div class="video-grid">
+                    <div class="video-container">
+                        <h3 style="color: #374151; margin-bottom: 12px;">🎬 Music Videos</h3>
+                        <div class="video-wrapper">
+                            ${currentMusicSong ? `
+                                <iframe src="https://www.youtube.com/embed/${currentMusicSong.id}?autoplay=1&mute=1&controls=0&disablekb=1&rel=0&modestbranding=1"
+                                        frameborder="0" allow="autoplay; encrypted-media"></iframe>
+                            ` : `
+                                <div class="no-video">
+                                    <div class="placeholder">🎬</div>
+                                    <p>No music video playing</p>
+                                    <p class="subtitle">Use /load command in Discord to start streaming</p>
+                                </div>
+                            `}
+                        </div>
+                    </div>
+                    <div class="video-container">
+                        <h3 style="color: #374151; margin-bottom: 12px;">🎤 Lyric Videos</h3>
+                        <div class="video-wrapper">
+                            ${currentLyricSong ? `
+                                <iframe src="https://www.youtube.com/embed/${currentLyricSong.id}?autoplay=1&mute=1&controls=0&disablekb=1&rel=0&modestbranding=1"
+                                        frameborder="0" allow="autoplay; encrypted-media"></iframe>
+                            ` : `
+                                <div class="no-video">
+                                    <div class="placeholder">🎤</div>
+                                    <p>No lyric video playing</p>
+                                    <p class="subtitle">Use /load command in Discord to start streaming</p>
+                                </div>
+                            `}
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="section">
+                <h2>📋 Current Status</h2>
+                <div class="grid">
+                    <div>
+                        <h3>🎬 Music Videos (${this.currentPlaylists.music.songs.length} songs)</h3>
+                        <p><strong>Currently Playing:</strong> ${currentMusicSong?.title || 'None'}</p>
+                        <p><strong>Status:</strong> ${this.currentPlaylists.music.isPlaying ? '▶️ Playing' : '⏸️ Stopped'}</p>
+                    </div>
+                    <div>
+                        <h3>🎤 Lyric Videos (${this.currentPlaylists.lyric.songs.length} songs)</h3>
+                        <p><strong>Currently Playing:</strong> ${currentLyricSong?.title || 'None'}</p>
+                        <p><strong>Status:</strong> ${this.currentPlaylists.lyric.isPlaying ? '▶️ Playing' : '⏸️ Stopped'}</p>
+                    </div>
+                </div>
+            </div>
+            <div class="section">
+                <h2>🎮 Discord Commands</h2>
+                <div class="grid">
+                    <div><h4>/load [url] [channel]</h4><p>Load YouTube playlist and start streaming</p></div>
+                    <div><h4>/play [channel]</h4><p>Start playing music</p></div>
+                    <div><h4>/skip [channel]</h4><p>Skip to next song</p></div>
+                    <div><h4>/stop [channel]</h4><p>Stop music and leave voice</p></div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <script>setInterval(() => location.reload(), 30000);</script>
+</body>
+</html>`;
+            res.send(html);
         });
 
         // Suno posting routes
