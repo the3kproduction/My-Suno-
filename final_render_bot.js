@@ -667,27 +667,64 @@ class EnhancedMusicBot {
         try {
             const channel = await this.client.channels.fetch(this.sunoChannelId);
             
+            // Extract real song data from Suno
             const songData = await this.extractSunoData(url);
             
+            // Create premium embed with beautiful formatting
             const embed = new EmbedBuilder()
-                .setAuthor({ name: 'Suno', iconURL: 'https://images.crunchbase.com/image/upload/c_lpad,h_170,w_170,f_auto,b_white,q_auto:eco,dpr_1/erkxwhl1gd48xfhe2yld' })
-                .setTitle(songData.title)
+                .setAuthor({ 
+                    name: '🎵 Suno AI Music', 
+                    iconURL: 'https://images.crunchbase.com/image/upload/c_lpad,h_170,w_170,f_auto,b_white,q_auto:eco,dpr_1/erkxwhl1gd48xfhe2yld' 
+                })
+                .setTitle(`🔥 ${songData.title}`)
                 .setURL(url)
-                .setColor('#4F46E5')
-                .setTimestamp();
+                .setColor(0x7C3AED) // Premium purple color
+                .setTimestamp()
+                .setFooter({ 
+                    text: '3AM VERIFIED • Premium Suno Bot' 
+                });
 
+            // Add beautiful description
+            if (songData.description) {
+                embed.setDescription(`🎶 **${songData.description}**\n\n🔗 [Listen on Suno](${url})`);
+            } else {
+                embed.setDescription(`🎶 **Fresh beats from Suno AI!**\n\n🔗 [Listen on Suno](${url})`);
+            }
+
+            // Add large artwork if available
             if (songData.imageUrl) {
                 embed.setImage(songData.imageUrl);
+                embed.setThumbnail(songData.imageUrl);
             }
 
-            if (songData.description || description) {
-                embed.setDescription(songData.description || description);
-            }
+            // Add premium fields
+            embed.addFields([
+                { 
+                    name: '🎤 Song Title', 
+                    value: songData.title, 
+                    inline: false 
+                },
+                { 
+                    name: '🌟 Status', 
+                    value: '✅ Manually Posted via Dashboard', 
+                    inline: true 
+                },
+                { 
+                    name: '⚡ Source', 
+                    value: '3AM VERIFIED Bot', 
+                    inline: true 
+                }
+            ]);
 
-            const message = `🎵 New Suno song: **${songData.title}** — ${url}`;
+            // Send with reactions
+            const message = await channel.send({ embeds: [embed] });
             
-            await channel.send({ content: message, embeds: [embed] });
-            console.log(`✅ Posted to Discord: ${songData.title}`);
+            // Add premium reactions
+            await message.react('🔥');
+            await message.react('💎');
+            await message.react('🎯');
+            
+            console.log(`✅ Posted premium Suno song to Discord: ${songData.title}`);
         } catch (error) {
             console.error('❌ Discord posting error:', error);
             throw error;
