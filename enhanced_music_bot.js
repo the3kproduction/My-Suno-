@@ -1166,6 +1166,17 @@ class EnhancedMusicBot {
             transform: scale(1.05);
         }
 
+        .video-overlay {
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: transparent;
+            z-index: 10;
+            pointer-events: none;
+        }
+
         .video-info {
             color: white;
             font-size: 0.9rem;
@@ -1245,11 +1256,12 @@ class EnhancedMusicBot {
                         ${currentMusicSong ? `
                             <iframe 
                                 id="musicVideo"
-                                src="https://www.youtube.com/embed/${currentMusicSong.id}?autoplay=1&mute=1&controls=1&rel=0&modestbranding=1"
+                                src="https://www.youtube.com/embed/${currentMusicSong.id}?autoplay=1&mute=1&controls=0&disablekb=1&rel=0&modestbranding=1&loop=1&playlist=${currentMusicSong.id}"
                                 frameborder="0" 
-                                allow="autoplay; encrypted-media; picture-in-picture"
+                                allow="autoplay; encrypted-media"
                                 allowfullscreen>
                             </iframe>
+                            <div class="video-overlay"></div>
                             <div class="video-controls">
                                 <button class="btn-volume" onclick="toggleMute('musicVideo')" id="musicMute">🔊 Unmute</button>
                                 <div class="video-info">
@@ -1273,11 +1285,12 @@ class EnhancedMusicBot {
                         ${currentLyricSong ? `
                             <iframe 
                                 id="lyricVideo"
-                                src="https://www.youtube.com/embed/${currentLyricSong.id}?autoplay=1&mute=1&controls=1&rel=0&modestbranding=1"
+                                src="https://www.youtube.com/embed/${currentLyricSong.id}?autoplay=1&mute=1&controls=0&disablekb=1&rel=0&modestbranding=1&loop=1&playlist=${currentLyricSong.id}"
                                 frameborder="0" 
-                                allow="autoplay; encrypted-media; picture-in-picture"
+                                allow="autoplay; encrypted-media"
                                 allowfullscreen>
                             </iframe>
+                            <div class="video-overlay"></div>
                             <div class="video-controls">
                                 <button class="btn-volume" onclick="toggleMute('lyricVideo')" id="lyricMute">🔊 Unmute</button>
                                 <div class="video-info">
