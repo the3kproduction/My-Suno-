@@ -717,18 +717,14 @@ class EnhancedMusicBot {
         const currentSong = playlist.songs[playlist.currentIndex];
         
         try {
-            // Use ytdl-core for reliable streaming
+            // Simple and reliable streaming method
             const stream = ytdl(currentSong.url, { 
                 filter: 'audioonly',
-                quality: 'highestaudio',
-                highWaterMark: 1 << 25
+                quality: 'lowestaudio'
             });
             
             // Create audio resource from stream
-            const resource = createAudioResource(stream, {
-                inputType: StreamType.Arbitrary,
-                inlineVolume: true
-            });
+            const resource = createAudioResource(stream);
             
             // Auto-skip when song ends for 24/7 continuous play
             playlist.player.on(AudioPlayerStatus.Idle, () => {
