@@ -359,61 +359,108 @@ class EnhancedMusicBot {
     <style>
         * { margin: 0; padding: 0; box-sizing: border-box; }
         
-        @keyframes gradient {
+        @keyframes gentleGradient {
             0% { background-position: 0% 50%; }
             50% { background-position: 100% 50%; }
             100% { background-position: 0% 50%; }
         }
         
-        @keyframes rainbowGlow {
-            0% { 
-                box-shadow: 0 0 30px #ff6b6b, 0 0 60px #ff6b6b, 0 0 90px #ff6b6b;
-                filter: hue-rotate(0deg);
-            }
-            25% { 
-                box-shadow: 0 0 30px #4ecdc4, 0 0 60px #4ecdc4, 0 0 90px #4ecdc4;
-                filter: hue-rotate(90deg);
+        @keyframes softGlow {
+            0%, 100% { 
+                box-shadow: 0 0 15px rgba(255, 107, 107, 0.2), 0 0 25px rgba(78, 205, 196, 0.1);
             }
             50% { 
-                box-shadow: 0 0 30px #667eea, 0 0 60px #667eea, 0 0 90px #667eea;
-                filter: hue-rotate(180deg);
-            }
-            75% { 
-                box-shadow: 0 0 30px #764ba2, 0 0 60px #764ba2, 0 0 90px #764ba2;
-                filter: hue-rotate(270deg);
-            }
-            100% { 
-                box-shadow: 0 0 30px #ff6b6b, 0 0 60px #ff6b6b, 0 0 90px #ff6b6b;
-                filter: hue-rotate(360deg);
+                box-shadow: 0 0 20px rgba(78, 205, 196, 0.2), 0 0 30px rgba(255, 107, 107, 0.1);
             }
         }
         
-        @keyframes megaPulse {
+        @keyframes gentlePulse {
             0%, 100% { 
-                transform: scale(1) rotate(0deg); 
+                transform: scale(1); 
                 filter: brightness(1);
             }
             50% { 
-                transform: scale(1.1) rotate(2deg); 
-                filter: brightness(1.3);
+                transform: scale(1.02); 
+                filter: brightness(1.05);
             }
         }
         
-        @keyframes textShimmer {
-            0% { background-position: -200% center; }
-            100% { background-position: 200% center; }
+        @keyframes subtleShimmer {
+            0% { background-position: -100% center; }
+            100% { background-position: 100% center; }
         }
         
-        @keyframes float {
+        @keyframes gentleFloat {
             0%, 100% { transform: translateY(0px); }
-            50% { transform: translateY(-10px); }
+            50% { transform: translateY(-3px); }
+        }
+        
+        @keyframes crazyBanner {
+            0% { 
+                transform: scale(1) rotateZ(0deg) rotateY(0deg);
+                filter: hue-rotate(0deg) brightness(1) saturate(1);
+            }
+            25% { 
+                transform: scale(1.05) rotateZ(1deg) rotateY(5deg);
+                filter: hue-rotate(90deg) brightness(1.1) saturate(1.2);
+            }
+            50% { 
+                transform: scale(1.08) rotateZ(0deg) rotateY(10deg);
+                filter: hue-rotate(180deg) brightness(1.15) saturate(1.4);
+            }
+            75% { 
+                transform: scale(1.05) rotateZ(-1deg) rotateY(5deg);
+                filter: hue-rotate(270deg) brightness(1.1) saturate(1.2);
+            }
+            100% { 
+                transform: scale(1) rotateZ(0deg) rotateY(0deg);
+                filter: hue-rotate(360deg) brightness(1) saturate(1);
+            }
+        }
+        
+        @keyframes textExplosion {
+            0% { 
+                text-shadow: 
+                    0 0 5px #ff6b6b,
+                    0 0 10px #4ecdc4,
+                    0 0 15px #667eea,
+                    0 0 20px #764ba2;
+            }
+            25% { 
+                text-shadow: 
+                    0 0 10px #4ecdc4,
+                    0 0 20px #667eea,
+                    0 0 30px #764ba2,
+                    0 0 40px #ff6b6b;
+            }
+            50% { 
+                text-shadow: 
+                    0 0 15px #667eea,
+                    0 0 30px #764ba2,
+                    0 0 45px #ff6b6b,
+                    0 0 60px #4ecdc4;
+            }
+            75% { 
+                text-shadow: 
+                    0 0 10px #764ba2,
+                    0 0 20px #ff6b6b,
+                    0 0 30px #4ecdc4,
+                    0 0 40px #667eea;
+            }
+            100% { 
+                text-shadow: 
+                    0 0 5px #ff6b6b,
+                    0 0 10px #4ecdc4,
+                    0 0 15px #667eea,
+                    0 0 20px #764ba2;
+            }
         }
         
         body {
             font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
             background: linear-gradient(-45deg, #667eea, #764ba2, #ff6b6b, #4ecdc4);
             background-size: 400% 400%;
-            animation: gradient 15s ease infinite;
+            animation: gentleGradient 25s ease infinite;
             min-height: 100vh; color: white; padding: 20px;
         }
         
@@ -421,25 +468,30 @@ class EnhancedMusicBot {
         
         .header { 
             text-align: center; margin-bottom: 60px; 
-            animation: megaPulse 4s ease-in-out infinite;
+            animation: crazyBanner 12s ease-in-out infinite;
+            perspective: 1000px;
+            transform-style: preserve-3d;
         }
         
         .header h1 { 
-            font-size: 4rem; margin-bottom: 20px; 
-            background: linear-gradient(45deg, #ff6b6b, #4ecdc4, #667eea, #764ba2, #ff6b6b);
-            background-size: 400% 400%;
-            animation: gradient 2s ease infinite, rainbowGlow 3s ease infinite;
+            font-size: 5rem; margin-bottom: 20px; 
+            background: linear-gradient(45deg, #ff6b6b, #4ecdc4, #667eea, #764ba2, #ff6b6b, #ff1493, #00ff7f);
+            background-size: 600% 600%;
+            animation: gentleGradient 6s ease infinite, textExplosion 8s ease infinite;
             -webkit-background-clip: text;
             -webkit-text-fill-color: transparent;
             background-clip: text;
-            filter: drop-shadow(0 0 20px rgba(255,255,255,0.8)) drop-shadow(0 10px 20px rgba(0,0,0,0.5));
+            filter: drop-shadow(0 10px 25px rgba(255,255,255,0.6)) drop-shadow(0 20px 40px rgba(0,0,0,0.4));
+            font-weight: 900;
+            letter-spacing: 3px;
+            transform: perspective(800px) rotateX(10deg) rotateY(5deg);
         }
         
         .header p {
             font-size: 1.3rem;
             background: linear-gradient(90deg, transparent, #fff, transparent);
             background-size: 200% 100%;
-            animation: textShimmer 2s infinite;
+            animation: subtleShimmer 6s infinite;
             -webkit-background-clip: text;
             -webkit-text-fill-color: transparent;
             background-clip: text;
@@ -453,27 +505,27 @@ class EnhancedMusicBot {
             border: 2px solid rgba(255,255,255,0.3);
             box-shadow: 0 15px 50px rgba(0,0,0,0.2);
             transition: all 0.4s ease;
-            animation: float 6s ease-in-out infinite;
+            animation: gentleFloat 10s ease-in-out infinite;
         }
         
         .section:hover {
-            transform: translateY(-15px) scale(1.02);
-            box-shadow: 0 25px 80px rgba(0,0,0,0.3);
-            animation: rainbowGlow 1s ease infinite;
+            transform: translateY(-8px) scale(1.01);
+            box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+            animation: softGlow 3s ease infinite;
         }
         
         .section h2 {
             font-size: 3rem; margin-bottom: 50px; 
             text-align: center;
             background: linear-gradient(45deg, #ff6b6b, #4ecdc4, #667eea, #764ba2, #ff6b6b);
-            background-size: 500% 500%;
-            animation: gradient 3s ease infinite, megaPulse 4s ease infinite;
+            background-size: 400% 400%;
+            animation: gentleGradient 10s ease infinite, gentlePulse 6s ease infinite;
             -webkit-background-clip: text;
             -webkit-text-fill-color: transparent;
             background-clip: text;
-            filter: drop-shadow(0 0 30px rgba(255,255,255,0.9)) drop-shadow(0 15px 30px rgba(0,0,0,0.6));
-            transform: perspective(800px) rotateX(20deg);
-            text-shadow: 0 0 50px rgba(255,255,255,0.8);
+            filter: drop-shadow(0 8px 20px rgba(255,255,255,0.4)) drop-shadow(0 15px 30px rgba(0,0,0,0.3));
+            transform: perspective(600px) rotateX(15deg);
+            text-shadow: 0 0 30px rgba(255,255,255,0.4);
         }
         
         .grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(500px, 1fr)); gap: 40px; }
