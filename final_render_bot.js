@@ -1439,23 +1439,19 @@ class EnhancedMusicBot {
 
             <!-- Suno Song Posting -->
             <div class="section">
-                <h2>🎵 Post Suno Song</h2>
+                <h2>🎵 Auto-Post Suno Song</h2>
                 <form id="sunoForm">
-                    <div class="form-group">
-                        <label>Song Title</label>
-                        <input type="text" id="songTitle" placeholder="Enter the song title..." required>
-                    </div>
                     <div class="form-group">
                         <label>Suno Song URL</label>
                         <input type="text" id="sunoUrl" placeholder="https://suno.com/song/..." required>
                     </div>
-                    <div class="form-group">
-                        <label>Description (Optional)</label>
-                        <textarea id="songDescription" placeholder="Add a description..." rows="3"></textarea>
-                    </div>
-                    <button type="submit" class="btn">🎵 Post to Discord</button>
+                    <button type="submit" class="btn">🤖 Auto-Post with Smart Detection</button>
                 </form>
                 <div id="sunoStatus" style="margin-top: 15px;"></div>
+                <div style="background: rgba(255,255,255,0.1); padding: 15px; border-radius: 10px; margin-top: 15px; border: 1px solid rgba(255,255,255,0.2);">
+                    <h4 style="margin-top: 0; color: #4ade80;">🤖 Smart Auto-Detection</h4>
+                    <p style="margin-bottom: 0; opacity: 0.9;">Your bot automatically extracts the real song title and artwork from Suno URLs using advanced detection technology. No manual input needed!</p>
+                </div>
             </div>
 
             <!-- Suno Profile Monitoring -->
@@ -1616,29 +1612,21 @@ class EnhancedMusicBot {
                         
                         try {
                             const sunoUrl = urlInput.value.trim();
-                            const songTitle = document.getElementById('songTitle').value.trim();
-                            const songDescription = document.getElementById('songDescription').value.trim();
                             
                             if (!sunoUrl) {
                                 throw new Error('Please enter a Suno URL');
                             }
                             
-                            if (!songTitle) {
-                                throw new Error('Please enter a song title');
-                            }
+                            console.log('Auto-posting Suno URL:', sunoUrl);
                             
-                            console.log('Posting Suno URL:', sunoUrl);
-                            
-                            const response = await fetch('/post-suno', {
+                            const response = await fetch('/auto-post-suno', {
                                 method: 'POST',
                                 headers: { 
                                     'Content-Type': 'application/json',
                                     'Accept': 'application/json'
                                 },
                                 body: JSON.stringify({
-                                    sunoUrl: sunoUrl,
-                                    songTitle: songTitle,
-                                    songDescription: songDescription
+                                    sunoUrl: sunoUrl
                                 })
                             });
                             
@@ -1650,7 +1638,7 @@ class EnhancedMusicBot {
                             console.log('Server response:', result);
                             
                             if (result.success) {
-                                status.innerHTML = '<p style="color: #4ecdc4;">✅ ' + result.message + '</p>';
+                                status.innerHTML = '<div style="color: #4ecdc4; padding: 15px; background: rgba(78, 205, 196, 0.1); border-radius: 8px; border: 1px solid rgba(78, 205, 196, 0.3);">✅ Song auto-posted with smart detection!<br><strong>URL:</strong> <a href="' + result.url + '" target="_blank" style="color: #4ecdc4;">' + result.url + '</a><br><small>🤖 Bot will automatically extract title and artwork</small></div>';
                                 sunoForm.reset();
                             } else {
                                 status.innerHTML = '<p style="color: #ff6b6b;">❌ ' + (result.error || 'Unknown error') + '</p>';
@@ -1661,7 +1649,7 @@ class EnhancedMusicBot {
                         } finally {
                             // Re-enable submit button
                             submitBtn.disabled = false;
-                            submitBtn.textContent = '🎵 Post to Discord';
+                            submitBtn.textContent = '🤖 Auto-Post with Smart Detection';
                         }
                         
                         return false;
