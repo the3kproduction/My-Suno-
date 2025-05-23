@@ -302,44 +302,200 @@ class EnhancedMusicBot {
     <title>🎵 Enhanced Music Bot Dashboard</title>
     <style>
         * { margin: 0; padding: 0; box-sizing: border-box; }
+        
+        @keyframes gradient {
+            0% { background-position: 0% 50%; }
+            50% { background-position: 100% 50%; }
+            100% { background-position: 0% 50%; }
+        }
+        
+        @keyframes glow {
+            0%, 100% { box-shadow: 0 0 20px rgba(255, 107, 107, 0.5), 0 0 40px rgba(78, 205, 196, 0.3); }
+            50% { box-shadow: 0 0 30px rgba(78, 205, 196, 0.5), 0 0 60px rgba(255, 107, 107, 0.3); }
+        }
+        
+        @keyframes pulse {
+            0%, 100% { transform: scale(1); }
+            50% { transform: scale(1.05); }
+        }
+        
         body {
             font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            background: linear-gradient(-45deg, #667eea, #764ba2, #ff6b6b, #4ecdc4);
+            background-size: 400% 400%;
+            animation: gradient 15s ease infinite;
             min-height: 100vh; color: white; padding: 20px;
         }
+        
         .container { max-width: 1200px; margin: 0 auto; }
-        .header { text-align: center; margin-bottom: 40px; }
-        .header h1 { font-size: 3rem; margin-bottom: 10px; }
+        
+        .header { 
+            text-align: center; margin-bottom: 50px; 
+            animation: pulse 3s ease-in-out infinite;
+        }
+        
+        .header h1 { 
+            font-size: 3.5rem; margin-bottom: 15px; 
+            background: linear-gradient(45deg, #ff6b6b, #4ecdc4, #ff6b6b);
+            background-size: 200% 200%;
+            animation: gradient 3s ease infinite;
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            text-shadow: 0 0 30px rgba(255,255,255,0.5);
+        }
+        
         .section {
-            background: rgba(255,255,255,0.1); border-radius: 15px;
-            padding: 30px; margin-bottom: 30px; backdrop-filter: blur(10px);
+            background: rgba(255,255,255,0.15); 
+            border-radius: 20px;
+            padding: 35px; margin-bottom: 40px; 
+            backdrop-filter: blur(15px);
+            border: 1px solid rgba(255,255,255,0.2);
+            box-shadow: 0 8px 32px rgba(0,0,0,0.1);
+            transition: all 0.3s ease;
         }
-        .grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(500px, 1fr)); gap: 30px; }
+        
+        .section:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 15px 45px rgba(0,0,0,0.2);
+        }
+        
+        .section h2 {
+            font-size: 2.2rem; margin-bottom: 35px; 
+            text-align: center;
+            background: linear-gradient(45deg, #ff6b6b, #4ecdc4);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            text-shadow: 0 2px 10px rgba(0,0,0,0.3);
+        }
+        
+        .grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(500px, 1fr)); gap: 40px; }
+        
         .video-container {
-            background: rgba(0,0,0,0.3); border-radius: 10px; overflow: hidden;
+            background: rgba(0,0,0,0.4); 
+            border-radius: 15px; overflow: hidden;
+            animation: glow 4s ease-in-out infinite;
+            transition: all 0.3s ease;
+            border: 2px solid rgba(255,255,255,0.1);
         }
-        .video-container h3 { padding: 15px; font-size: 1.2rem; }
-        .video-wrapper { height: 315px; background: #000; }
-        .video-wrapper iframe { width: 100%; height: 100%; border: none; }
+        
+        .video-container:hover {
+            transform: scale(1.02);
+            border-color: rgba(255,107,107,0.5);
+        }
+        
+        .video-container h3 { 
+            padding: 20px; font-size: 1.4rem; 
+            background: linear-gradient(135deg, #ff6b6b, #4ecdc4);
+            margin: 0;
+            text-align: center;
+            font-weight: 700;
+            text-shadow: 0 2px 5px rgba(0,0,0,0.3);
+        }
+        
+        .video-wrapper { 
+            height: 315px; background: #000; 
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .video-wrapper iframe { 
+            width: 100%; height: 100%; border: none; 
+            transition: all 0.3s ease;
+        }
+        
+        .video-wrapper:hover iframe {
+            transform: scale(1.05);
+        }
+        
         .no-video {
             display: flex; flex-direction: column; align-items: center;
             justify-content: center; height: 315px; color: #ccc;
+            background: linear-gradient(135deg, rgba(0,0,0,0.6), rgba(255,255,255,0.1));
         }
-        .form-group { margin-bottom: 20px; }
-        .form-group label { display: block; margin-bottom: 8px; font-weight: 600; }
+        
+        .no-video h3 { font-size: 3rem; margin-bottom: 10px; opacity: 0.7; }
+        
+        .form-group { margin-bottom: 25px; }
+        
+        .form-group label { 
+            display: block; margin-bottom: 10px; font-weight: 700; 
+            font-size: 1.1rem;
+            color: #fff;
+            text-shadow: 0 2px 5px rgba(0,0,0,0.3);
+        }
+        
         .form-group input, .form-group textarea {
-            width: 100%; padding: 12px; border: none; border-radius: 8px;
-            font-size: 16px; background: rgba(255,255,255,0.9);
+            width: 100%; padding: 15px; border: none; border-radius: 12px;
+            font-size: 16px; background: rgba(255,255,255,0.95);
+            transition: all 0.3s ease;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.1);
         }
+        
+        .form-group input:focus, .form-group textarea:focus {
+            outline: none;
+            transform: translateY(-2px);
+            box-shadow: 0 10px 25px rgba(78, 205, 196, 0.3);
+            background: rgba(255,255,255,1);
+        }
+        
         .btn {
-            background: linear-gradient(135deg, #ff6b6b, #4ecdc4); color: white;
-            border: none; padding: 12px 24px; border-radius: 8px;
-            font-size: 16px; font-weight: 600; cursor: pointer;
-            transition: transform 0.3s;
+            background: linear-gradient(135deg, #ff6b6b, #4ecdc4); 
+            color: white;
+            border: none; padding: 15px 30px; border-radius: 12px;
+            font-size: 18px; font-weight: 700; cursor: pointer;
+            transition: all 0.3s ease;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.2);
+            text-transform: uppercase;
+            letter-spacing: 1px;
         }
-        .btn:hover { transform: translateY(-2px); }
-        .commands { display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 15px; }
-        .command { background: rgba(255,255,255,0.1); padding: 15px; border-radius: 8px; }
+        
+        .btn:hover { 
+            transform: translateY(-3px) scale(1.05); 
+            box-shadow: 0 10px 25px rgba(255, 107, 107, 0.4);
+            animation: glow 1s ease-in-out infinite;
+        }
+        
+        .commands { 
+            display: grid; 
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); 
+            gap: 20px; 
+        }
+        
+        .command { 
+            background: rgba(255,255,255,0.15); 
+            padding: 20px; border-radius: 12px; 
+            transition: all 0.3s ease;
+            border: 1px solid rgba(255,255,255,0.2);
+        }
+        
+        .command:hover {
+            background: rgba(255,255,255,0.25);
+            transform: translateY(-3px);
+            box-shadow: 0 10px 20px rgba(0,0,0,0.15);
+        }
+        
+        .command h4 {
+            color: #4ecdc4;
+            font-size: 1.2rem;
+            margin-bottom: 8px;
+            text-shadow: 0 2px 5px rgba(0,0,0,0.3);
+        }
+        
+        .status-text {
+            padding: 12px; 
+            border-radius: 8px; 
+            font-weight: 600;
+            text-align: center;
+            margin-top: 10px;
+        }
+        
+        @media (max-width: 768px) {
+            .header h1 { font-size: 2.5rem; }
+            .grid { grid-template-columns: 1fr; gap: 20px; }
+            .section { padding: 25px; margin-bottom: 25px; }
+        }
     </style>
 </head>
 <body>
