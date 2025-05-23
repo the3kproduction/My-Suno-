@@ -2,6 +2,7 @@ const { Client, GatewayIntentBits, SlashCommandBuilder, EmbedBuilder, ChannelTyp
 const { REST } = require('@discordjs/rest');
 const { joinVoiceChannel, createAudioPlayer, createAudioResource, AudioPlayerStatus, VoiceConnectionStatus } = require('@discordjs/voice');
 const ytdl = require('ytdl-core');
+const youtubeDl = require('youtube-dl-exec');
 const express = require('express');
 const axios = require('axios');
 require('dotenv').config();
