@@ -23,6 +23,10 @@ args = "Manual Trigger Bot"
 task = "workflow.run"
 args = "Ultimate Suno Bot"
 
+[[workflows.workflow.tasks]]
+task = "workflow.run"
+args = "AI Suno Bot"
+
 [[workflows.workflow]]
 name = "discord-bot-test"
 author = "agent"
@@ -47,6 +51,15 @@ author = "agent"
 [[workflows.workflow.tasks]]
 task = "shell.exec"
 args = "node ultimate_suno_bot.js"
+waitForPort = 5000
+
+[[workflows.workflow]]
+name = "AI Suno Bot"
+author = "agent"
+
+[[workflows.workflow.tasks]]
+task = "shell.exec"
+args = "node ai_suno_bot.js"
 waitForPort = 5000
 
 [deployment]

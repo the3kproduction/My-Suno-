@@ -144,18 +144,18 @@ class ManualSunoBot {
             `);
         });
 
-        // Handle automatic song posting with URL scraping
+        // Handle automatic song posting with AI features
         this.app.post('/post-song-auto', async (req, res) => {
             try {
-                const { url } = req.body;
+                const { url, generateAI } = req.body;
                 
                 if (!url) {
                     return res.send(this.errorPage('Please provide a Suno URL'));
                 }
 
-                // Scrape title from Suno URL
-                const title = await this.scrapeSongTitle(url);
-                if (!title) {
+                // Enhanced song data extraction
+                const songData = await this.extractSongData(url);
+                if (!songData.title) {
                     return res.send(this.errorPage('Could not extract song title from URL. Please use manual posting.'));
                 }
 
@@ -165,17 +165,47 @@ class ManualSunoBot {
                     return res.send(this.errorPage('This song has already been posted to Discord'));
                 }
 
+                // Generate AI features if requested
+                if (generateAI && process.env.OPENAI_API_KEY) {
+                    try {
+                        const aiFeatures = await this.generateAIFeatures(songData);
+                        songData.description = aiFeatures.description;
+                        songData.hashtags = aiFeatures.hashtags;
+                        songData.socialCaption = aiFeatures.socialCaption;
+                    } catch (aiError) {
+                        logger.warn('AI generation failed, continuing without AI features:', aiError);
+                    }
+                }
+
                 const song = {
                     id: songId,
-                    title: title,
+                    title: songData.title,
                     url: url,
+                    description: songData.description,
+                    hashtags: songData.hashtags,
                     created_at: new Date().toISOString()
                 };
+
+                // Save to database with enhanced data
+                if (this.storage.addSong) {
+                    await this.storage.addSong({
+                        sunoId: songId,
+                        title: songData.title,
+                        url: url,
+                        description: songData.description,
+                        tags: songData.hashtags || [],
+                        metadata: { socialCaption: songData.socialCaption }
+                    });
+                }
 
                 await this.discordService.postSong(config.discord.channelId, song);
                 await this.storage.addPostedSong(song);
 
-                res.send(this.successPage(title, `🎵 "${title}" posted to Discord successfully!`, 'success'));
+                const successMessage = generateAI && songData.description ? 
+                    `🎵 "${songData.title}" posted with AI-generated description and hashtags!` :
+                    `🎵 "${songData.title}" posted to Discord successfully!`;
+
+                res.send(this.successPage(songData.title, successMessage, 'success'));
                 
             } catch (error) {
                 logger.error('Error posting song automatically:', error);
