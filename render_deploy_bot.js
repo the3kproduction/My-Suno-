@@ -72,8 +72,8 @@ app.post("/post", async (req, res) => {
     res.send({ success: true });
 });
 
-app.listen(port, () => {
-    console.log(`[AI Suno Bot] Running at http://localhost:${port}`);
+app.listen(port, "0.0.0.0", () => {
+    console.log(`[AI Suno Bot] Running on port ${port}`);
 });
 
 client.login(process.env.DISCORD_TOKEN);
