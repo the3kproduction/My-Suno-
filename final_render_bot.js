@@ -31,6 +31,15 @@ class EnhancedMusicBot {
         this.connection = null;
         this.player = null;
         
+        // Connection status for dashboard
+        this.connectionStatus = {
+            connected: false,
+            muted: true,
+            deafened: true,
+            channelName: null,
+            playing: false
+        };
+        
         // YouTube integration
         this.currentVideoId = null;
         
@@ -167,14 +176,27 @@ class EnhancedMusicBot {
         await interaction.deferReply();
         
         try {
-            // Join voice channel first
-            const voiceChannel = interaction.member.voice.channel;
+            // Try to join user's voice channel, or find a music channel
+            let voiceChannel = interaction.member.voice.channel;
+            
             if (!voiceChannel) {
-                await interaction.editReply('❌ You need to be in a voice channel to play music!');
-                return;
+                // Auto-join a music channel if user isn't in voice
+                const musicChannels = interaction.guild.channels.cache.filter(
+                    channel => channel.type === ChannelType.GuildVoice && 
+                    (channel.name.toLowerCase().includes('music') || 
+                     channel.name.toLowerCase().includes('general'))
+                );
+                
+                if (musicChannels.size > 0) {
+                    voiceChannel = musicChannels.first();
+                    await interaction.editReply(`🎵 Auto-joining ${voiceChannel.name} since you're not in a voice channel`);
+                } else {
+                    await interaction.editReply('❌ Please join a voice channel or create a "Music" voice channel for auto-join!');
+                    return;
+                }
             }
 
-            await this.joinVoiceChannel(interaction);
+            await this.joinVoiceChannelById(voiceChannel.id, interaction.guild);
             
             if (url.includes('playlist')) {
                 const songs = await this.getPlaylistSongs(url);
@@ -258,25 +280,29 @@ class EnhancedMusicBot {
         this.currentVideoId = null;
     }
 
-    async joinVoiceChannel(interaction) {
-        const voiceChannel = interaction.member.voice.channel;
-        if (!voiceChannel) {
-            throw new Error('You need to be in a voice channel!');
-        }
-
+    async joinVoiceChannelById(channelId, guild) {
         const connection = joinVoiceChannel({
-            channelId: voiceChannel.id,
-            guildId: interaction.guild.id,
-            adapterCreator: interaction.guild.voiceAdapterCreator,
+            channelId: channelId,
+            guildId: guild.id,
+            adapterCreator: guild.voiceAdapterCreator,
         });
 
         this.connection = connection;
         this.player = createAudioPlayer();
         connection.subscribe(this.player);
         
-        // Ensure bot is not muted/deafened
+        // Update connection status
+        this.connectionStatus.connected = true;
+        this.connectionStatus.channelName = guild.channels.cache.get(channelId)?.name || 'Unknown';
+        
         connection.on(VoiceConnectionStatus.Ready, () => {
-            console.log('🎵 Connected to voice channel - undeafening bot');
+            console.log('🎵 Connected to voice channel:', this.connectionStatus.channelName);
+            console.log('⚠️  BOT IS MUTED/DEAFENED - Right-click bot and uncheck "Server Mute" and "Server Deafen"');
+        });
+        
+        connection.on(VoiceConnectionStatus.Disconnected, () => {
+            this.connectionStatus.connected = false;
+            this.connectionStatus.playing = false;
         });
     }
 
@@ -293,16 +319,18 @@ class EnhancedMusicBot {
             const stream = ytdl(song.url, { 
                 filter: 'audioonly',
                 quality: 'lowest',
-                highWaterMark: 1 << 25
+                requestOptions: {
+                    headers: {
+                        'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36'
+                    }
+                }
             });
             
-            const resource = createAudioResource(stream, {
-                inputType: 'arbitrary',
-                inlineVolume: true
-            });
-            
+            const resource = createAudioResource(stream);
             this.player.play(resource);
+            
             console.log('🎵 Audio resource created and playing');
+            console.log('⚠️  REMINDER: Right-click bot in Discord voice channel and uncheck "Server Mute" and "Server Deafen"');
             
             this.player.on(AudioPlayerStatus.Idle, () => {
                 console.log('🎵 Song finished, playing next...');
@@ -310,7 +338,12 @@ class EnhancedMusicBot {
             });
             
             this.player.on(AudioPlayerStatus.Playing, () => {
-                console.log('🎵 Now playing audio');
+                console.log('✅ Bot is now playing audio - Check if unmuted in Discord!');
+                this.connectionStatus.playing = true;
+            });
+            
+            this.player.on(AudioPlayerStatus.Idle, () => {
+                this.connectionStatus.playing = false;
             });
             
         } catch (error) {
@@ -908,6 +941,57 @@ class EnhancedMusicBot {
         }
         
         .no-video h3 { font-size: 3rem; margin-bottom: 10px; opacity: 0.7; }
+        
+        .connection-status {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 20px;
+        }
+        
+        .status-item {
+            background: var(--input-bg);
+            padding: 15px;
+            border-radius: 10px;
+            border: 1px solid var(--border-color);
+        }
+        
+        .status-label {
+            display: block;
+            font-weight: bold;
+            margin-bottom: 5px;
+            color: var(--text-secondary);
+        }
+        
+        .status-value {
+            font-size: 1.1rem;
+            font-weight: bold;
+        }
+        
+        .status-value.connected {
+            color: #4ecdc4;
+        }
+        
+        .status-value.disconnected {
+            color: #ff6b6b;
+        }
+        
+        .status-value.playing {
+            color: #4ecdc4;
+        }
+        
+        .status-value.idle {
+            color: #feca57;
+        }
+        
+        .status-value.warning {
+            color: #ff6b6b;
+            animation: pulse 2s infinite;
+        }
+        
+        @keyframes pulse {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.6; }
+        }
         </style>
     </head>
     <body>
@@ -927,6 +1011,33 @@ class EnhancedMusicBot {
                 </div>
                 <h1>Enhanced Music Bot</h1>
                 <p>Discord Music Bot with YouTube Integration & Suno Monitoring</p>
+            </div>
+
+            <!-- Connection Status -->
+            <div class="section">
+                <h2>🔊 Voice Connection Status</h2>
+                <div class="connection-status">
+                    <div class="status-item">
+                        <span class="status-label">Connection:</span>
+                        <span class="status-value ${this.connectionStatus.connected ? 'connected' : 'disconnected'}">
+                            ${this.connectionStatus.connected ? '✅ Connected' : '❌ Disconnected'}
+                        </span>
+                    </div>
+                    <div class="status-item">
+                        <span class="status-label">Channel:</span>
+                        <span class="status-value">${this.connectionStatus.channelName || 'None'}</span>
+                    </div>
+                    <div class="status-item">
+                        <span class="status-label">Audio Status:</span>
+                        <span class="status-value ${this.connectionStatus.playing ? 'playing' : 'idle'}">
+                            ${this.connectionStatus.playing ? '🎵 Playing' : '⏸️ Idle'}
+                        </span>
+                    </div>
+                    <div class="status-item">
+                        <span class="status-label">Bot Mute Status:</span>
+                        <span class="status-value warning">⚠️ Check Discord - Unmute bot manually</span>
+                    </div>
+                </div>
             </div>
 
             <!-- YouTube Video Display -->
