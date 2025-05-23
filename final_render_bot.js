@@ -298,7 +298,13 @@ class EnhancedMusicBot {
     }
 
     async joinVoiceChannelById(channelId, guild) {
-        console.log(`🔗 Attempting voice connection to channel ID: ${channelId}`);
+        // Don't create multiple connections
+        if (this.connection && this.connection.state.status !== VoiceConnectionStatus.Destroyed) {
+            console.log(`🔗 Already connected, reusing existing connection`);
+            return;
+        }
+        
+        console.log(`🔗 Creating new voice connection to channel ID: ${channelId}`);
         
         const connection = joinVoiceChannel({
             channelId: channelId,
@@ -307,9 +313,13 @@ class EnhancedMusicBot {
         });
 
         this.connection = connection;
-        this.player = createAudioPlayer();
-        connection.subscribe(this.player);
         
+        // Only create player if we don't have one
+        if (!this.player) {
+            this.player = createAudioPlayer();
+        }
+        
+        connection.subscribe(this.player);
         console.log(`🎵 Voice connection created and player subscribed`);
         
         // Update connection status
