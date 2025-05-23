@@ -155,8 +155,8 @@ class EnhancedMusicBot {
 
         // Smart channel monitoring for automatic song extraction
         this.client.on('messageCreate', async (message) => {
-            // Only monitor the bot-helper channel
-            if (message.channel.id === this.botHelperChannelId && !message.author.bot) {
+            // Monitor the bot-helper channel for ANY Suno links (including from bot itself)
+            if (message.channel.id === this.botHelperChannelId) {
                 await this.handleBotHelperMessage(message);
             }
         });
