@@ -1155,14 +1155,7 @@ class EnhancedMusicBot {
                 </div>
             </div>
 
-            <!-- YouTube Video Display -->
-            <div class="section">
-                <h2>🎬 Current Video</h2>
-                <div class="video-wrapper">
-                    ${currentVideo}
-                    <div class="video-overlay"></div>
-                </div>
-            </div>
+
 
             <!-- Premium Suno Monitoring Dashboard -->
             <div class="section" style="background: linear-gradient(135deg, rgba(124, 58, 237, 0.3), rgba(79, 70, 229, 0.3)); border: 2px solid rgba(124, 58, 237, 0.5);">
