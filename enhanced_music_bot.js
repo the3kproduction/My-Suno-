@@ -225,6 +225,22 @@ class EnhancedMusicBot {
                         ]
                     }
                 ]
+            },
+            {
+                name: 'clear',
+                description: 'Clear playlist (Admin only)',
+                options: [
+                    {
+                        name: 'channel',
+                        description: 'Choose music or lyric channel',
+                        type: 3,
+                        required: true,
+                        choices: [
+                            { name: 'Music Videos', value: 'music' },
+                            { name: 'Lyric Videos', value: 'lyric' }
+                        ]
+                    }
+                ]
             }
         ];
 
@@ -322,6 +338,24 @@ class EnhancedMusicBot {
                     } catch (error) {
                         await interaction.editReply(`❌ Failed to load content: ${error.message}`);
                     }
+                    break;
+
+                case 'clear':
+                    // Admin-only command - replace 'YOUR_DISCORD_USER_ID' with your actual Discord user ID
+                    const adminUserId = 'YOUR_DISCORD_USER_ID'; // You'll need to provide your Discord user ID
+                    
+                    if (interaction.user.id !== adminUserId) {
+                        await interaction.reply('❌ This command is admin-only!');
+                        return;
+                    }
+
+                    this.currentPlaylists[channelType].songs = [];
+                    this.currentPlaylists[channelType].currentIndex = 0;
+                    
+                    // Stop current playback if any
+                    this.stopPlayback(channelType);
+                    
+                    await interaction.reply(`✅ Cleared ${channelType} playlist`);
                     break;
             }
         } catch (error) {
