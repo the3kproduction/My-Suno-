@@ -194,10 +194,9 @@ class EnhancedMusicBot {
                 console.log('⏳ Waiting for Discord client to initialize...');
                 return;
             }
-
             await rest.put(
                 Routes.applicationCommands(this.client.application.id),
-
+            );
                 { body: commands }
             );
             console.log('🎯 Slash commands registered successfully!');

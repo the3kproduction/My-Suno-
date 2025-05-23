@@ -1,0 +1,58 @@
+==> Docs on specifying a bun version: https://render.com/docs/bun-version
+added 104 packages, and audited 214 packages in 9s
+32 packages are looking for funding
+  run `npm fund` for details
+4 low severity vulnerabilities
+To address issues that do not require attention, run:
+  npm audit fix
+To address all issues (including breaking changes), run:
+  npm audit fix --force
+Run `npm audit` for details.
+==> Uploading build...
+==> Uploaded in 4.8s. Compression took 2.2s
+==> Build successful 🎉
+==> Deploying...
+==> Running 'node render_ready_bot.js'
+node:internal/modules/cjs/loader:1228
+  throw err;
+  ^
+Error: Cannot find module '@discordjs/voice'
+Require stack:
+- /opt/render/project/src/render_ready_bot.js
+    at Function._resolveFilename (node:internal/modules/cjs/loader:1225:15)
+    at Function._load (node:internal/modules/cjs/loader:1055:27)
+    at TracingChannel.traceSync (node:diagnostics_channel:322:14)
+    at wrapModuleLoad (node:internal/modules/cjs/loader:220:24)
+    at Module.require (node:internal/modules/cjs/loader:1311:12)
+    at require (node:internal/modules/helpers:136:16)
+    at Object.<anonymous> (/opt/render/project/src/render_ready_bot.js:2:112)
+    at Module._compile (node:internal/modules/cjs/loader:1554:14)
+    at Object..js (node:internal/modules/cjs/loader:1706:10)
+    at Module.load (node:internal/modules/cjs/loader:1289:32) {
+  code: 'MODULE_NOT_FOUND',
+  requireStack: [ '/opt/render/project/src/render_ready_bot.js' ]
+}
+Node.js v22.14.0
+==> Exited with status 1
+==> Common ways to troubleshoot your deploy: https://render.com/docs/troubleshooting-deploys
+==> Running 'node render_ready_bot.js'
+node:internal/modules/cjs/loader:1228
+  throw err;
+  ^
+Error: Cannot find module '@discordjs/voice'
+Require stack:
+- /opt/render/project/src/render_ready_bot.js
+    at Function._resolveFilename (node:internal/modules/cjs/loader:1225:15)
+    at Function._load (node:internal/modules/cjs/loader:1055:27)
+    at TracingChannel.traceSync (node:diagnostics_channel:322:14)
+    at wrapModuleLoad (node:internal/modules/cjs/loader:220:24)
+    at Module.require (node:internal/modules/cjs/loader:1311:12)
+    at require (node:internal/modules/helpers:136:16)
+    at Object.<anonymous> (/opt/render/project/src/render_ready_bot.js:2:112)
+    at Module._compile (node:internal/modules/cjs/loader:1554:14)
+    at Object..js (node:internal/modules/cjs/loader:1706:10)
+    at Module.load (node:internal/modules/cjs/loader:1289:32) {
+  code: 'MODULE_NOT_FOUND',
+  requireStack: [ '/opt/render/project/src/render_ready_bot.js' ]
+}
+Node.js v22.14.0
