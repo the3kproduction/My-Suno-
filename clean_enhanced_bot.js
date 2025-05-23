@@ -173,26 +173,82 @@ class EnhancedMusicBot {
         await interaction.deferReply();
         
         try {
-            // Get video info
-            const info = await ytdl.getInfo(url);
-            const song = {
-                title: info.videoDetails.title,
-                url: url,
-                id: info.videoDetails.videoId
-            };
+            // Check if it's a playlist or single video
+            if (url.includes('playlist?list=')) {
+                // Handle playlist
+                const songs = await this.getPlaylistSongs(url);
+                this.channels[channelType].playlist = songs;
+                this.channels[channelType].currentIndex = 0;
+                
+                await interaction.editReply(`✅ Loaded playlist with ${songs.length} songs in ${channelType} channel!`);
+            } else {
+                // Handle single video
+                const videoId = this.extractVideoId(url);
+                const info = await ytdl.getInfo(url);
+                const song = {
+                    title: info.videoDetails.title,
+                    url: url,
+                    id: videoId
+                };
 
-            // Add to playlist
-            this.channels[channelType].playlist.push(song);
+                this.channels[channelType].playlist.push(song);
+                await interaction.editReply(`✅ Loaded: **${song.title}** in ${channelType} channel!`);
+            }
             
             // Join voice channel and start playing
             await this.joinVoiceChannel(interaction, channelType);
             await this.playCurrentSong(channelType);
 
-            await interaction.editReply(`✅ Loaded and playing: **${song.title}** in ${channelType} channel!`);
         } catch (error) {
             console.error('❌ Load error:', error);
-            await interaction.editReply('❌ Failed to load the video!');
+            await interaction.editReply('❌ Failed to load the content! Make sure the URL is valid.');
         }
+    }
+
+    extractVideoId(url) {
+        const regex = /(?:youtube\.com\/watch\?v=|youtu\.be\/|youtube\.com\/embed\/)([^&\n?#]+)/;
+        const match = url.match(regex);
+        return match ? match[1] : null;
+    }
+
+    async getPlaylistSongs(playlistUrl) {
+        // Extract playlist ID
+        const playlistId = this.extractPlaylistId(playlistUrl);
+        if (!playlistId) throw new Error('Invalid playlist URL');
+
+        // Use YouTube Data API to get playlist items
+        const apiKey = process.env.YOUTUBE_API_KEY;
+        if (!apiKey) {
+            throw new Error('YouTube API key not configured');
+        }
+
+        try {
+            const response = await axios.get(`https://www.googleapis.com/youtube/v3/playlistItems`, {
+                params: {
+                    part: 'snippet',
+                    playlistId: playlistId,
+                    maxResults: 50,
+                    key: apiKey
+                }
+            });
+
+            return response.data.items
+                .filter(item => item.snippet.title !== 'Private video' && item.snippet.title !== 'Deleted video')
+                .map(item => ({
+                    title: item.snippet.title,
+                    url: `https://www.youtube.com/watch?v=${item.snippet.resourceId.videoId}`,
+                    id: item.snippet.resourceId.videoId
+                }));
+        } catch (error) {
+            console.error('❌ YouTube API error:', error);
+            throw new Error('Failed to load playlist. Check your YouTube API key.');
+        }
+    }
+
+    extractPlaylistId(url) {
+        const regex = /[&?]list=([^&]+)/;
+        const match = url.match(regex);
+        return match ? match[1] : null;
     }
 
     async handlePlay(interaction, channelType) {
@@ -309,14 +365,48 @@ class EnhancedMusicBot {
             100% { background-position: 0% 50%; }
         }
         
-        @keyframes glow {
-            0%, 100% { box-shadow: 0 0 20px rgba(255, 107, 107, 0.5), 0 0 40px rgba(78, 205, 196, 0.3); }
-            50% { box-shadow: 0 0 30px rgba(78, 205, 196, 0.5), 0 0 60px rgba(255, 107, 107, 0.3); }
+        @keyframes rainbowGlow {
+            0% { 
+                box-shadow: 0 0 30px #ff6b6b, 0 0 60px #ff6b6b, 0 0 90px #ff6b6b;
+                filter: hue-rotate(0deg);
+            }
+            25% { 
+                box-shadow: 0 0 30px #4ecdc4, 0 0 60px #4ecdc4, 0 0 90px #4ecdc4;
+                filter: hue-rotate(90deg);
+            }
+            50% { 
+                box-shadow: 0 0 30px #667eea, 0 0 60px #667eea, 0 0 90px #667eea;
+                filter: hue-rotate(180deg);
+            }
+            75% { 
+                box-shadow: 0 0 30px #764ba2, 0 0 60px #764ba2, 0 0 90px #764ba2;
+                filter: hue-rotate(270deg);
+            }
+            100% { 
+                box-shadow: 0 0 30px #ff6b6b, 0 0 60px #ff6b6b, 0 0 90px #ff6b6b;
+                filter: hue-rotate(360deg);
+            }
         }
         
-        @keyframes pulse {
-            0%, 100% { transform: scale(1); }
-            50% { transform: scale(1.05); }
+        @keyframes megaPulse {
+            0%, 100% { 
+                transform: scale(1) rotate(0deg); 
+                filter: brightness(1);
+            }
+            50% { 
+                transform: scale(1.1) rotate(2deg); 
+                filter: brightness(1.3);
+            }
+        }
+        
+        @keyframes textShimmer {
+            0% { background-position: -200% center; }
+            100% { background-position: 200% center; }
+        }
+        
+        @keyframes float {
+            0%, 100% { transform: translateY(0px); }
+            50% { transform: translateY(-10px); }
         }
         
         body {
@@ -330,48 +420,60 @@ class EnhancedMusicBot {
         .container { max-width: 1200px; margin: 0 auto; }
         
         .header { 
-            text-align: center; margin-bottom: 50px; 
-            animation: pulse 3s ease-in-out infinite;
+            text-align: center; margin-bottom: 60px; 
+            animation: megaPulse 4s ease-in-out infinite;
         }
         
         .header h1 { 
-            font-size: 3.5rem; margin-bottom: 15px; 
-            background: linear-gradient(45deg, #ff6b6b, #4ecdc4, #ff6b6b);
-            background-size: 200% 200%;
-            animation: gradient 3s ease infinite;
+            font-size: 4rem; margin-bottom: 20px; 
+            background: linear-gradient(45deg, #ff6b6b, #4ecdc4, #667eea, #764ba2, #ff6b6b);
+            background-size: 400% 400%;
+            animation: gradient 2s ease infinite, rainbowGlow 3s ease infinite;
             -webkit-background-clip: text;
             -webkit-text-fill-color: transparent;
             background-clip: text;
-            text-shadow: 0 0 30px rgba(255,255,255,0.5);
+            filter: drop-shadow(0 0 20px rgba(255,255,255,0.8)) drop-shadow(0 10px 20px rgba(0,0,0,0.5));
+        }
+        
+        .header p {
+            font-size: 1.3rem;
+            background: linear-gradient(90deg, transparent, #fff, transparent);
+            background-size: 200% 100%;
+            animation: textShimmer 2s infinite;
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
         }
         
         .section {
-            background: rgba(255,255,255,0.15); 
-            border-radius: 20px;
-            padding: 35px; margin-bottom: 40px; 
-            backdrop-filter: blur(15px);
-            border: 1px solid rgba(255,255,255,0.2);
-            box-shadow: 0 8px 32px rgba(0,0,0,0.1);
-            transition: all 0.3s ease;
+            background: rgba(255,255,255,0.2); 
+            border-radius: 25px;
+            padding: 40px; margin-bottom: 50px; 
+            backdrop-filter: blur(20px);
+            border: 2px solid rgba(255,255,255,0.3);
+            box-shadow: 0 15px 50px rgba(0,0,0,0.2);
+            transition: all 0.4s ease;
+            animation: float 6s ease-in-out infinite;
         }
         
         .section:hover {
-            transform: translateY(-5px);
-            box-shadow: 0 15px 45px rgba(0,0,0,0.2);
+            transform: translateY(-15px) scale(1.02);
+            box-shadow: 0 25px 80px rgba(0,0,0,0.3);
+            animation: rainbowGlow 1s ease infinite;
         }
         
         .section h2 {
-            font-size: 2.5rem; margin-bottom: 40px; 
+            font-size: 3rem; margin-bottom: 50px; 
             text-align: center;
-            background: linear-gradient(45deg, #ff6b6b, #4ecdc4, #667eea, #764ba2);
-            background-size: 300% 300%;
-            animation: gradient 4s ease infinite;
+            background: linear-gradient(45deg, #ff6b6b, #4ecdc4, #667eea, #764ba2, #ff6b6b);
+            background-size: 500% 500%;
+            animation: gradient 3s ease infinite, megaPulse 4s ease infinite;
             -webkit-background-clip: text;
             -webkit-text-fill-color: transparent;
             background-clip: text;
-            text-shadow: 0 0 20px rgba(255,255,255,0.5);
-            filter: drop-shadow(0 5px 10px rgba(0,0,0,0.3));
-            transform: perspective(500px) rotateX(15deg);
+            filter: drop-shadow(0 0 30px rgba(255,255,255,0.9)) drop-shadow(0 15px 30px rgba(0,0,0,0.6));
+            transform: perspective(800px) rotateX(20deg);
+            text-shadow: 0 0 50px rgba(255,255,255,0.8);
         }
         
         .grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(500px, 1fr)); gap: 40px; }
