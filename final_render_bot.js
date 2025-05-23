@@ -603,40 +603,85 @@ class EnhancedMusicBot {
 
     async extractSunoData(url) {
         try {
+            console.log('🔍 Extracting Suno data from:', url);
+            
             const response = await axios.get(url, {
                 headers: {
-                    'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36'
+                    'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36',
+                    'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,*/*;q=0.8',
+                    'Accept-Language': 'en-US,en;q=0.5',
+                    'Accept-Encoding': 'gzip, deflate, br',
+                    'Connection': 'keep-alive',
+                    'Upgrade-Insecure-Requests': '1'
                 }
             });
             const html = response.data;
             
             let title = 'Unknown Song';
-            const ogTitleMatch = html.match(/<meta property="og:title" content="([^"]*)"[^>]*>/i);
-            if (ogTitleMatch) {
-                title = ogTitleMatch[1];
-            }
-            
             let imageUrl = null;
-            const ogImageMatch = html.match(/<meta property="og:image" content="([^"]*)"[^>]*>/i);
-            if (ogImageMatch) {
-                imageUrl = ogImageMatch[1];
+            let description = '';
+            
+            // Try multiple patterns for title extraction
+            const titlePatterns = [
+                /<meta property="og:title" content="([^"]*)"[^>]*>/i,
+                /<title[^>]*>([^<]*)<\/title>/i,
+                /"title":\s*"([^"]*)"[^}]*>/i,
+                /"name":\s*"([^"]*)"[^}]*>/i
+            ];
+            
+            for (const pattern of titlePatterns) {
+                const match = html.match(pattern);
+                if (match && match[1] && match[1].trim() !== '') {
+                    title = match[1].trim();
+                    // Clean up title - remove "Suno" and other common prefixes/suffixes
+                    title = title.replace(/\s*-\s*Suno$/i, '').replace(/^Suno\s*-\s*/i, '').trim();
+                    if (title && title !== 'Suno') break;
+                }
             }
             
-            let description = '';
-            const ogDescMatch = html.match(/<meta property="og:description" content="([^"]*)"[^>]*>/i);
-            if (ogDescMatch) {
-                description = ogDescMatch[1];
+            // Try multiple patterns for image extraction
+            const imagePatterns = [
+                /<meta property="og:image" content="([^"]*)"[^>]*>/i,
+                /<meta name="twitter:image" content="([^"]*)"[^>]*>/i,
+                /"image_url":\s*"([^"]*)"[^}]*>/i,
+                /"image":\s*"([^"]*)"[^}]*>/i
+            ];
+            
+            for (const pattern of imagePatterns) {
+                const match = html.match(pattern);
+                if (match && match[1]) {
+                    imageUrl = match[1];
+                    break;
+                }
             }
+            
+            // Try multiple patterns for description
+            const descPatterns = [
+                /<meta property="og:description" content="([^"]*)"[^>]*>/i,
+                /<meta name="description" content="([^"]*)"[^>]*>/i,
+                /"prompt":\s*"([^"]*)"[^}]*>/i,
+                /"lyrics":\s*"([^"]*)"[^}]*>/i
+            ];
+            
+            for (const pattern of descPatterns) {
+                const match = html.match(pattern);
+                if (match && match[1] && match[1].trim() !== '') {
+                    description = match[1].trim();
+                    break;
+                }
+            }
+            
+            console.log('🎵 Extracted Suno data:', { title, imageUrl: !!imageUrl, description: !!description });
             
             return { 
-                title: title.trim(), 
+                title: title || 'Unknown Song', 
                 url, 
                 imageUrl,
-                description: description.trim()
+                description: description || 'Fresh beats from Suno AI!'
             };
         } catch (error) {
             console.error('❌ Error extracting Suno data:', error);
-            return { title: 'Unknown Song', url, imageUrl: null, description: '' };
+            return { title: 'Unknown Song', url, imageUrl: null, description: 'Fresh beats from Suno AI!' };
         }
     }
 
