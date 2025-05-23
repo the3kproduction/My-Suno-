@@ -1261,7 +1261,7 @@ class EnhancedMusicBot {
                         ${currentMusicSong ? `
                             <iframe 
                                 id="musicVideo"
-                                src="https://www.youtube.com/embed/${currentMusicSong.id}?autoplay=1&mute=1&controls=0&disablekb=1&rel=0&modestbranding=1&enablejsapi=0&origin=${req.get('host')}"
+                                src="https://www.youtube.com/embed/${currentMusicSong.id}?autoplay=1&mute=1&controls=0&disablekb=1&rel=0&modestbranding=1&enablejsapi=0"
                                 frameborder="0" 
                                 allow="autoplay; encrypted-media"
                                 style="pointer-events: none;">
@@ -1290,7 +1290,7 @@ class EnhancedMusicBot {
                         ${currentLyricSong ? `
                             <iframe 
                                 id="lyricVideo"
-                                src="https://www.youtube.com/embed/${currentLyricSong.id}?autoplay=1&mute=1&controls=0&disablekb=1&rel=0&modestbranding=1&enablejsapi=0&origin=${req.get('host')}"
+                                src="https://www.youtube.com/embed/${currentLyricSong.id}?autoplay=1&mute=1&controls=0&disablekb=1&rel=0&modestbranding=1&enablejsapi=0"
                                 frameborder="0" 
                                 allow="autoplay; encrypted-media"
                                 style="pointer-events: none;">
