@@ -1421,6 +1421,7 @@ class EnhancedMusicBot {
                         return false;
                     });
                 }
+            });
             
             document.getElementById('requestProfileForm').addEventListener('submit', async (e) => {
                 e.preventDefault();
