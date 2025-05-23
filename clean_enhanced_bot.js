@@ -125,11 +125,12 @@ class EnhancedMusicBot {
         // Wait for bot to be ready before registering commands
         this.client.once('ready', async () => {
             try {
+                console.log('🔄 Refreshing slash commands...');
                 await rest.put(
                     Routes.applicationCommands(this.client.user.id),
                     { body: commands }
                 );
-                console.log('✅ Slash commands registered!');
+                console.log('✅ Slash commands registered and refreshed!');
             } catch (error) {
                 console.error('❌ Error registering commands:', error);
             }
@@ -561,10 +562,20 @@ class EnhancedMusicBot {
         .video-wrapper iframe { 
             width: 100%; height: 100%; border: none; 
             transition: all 0.3s ease;
+            pointer-events: none;
         }
         
         .video-wrapper:hover iframe {
             transform: scale(1.05);
+        }
+        
+        .video-overlay {
+            position: absolute;
+            top: 0; left: 0; right: 0; bottom: 0;
+            background: transparent;
+            z-index: 10;
+            pointer-events: all;
+            cursor: default;
         }
         
         .no-video {
@@ -671,8 +682,9 @@ class EnhancedMusicBot {
                     <h3>🎬 Music Videos Channel</h3>
                     <div class="video-wrapper">
                         ${musicSong ? `
-                            <iframe src="https://www.youtube.com/embed/${musicSong.id}?autoplay=1&mute=1&controls=0" 
+                            <iframe src="https://www.youtube.com/embed/${musicSong.id}?autoplay=1&mute=1&controls=0&disablekb=1" 
                                     allow="autoplay; encrypted-media"></iframe>
+                            <div class="video-overlay"></div>
                         ` : `
                             <div class="no-video">
                                 <h3>🎬</h3>
@@ -688,8 +700,9 @@ class EnhancedMusicBot {
                     <h3>🎤 Lyric Videos Channel</h3>
                     <div class="video-wrapper">
                         ${lyricSong ? `
-                            <iframe src="https://www.youtube.com/embed/${lyricSong.id}?autoplay=1&mute=1&controls=0" 
+                            <iframe src="https://www.youtube.com/embed/${lyricSong.id}?autoplay=1&mute=1&controls=0&disablekb=1" 
                                     allow="autoplay; encrypted-media"></iframe>
+                            <div class="video-overlay"></div>
                         ` : `
                             <div class="no-video">
                                 <h3>🎤</h3>
