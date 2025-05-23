@@ -426,6 +426,15 @@ class EnhancedMusicBot {
                     return res.status(400).json({ error: 'URL and title are required' });
                 }
 
+                // Validate that it's a Suno URL, not YouTube
+                if (url.includes('youtube.com') || url.includes('youtu.be')) {
+                    return res.status(400).json({ error: 'Please use Suno URLs only. For YouTube content, use the playlist loading feature instead.' });
+                }
+
+                if (!url.includes('suno.com')) {
+                    return res.status(400).json({ error: 'Please enter a valid Suno.com URL' });
+                }
+
                 let finalDescription = description || '';
                 
                 if (useAI) {
