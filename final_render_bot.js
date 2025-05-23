@@ -320,15 +320,42 @@ class EnhancedMusicBot {
         try {
             console.log(`🎵 Playing: ${song.title} - ${song.url}`);
             
-            const stream = ytdl(song.url, { 
-                filter: 'audioonly',
-                quality: 'lowest',
-                requestOptions: {
-                    headers: {
-                        'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36'
-                    }
+            // Try youtube-dl-exec first (more reliable than ytdl-core)
+            let audioSource;
+            try {
+                console.log('🔄 Using youtube-dl-exec for reliable audio...');
+                const info = await youtubeDl(song.url, {
+                    dumpSingleJson: true,
+                    noCheckCertificates: true,
+                    noWarnings: true,
+                    preferFreeFormats: true,
+                    addHeader: ['referer:youtube.com', 'user-agent:googlebot']
+                });
+                
+                const audioFormat = info.formats.find(f => 
+                    f.acodec && f.acodec !== 'none' && f.url
+                );
+                
+                if (audioFormat) {
+                    console.log(`✅ Found reliable audio: ${audioFormat.ext}`);
+                    audioSource = audioFormat.url;
+                } else {
+                    throw new Error('No audio format found');
                 }
-            });
+            } catch (dlError) {
+                console.log('⚠️ Fallback to ytdl-core...');
+                audioSource = ytdl(song.url, { 
+                    filter: 'audioonly',
+                    quality: 'lowest',
+                    requestOptions: {
+                        headers: {
+                            'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36'
+                        }
+                    }
+                });
+            }
+            
+            const stream = audioSource;
             
             const resource = createAudioResource(stream);
             this.player.play(resource);
