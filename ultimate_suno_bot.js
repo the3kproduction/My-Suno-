@@ -208,7 +208,7 @@ class UltimateSunoBot {
 
         // Start server
         const PORT = process.env.PORT || 5000;
-        this.app.listen(PORT, '0.0.0.0', () => {
+        this.server = this.app.listen(PORT, '0.0.0.0', () => {
             logger.info(`🌟 Ultimate Suno Bot server running on port ${PORT}`);
         });
     }

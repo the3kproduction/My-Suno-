@@ -1,4 +1,4 @@
-modules = ["nodejs-20", "python-3.11", "python3"]
+modules = ["nodejs-20", "python-3.11", "python3", "postgresql-16"]
 
 [nix]
 channel = "stable-24_05"
