@@ -361,13 +361,17 @@ class EnhancedMusicBot {
         }
         
         .section h2 {
-            font-size: 2.2rem; margin-bottom: 35px; 
+            font-size: 2.5rem; margin-bottom: 40px; 
             text-align: center;
-            background: linear-gradient(45deg, #ff6b6b, #4ecdc4);
+            background: linear-gradient(45deg, #ff6b6b, #4ecdc4, #667eea, #764ba2);
+            background-size: 300% 300%;
+            animation: gradient 4s ease infinite;
             -webkit-background-clip: text;
             -webkit-text-fill-color: transparent;
             background-clip: text;
-            text-shadow: 0 2px 10px rgba(0,0,0,0.3);
+            text-shadow: 0 0 20px rgba(255,255,255,0.5);
+            filter: drop-shadow(0 5px 10px rgba(0,0,0,0.3));
+            transform: perspective(500px) rotateX(15deg);
         }
         
         .grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(500px, 1fr)); gap: 40px; }
@@ -653,18 +657,52 @@ class EnhancedMusicBot {
 
     async extractSunoData(url) {
         try {
-            // Try to get page content to extract title
-            const response = await axios.get(url);
+            // Get page content to extract song data
+            const response = await axios.get(url, {
+                headers: {
+                    'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.124 Safari/537.36'
+                }
+            });
             const html = response.data;
             
-            // Extract title from HTML
-            const titleMatch = html.match(/<title>(.*?)<\/title>/i);
-            const title = titleMatch ? titleMatch[1].replace(' | Suno', '').trim() : 'Unknown Song';
+            // Extract title from meta tags or title
+            let title = 'Unknown Song';
             
-            return { title, url };
+            // Try OpenGraph title first
+            const ogTitleMatch = html.match(/<meta property="og:title" content="([^"]*)"[^>]*>/i);
+            if (ogTitleMatch) {
+                title = ogTitleMatch[1];
+            } else {
+                // Fallback to page title
+                const titleMatch = html.match(/<title>(.*?)<\/title>/i);
+                if (titleMatch) {
+                    title = titleMatch[1].replace(' | Suno', '').trim();
+                }
+            }
+            
+            // Extract image URL for thumbnail
+            let imageUrl = null;
+            const ogImageMatch = html.match(/<meta property="og:image" content="([^"]*)"[^>]*>/i);
+            if (ogImageMatch) {
+                imageUrl = ogImageMatch[1];
+            }
+            
+            // Extract description
+            let description = '';
+            const ogDescMatch = html.match(/<meta property="og:description" content="([^"]*)"[^>]*>/i);
+            if (ogDescMatch) {
+                description = ogDescMatch[1];
+            }
+            
+            return { 
+                title: title.trim(), 
+                url, 
+                imageUrl,
+                description: description.trim()
+            };
         } catch (error) {
             console.error('❌ Error extracting Suno data:', error);
-            return { title: 'Unknown Song', url };
+            return { title: 'Unknown Song', url, imageUrl: null, description: '' };
         }
     }
 
@@ -672,16 +710,30 @@ class EnhancedMusicBot {
         try {
             const channel = await this.client.channels.fetch(this.sunoChannelId);
             
+            // Get song data with artwork
+            const songData = await this.extractSunoData(url);
+            
             const embed = new EmbedBuilder()
-                .setTitle('🎵 New Suno Song')
-                .setDescription(`**${title}**\n\n${description}\n\n[Listen Here](${url})`)
-                .setColor('#FF6B6B')
+                .setAuthor({ name: 'Suno', iconURL: 'https://images.crunchbase.com/image/upload/c_lpad,h_170,w_170,f_auto,b_white,q_auto:eco,dpr_1/erkxwhl1gd48xfhe2yld' })
+                .setTitle(songData.title)
+                .setURL(url)
+                .setColor('#4F46E5')
                 .setTimestamp();
 
-            const message = `🎵 New Suno song: **${title}** — ${url}`;
+            // Add image if available
+            if (songData.imageUrl) {
+                embed.setImage(songData.imageUrl);
+            }
+
+            // Add description if available
+            if (songData.description || description) {
+                embed.setDescription(songData.description || description);
+            }
+
+            const message = `🎵 New Suno song: **${songData.title}** — ${url}`;
             
             await channel.send({ content: message, embeds: [embed] });
-            console.log(`✅ Posted to Discord: ${title}`);
+            console.log(`✅ Posted to Discord: ${songData.title}`);
         } catch (error) {
             console.error('❌ Discord posting error:', error);
             throw error;
