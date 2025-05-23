@@ -727,6 +727,65 @@ class EnhancedMusicBot {
             }
         });
 
+        // Approve profile endpoint
+        this.app.post('/approve-profile', async (req, res) => {
+            try {
+                const { index } = req.body;
+                
+                if (index < 0 || index >= this.pendingProfiles.length) {
+                    return res.json({ success: false, error: 'Invalid profile index' });
+                }
+                
+                const request = this.pendingProfiles[index];
+                
+                // Add to monitoring list
+                this.sunoProfiles.push({
+                    id: request.profileId,
+                    name: request.profileName,
+                    lastChecked: new Date()
+                });
+                
+                // Remove from pending
+                this.pendingProfiles.splice(index, 1);
+                
+                console.log(`✅ Approved profile: ${request.profileName} (${request.profileId})`);
+                
+                res.json({ 
+                    success: true, 
+                    message: `Profile "${request.profileName}" approved and added to monitoring!` 
+                });
+            } catch (error) {
+                console.error('❌ Approve profile error:', error);
+                res.json({ success: false, error: 'Failed to approve profile' });
+            }
+        });
+
+        // Deny profile endpoint
+        this.app.post('/deny-profile', async (req, res) => {
+            try {
+                const { index } = req.body;
+                
+                if (index < 0 || index >= this.pendingProfiles.length) {
+                    return res.json({ success: false, error: 'Invalid profile index' });
+                }
+                
+                const request = this.pendingProfiles[index];
+                
+                // Remove from pending
+                this.pendingProfiles.splice(index, 1);
+                
+                console.log(`❌ Denied profile: ${request.profileName} (${request.profileId})`);
+                
+                res.json({ 
+                    success: true, 
+                    message: `Profile "${request.profileName}" request denied and removed` 
+                });
+            } catch (error) {
+                console.error('❌ Deny profile error:', error);
+                res.json({ success: false, error: 'Failed to deny profile' });
+            }
+        });
+
         this.app.listen(5000, () => {
             console.log('🌟 Web server running on port 5000');
         });
@@ -1487,6 +1546,10 @@ class EnhancedMusicBot {
                                     <p><strong>Profile ID:</strong> ${request.profileId}</p>
                                     <p><strong>Submitted by:</strong> ${request.submittedBy || 'Anonymous'}</p>
                                     <p><strong>Reason:</strong> ${request.reason || 'No reason provided'}</p>
+                                    <div style="margin-top: 15px; display: flex; gap: 10px;">
+                                        <button onclick="approveProfile(${index})" class="btn" style="background: #4ecdc4; padding: 8px 16px;">✅ Approve</button>
+                                        <button onclick="denyProfile(${index})" class="btn" style="background: #ff6b6b; padding: 8px 16px;">❌ Deny</button>
+                                    </div>
                                 </div>
                             `).join('')}
                         </div>
@@ -1550,6 +1613,47 @@ class EnhancedMusicBot {
                     setTheme('auto');
                 }
             }, 60000);
+
+            // Admin functions for profile management
+            async function approveProfile(index) {
+                try {
+                    const response = await fetch('/approve-profile', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({ index })
+                    });
+                    
+                    const result = await response.json();
+                    if (result.success) {
+                        alert('✅ Profile approved and added to monitoring!');
+                        updateDashboard();
+                    } else {
+                        alert('❌ Failed to approve profile: ' + result.error);
+                    }
+                } catch (error) {
+                    alert('❌ Error approving profile: ' + error.message);
+                }
+            }
+            
+            async function denyProfile(index) {
+                try {
+                    const response = await fetch('/deny-profile', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({ index })
+                    });
+                    
+                    const result = await response.json();
+                    if (result.success) {
+                        alert('❌ Profile request denied and removed');
+                        updateDashboard();
+                    } else {
+                        alert('❌ Failed to deny profile: ' + result.error);
+                    }
+                } catch (error) {
+                    alert('❌ Error denying profile: ' + error.message);
+                }
+            }
 
             // Initialize theme when page loads
             document.addEventListener('DOMContentLoaded', initTheme);
