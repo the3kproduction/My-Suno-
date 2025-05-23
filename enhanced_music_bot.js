@@ -717,20 +717,15 @@ class EnhancedMusicBot {
         const currentSong = playlist.songs[playlist.currentIndex];
         
         try {
-            // Use youtube-dl-exec for more reliable streaming
-            const youtubeDl = require('youtube-dl-exec');
-            
-            // Get direct audio URL
-            const info = await youtubeDl(currentSong.url, {
-                dumpSingleJson: true,
-                noCheckCertificates: true,
-                noWarnings: true,
-                format: 'bestaudio',
-                extractFlat: false
+            // Use ytdl-core for reliable streaming
+            const stream = ytdl(currentSong.url, { 
+                filter: 'audioonly',
+                quality: 'highestaudio',
+                highWaterMark: 1 << 25
             });
             
-            // Create audio resource from direct URL
-            const resource = createAudioResource(info.url, {
+            // Create audio resource from stream
+            const resource = createAudioResource(stream, {
                 inputType: StreamType.Arbitrary,
                 inlineVolume: true
             });
