@@ -298,6 +298,8 @@ class EnhancedMusicBot {
     }
 
     async joinVoiceChannelById(channelId, guild) {
+        console.log(`🔗 Attempting voice connection to channel ID: ${channelId}`);
+        
         const connection = joinVoiceChannel({
             channelId: channelId,
             guildId: guild.id,
@@ -307,6 +309,8 @@ class EnhancedMusicBot {
         this.connection = connection;
         this.player = createAudioPlayer();
         connection.subscribe(this.player);
+        
+        console.log(`🎵 Voice connection created and player subscribed`);
         
         // Update connection status
         this.connectionStatus.connected = true;
