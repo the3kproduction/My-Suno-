@@ -153,20 +153,45 @@ class EnhancedMusicBot {
         });
 
         this.client.on('interactionCreate', async interaction => {
-            if (!interaction.isChatInputCommand()) return;
-
-            const { commandName, options } = interaction;
-
             try {
-                switch (commandName) {
-                    case 'load':
-                        const url = options.getString('url');
-                        await this.handleLoadAndPlay(interaction, url);
-                        break;
+                if (interaction.isChatInputCommand()) {
+                    const { commandName, options } = interaction;
+                    
+                    switch (commandName) {
+                        case 'load':
+                            const url = options.getString('url');
+                            await this.handleLoadAndPlay(interaction, url);
+                            break;
+                    }
+                } else if (interaction.isButton()) {
+                    await interaction.deferReply({ ephemeral: true });
+                    
+                    switch (interaction.customId) {
+                        case 'pause_music':
+                            if (this.player) {
+                                this.player.pause();
+                                await interaction.editReply('⏸️ Music paused');
+                            }
+                            break;
+                        case 'skip_music':
+                            this.playCurrentSong();
+                            await interaction.editReply('⏭️ Skipped to next song');
+                            break;
+                        case 'stop_music':
+                            await this.adminStop();
+                            await interaction.editReply('⏹️ Music stopped and disconnected');
+                            break;
+                        case 'show_queue':
+                            const queueList = this.musicQueue.slice(0, 10).map((song, i) => 
+                                `${i + 1}. ${song.title}`
+                            ).join('\n') || 'Queue is empty';
+                            await interaction.editReply(`📜 **Current Queue:**\n\`\`\`${queueList}\`\`\``);
+                            break;
+                    }
                 }
             } catch (error) {
                 console.error('❌ Command error:', error);
-                if (!interaction.replied) {
+                if (!interaction.replied && !interaction.deferred) {
                     await interaction.reply('❌ An error occurred while processing your command.');
                 }
             }
@@ -213,7 +238,54 @@ class EnhancedMusicBot {
                 const songs = await this.getPlaylistSongs(url);
                 this.musicQueue.push(...songs);
                 
-                await interaction.editReply(`✅ Added ${songs.length} songs to queue and started playing!`);
+                // Create beautiful embed with controls like FlaviBot
+                const embed = {
+                    color: 0x00ff00,
+                    title: "🎵 Now Playing",
+                    description: `**${this.currentSong?.title || 'Loading...'}**`,
+                    fields: [
+                        {
+                            name: "📋 Queue",
+                            value: `Added ${songs.length} songs to queue`,
+                            inline: true
+                        }
+                    ],
+                    footer: {
+                        text: "3AM VERIFIED Music Bot"
+                    }
+                };
+
+                const row = {
+                    type: 1,
+                    components: [
+                        {
+                            type: 2,
+                            style: 2,
+                            label: "⏸️ Pause",
+                            custom_id: "pause_music"
+                        },
+                        {
+                            type: 2,
+                            style: 2,
+                            label: "⏭️ Skip",
+                            custom_id: "skip_music"
+                        },
+                        {
+                            type: 2,
+                            style: 4,
+                            label: "⏹️ Stop",
+                            custom_id: "stop_music"
+                        },
+                        {
+                            type: 2,
+                            style: 1,
+                            label: "📜 Queue",
+                            custom_id: "show_queue"
+                        }
+                    ]
+                };
+
+                await interaction.editReply({ embeds: [embed], components: [row] });
             } else {
                 const videoId = this.extractVideoId(url);
                 if (!videoId) {
