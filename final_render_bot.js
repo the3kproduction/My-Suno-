@@ -202,35 +202,15 @@ class EnhancedMusicBot {
         await interaction.deferReply();
         
         try {
-            // Find voice channel to join
-            let voiceChannel = interaction.member?.voice?.channel;
-            
+            // Always use your specific MUSIC VIDEO channel
+            const guild = interaction.guild;
+            const voiceChannel = guild.channels.cache.get('1375476962356887614');
+                
             if (!voiceChannel) {
-                // List all voice channels for debugging
-                const guild = interaction.guild;
-                const allVoiceChannels = guild.channels.cache.filter(channel => channel.type === 2);
-                console.log('🔍 Available voice channels:', allVoiceChannels.map(c => c.name).join(', '));
-                
-                // Use your specific MUSIC VIDEO channel ID
-                voiceChannel = guild.channels.cache.get('1375476962356887614') || 
-                    guild.channels.cache.find(channel => 
-                        channel.type === 2 && 
-                        channel.name.toUpperCase() === 'MUSIC VIDEO'
-                    );
-                
-                if (voiceChannel) {
-                    console.log(`🎵 Auto-joining ${voiceChannel.name}`);
-                    await interaction.editReply(`🎵 Auto-joining **${voiceChannel.name}** voice channel...`);
-                } else {
-                    const channelList = allVoiceChannels.map(c => c.name).join(', ');
-                    await interaction.editReply(`❌ No suitable voice channel found! Available channels: ${channelList || 'None'}`);
-                    return;
-                }
-            } else {
-                await interaction.editReply(`🎵 Joining your voice channel: **${voiceChannel.name}**...`);
+                await interaction.editReply('❌ Could not find your MUSIC VIDEO channel');
+                return;
             }
 
-            // Join the voice channel
             console.log(`🎵 Attempting to join voice channel: ${voiceChannel.name}`);
             await this.joinVoiceChannelById(voiceChannel.id, interaction.guild);
             
