@@ -632,28 +632,29 @@ class EnhancedMusicBot {
         });
 
         // Post Suno song endpoint
-        this.app.post('/post-suno', async (req, res) => {
+        this.app.post('/auto-post-suno', async (req, res) => {
             try {
-                const { sunoUrl, songTitle, songDescription } = req.body;
+                const { sunoUrl } = req.body;
                 
                 if (!sunoUrl) {
                     return res.json({ success: false, error: 'Suno URL is required' });
                 }
 
-                if (!songTitle) {
-                    return res.json({ success: false, error: 'Song title is required' });
-                }
-
-                console.log(`🎵 Posting Suno song: ${songTitle} - ${sunoUrl}`);
-                await this.postSunoToDiscord(songTitle, sunoUrl, songDescription || 'Manually posted via dashboard');
+                console.log(`🤖 Auto-posting Suno URL to bot-helper: ${sunoUrl}`);
+                
+                // Post URL to the hidden bot-helper channel
+                // This triggers our smart monitoring system
+                const botHelperChannel = await this.client.channels.fetch(this.botHelperChannelId);
+                await botHelperChannel.send(sunoUrl);
                 
                 res.json({ 
                     success: true, 
-                    message: `Song "${songTitle}" posted to Discord successfully!` 
+                    message: 'Song auto-posted with smart detection!',
+                    url: sunoUrl
                 });
             } catch (error) {
-                console.error('❌ Post Suno error:', error);
-                res.json({ success: false, error: 'Failed to post song to Discord' });
+                console.error('❌ Auto-post Suno error:', error);
+                res.json({ success: false, error: 'Failed to auto-post song' });
             }
         });
 
