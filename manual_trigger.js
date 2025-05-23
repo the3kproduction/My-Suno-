@@ -1,5 +1,6 @@
 const express = require('express');
 const { Client, GatewayIntentBits, SlashCommandBuilder, REST, Routes } = require('discord.js');
+const axios = require('axios');
 const config = require('./config/config');
 const DiscordService = require('./services/discordService');
 const Storage = require('./utils/storage');
@@ -137,6 +138,45 @@ class ManualSunoBot {
                     </body>
                 </html>
             `);
+        });
+
+        // Handle automatic song posting with URL scraping
+        this.app.post('/post-song-auto', async (req, res) => {
+            try {
+                const { url } = req.body;
+                
+                if (!url) {
+                    return res.send(this.errorPage('Please provide a Suno URL'));
+                }
+
+                // Scrape title from Suno URL
+                const title = await this.scrapeSongTitle(url);
+                if (!title) {
+                    return res.send(this.errorPage('Could not extract song title from URL. Please use manual posting.'));
+                }
+
+                const songId = this.generateSongId(url);
+                
+                if (await this.storage.isAlreadyPosted(songId)) {
+                    return res.send(this.errorPage('This song has already been posted to Discord'));
+                }
+
+                const song = {
+                    id: songId,
+                    title: title,
+                    url: url,
+                    created_at: new Date().toISOString()
+                };
+
+                await this.discordService.postSong(config.discord.channelId, song);
+                await this.storage.addPostedSong(song);
+
+                res.send(this.successPage(title, `🎵 "${title}" posted to Discord successfully!`, 'success'));
+                
+            } catch (error) {
+                logger.error('Error posting song automatically:', error);
+                res.send(this.errorPage('Failed to post song. Please try again.'));
+            }
         });
 
         // Handle song posting
