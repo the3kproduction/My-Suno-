@@ -2,6 +2,7 @@ modules = ["nodejs-20", "python-3.11", "python3", "postgresql-16"]
 
 [nix]
 channel = "stable-24_05"
+packages = ["ffmpeg"]
 
 [workflows]
 runButton = "Project"
@@ -34,6 +35,10 @@ args = "Enhanced AI Suno Bot"
 [[workflows.workflow.tasks]]
 task = "workflow.run"
 args = "Ultimate Music Bot"
+
+[[workflows.workflow.tasks]]
+task = "workflow.run"
+args = "Enhanced Music Bot"
 
 [[workflows.workflow]]
 name = "discord-bot-test"
@@ -86,6 +91,15 @@ author = "agent"
 [[workflows.workflow.tasks]]
 task = "shell.exec"
 args = "node ultimate_music_bot.js"
+waitForPort = 5000
+
+[[workflows.workflow]]
+name = "Enhanced Music Bot"
+author = "agent"
+
+[[workflows.workflow.tasks]]
+task = "shell.exec"
+args = "node enhanced_music_bot.js"
 waitForPort = 5000
 
 [deployment]
