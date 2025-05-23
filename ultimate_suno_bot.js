@@ -1,6 +1,7 @@
 const express = require('express');
 const { Client, GatewayIntentBits } = require('discord.js');
 const axios = require('axios');
+const puppeteer = require('puppeteer');
 const path = require('path');
 const config = require('./config/config');
 const DiscordService = require('./services/discordService');
@@ -215,11 +216,29 @@ class UltimateSunoBot {
 
     async extractSongData(url) {
         try {
+            // Try screenshot-based extraction first (more reliable for Suno)
+            try {
+                logger.info('Attempting screenshot-based extraction...');
+                const screenshotData = await this.extractFromScreenshot(url);
+                if (screenshotData && screenshotData.title) {
+                    logger.info(`Screenshot extraction successful: ${screenshotData.title}`);
+                    return screenshotData;
+                }
+            } catch (screenshotError) {
+                logger.warn('Screenshot extraction failed, falling back to HTML scraping:', screenshotError.message);
+            }
+
+            // Fallback to traditional web scraping
             const response = await axios.get(url, {
                 headers: {
-                    'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36'
+                    'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/121.0.0.0 Safari/537.36',
+                    'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,*/*;q=0.8',
+                    'Accept-Language': 'en-US,en;q=0.9',
+                    'Accept-Encoding': 'gzip, deflate, br'
                 },
-                timeout: 15000
+                timeout: 15000,
+                maxRedirects: 10,
+                followRedirect: true
             });
             
             const html = response.data;
@@ -235,20 +254,33 @@ class UltimateSunoBot {
                 metadata: {}
             };
 
-            // Extract title
+            // Extract title with enhanced patterns
             const titlePatterns = [
-                /<title[^>]*>([^<]+)/i,
                 /<meta[^>]*property="og:title"[^>]*content="([^"]+)"/i,
-                /<h1[^>]*class="[^"]*title[^"]*"[^>]*>([^<]+)<\/h1>/i
+                /<meta[^>]*name="twitter:title"[^>]*content="([^"]+)"/i,
+                /<title[^>]*>([^<]+)/i,
+                /<h1[^>]*class="[^"]*title[^"]*"[^>]*>([^<]+)<\/h1>/i,
+                /"name"\s*:\s*"([^"]+)"/i
             ];
             
             for (const pattern of titlePatterns) {
                 const match = html.match(pattern);
                 if (match && match[1]) {
-                    songData.title = match[1].trim()
+                    let title = match[1].trim()
                         .replace(/\s*\|\s*Suno.*$/i, '')
-                        .replace(/\s*-\s*Suno.*$/i, '');
-                    break;
+                        .replace(/\s*-\s*Suno.*$/i, '')
+                        .replace(/&quot;/g, '"')
+                        .replace(/&#39;/g, "'")
+                        .replace(/&amp;/g, '&');
+                    
+                    // Skip generic titles
+                    if (title && title.length > 2 && 
+                        !title.toLowerCase().includes('loading') &&
+                        !title.toLowerCase().includes('error') &&
+                        title !== 'Suno') {
+                        songData.title = title;
+                        break;
+                    }
                 }
             }
 
@@ -279,6 +311,97 @@ class UltimateSunoBot {
                 title: '',
                 metadata: {}
             };
+        }
+    }
+
+    async extractFromScreenshot(url) {
+        // Visual extraction using screenshot + AI vision
+        try {
+            logger.info('Taking screenshot of Suno page...');
+            
+            const browser = await puppeteer.launch({
+                headless: true,
+                args: [
+                    '--no-sandbox', 
+                    '--disable-setuid-sandbox',
+                    '--disable-dev-shm-usage',
+                    '--disable-accelerated-2d-canvas',
+                    '--no-first-run',
+                    '--no-zygote',
+                    '--disable-gpu'
+                ]
+            });
+            
+            const page = await browser.newPage();
+            await page.setViewport({ width: 1280, height: 720 });
+            
+            // Navigate and wait for content
+            await page.goto(url, { 
+                waitUntil: 'networkidle2', 
+                timeout: 30000 
+            });
+            
+            // Wait a bit more for dynamic content
+            await page.waitForTimeout(3000);
+            
+            // Take screenshot
+            const screenshot = await page.screenshot({ 
+                encoding: 'base64',
+                fullPage: false
+            });
+            
+            await browser.close();
+            logger.info('Screenshot captured, analyzing with AI vision...');
+            
+            // Use OpenAI Vision to extract song data
+            const response = await axios.post('https://api.openai.com/v1/chat/completions', {
+                model: 'gpt-4o',
+                messages: [{
+                    role: 'user',
+                    content: [
+                        {
+                            type: 'text',
+                            text: 'Look at this Suno song page screenshot and extract the song title. The title should be clearly visible on the page. Return ONLY JSON format: {"title": "Song Title Here"}. If you cannot find a clear song title, return {"title": ""}.'
+                        },
+                        {
+                            type: 'image_url',
+                            image_url: {
+                                url: `data:image/png;base64,${screenshot}`
+                            }
+                        }
+                    ]
+                }],
+                response_format: { type: "json_object" },
+                max_tokens: 150
+            }, {
+                headers: {
+                    'Authorization': `Bearer ${process.env.OPENAI_API_KEY}`,
+                    'Content-Type': 'application/json'
+                }
+            });
+
+            const result = JSON.parse(response.data.choices[0].message.content);
+            
+            if (result.title && result.title.trim()) {
+                logger.info(`AI Vision extracted title: ${result.title}`);
+                return {
+                    sunoId: this.generateSongId(url),
+                    url: url,
+                    title: result.title.trim(),
+                    artist: '',
+                    genre: '',
+                    mood: '',
+                    duration: 0,
+                    tags: [],
+                    metadata: { extractionMethod: 'ai-vision' }
+                };
+            }
+            
+            return null;
+            
+        } catch (error) {
+            logger.error('Visual extraction failed:', error);
+            throw error;
         }
     }
 
