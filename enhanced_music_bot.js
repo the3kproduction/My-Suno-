@@ -875,8 +875,11 @@ class EnhancedMusicBot {
     }
 
     renderDashboard() {
-        const musicPlaylist = this.currentPlaylists.music;
-        const lyricPlaylist = this.currentPlaylists.lyric;
+        const musicPlaylist = this.currentPlaylists.music || { songs: [], currentIndex: 0 };
+        const lyricPlaylist = this.currentPlaylists.lyric || { songs: [], currentIndex: 0 };
+        
+        const currentMusicSong = musicPlaylist.songs.length > 0 ? musicPlaylist.songs[musicPlaylist.currentIndex] : null;
+        const currentLyricSong = lyricPlaylist.songs.length > 0 ? lyricPlaylist.songs[lyricPlaylist.currentIndex] : null;
         
         return `
 <!DOCTYPE html>
