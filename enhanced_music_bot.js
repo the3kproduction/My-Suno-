@@ -203,6 +203,28 @@ class EnhancedMusicBot {
                         ]
                     }
                 ]
+            },
+            {
+                name: 'load',
+                description: 'Load YouTube playlist or single video',
+                options: [
+                    {
+                        name: 'url',
+                        description: 'YouTube playlist or video URL',
+                        type: 3,
+                        required: true
+                    },
+                    {
+                        name: 'channel',
+                        description: 'Choose music or lyric channel',
+                        type: 3,
+                        required: true,
+                        choices: [
+                            { name: 'Music Videos', value: 'music' },
+                            { name: 'Lyric Videos', value: 'lyric' }
+                        ]
+                    }
+                ]
             }
         ];
 
@@ -271,6 +293,34 @@ class EnhancedMusicBot {
                             `${index === queue.currentIndex ? '▶️' : `${index + 1}.`} ${song.title}`
                         ).join('\n');
                         await interaction.reply(`🎵 **${channelType} Queue:**\n\`\`\`${queueList}\`\`\``);
+                    }
+                    break;
+
+                case 'load':
+                    const url = options.getString('url');
+                    await interaction.deferReply();
+                    
+                    try {
+                        let songs = [];
+                        if (this.isPlaylistUrl(url)) {
+                            songs = await this.getPlaylistSongs(url);
+                        } else if (this.isYouTubeVideoUrl(url)) {
+                            songs = await this.getSingleVideoData(url);
+                        } else {
+                            await interaction.editReply('❌ Invalid YouTube URL');
+                            return;
+                        }
+
+                        this.currentPlaylists[channelType].songs = songs;
+                        this.currentPlaylists[channelType].currentIndex = 0;
+
+                        const message = songs.length === 1 ? 
+                            `✅ Loaded song: **${songs[0].title}** in ${channelType} channel` : 
+                            `✅ Loaded **${songs.length} songs** in ${channelType} channel`;
+
+                        await interaction.editReply(message);
+                    } catch (error) {
+                        await interaction.editReply(`❌ Failed to load content: ${error.message}`);
                     }
                     break;
             }
