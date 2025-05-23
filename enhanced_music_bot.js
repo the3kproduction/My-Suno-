@@ -683,7 +683,7 @@ class EnhancedMusicBot {
         try {
             const stream = ytdl(currentSong.url, { 
                 filter: 'audioonly',
-                quality: 'highestaudio',
+                quality: 'lowestaudio', // Use lower quality for better reliability
                 requestOptions: {
                     headers: {
                         'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36'
@@ -692,7 +692,13 @@ class EnhancedMusicBot {
             });
             
             const resource = createAudioResource(stream, {
-                inputType: 'webm/opus'
+                inputType: StreamType.Arbitrary, // Let Discord auto-detect format
+                inlineVolume: true
+            });
+            
+            // Auto-skip when song ends
+            resource.playStream.on('end', () => {
+                setTimeout(() => this.skipSong(channelType), 1000);
             });
             
             playlist.player.play(resource);
@@ -700,7 +706,8 @@ class EnhancedMusicBot {
             logger.info(`🎵 Playing: ${currentSong.title} in ${channelType} channel`);
         } catch (error) {
             logger.error('Failed to play song', error);
-            throw error;
+            // Auto-skip to next song if this one fails
+            setTimeout(() => this.skipSong(channelType), 2000);
         }
     }
 
