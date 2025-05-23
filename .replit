@@ -46,7 +46,7 @@ args = "Final Music Bot"
 
 [[workflows.workflow.tasks]]
 task = "workflow.run"
-args = "Enhanced YouTube Bot"
+args = "Music Video Bot"
 
 [[workflows.workflow]]
 name = "discord-bot-test"
@@ -120,7 +120,7 @@ args = "node final_render_bot.js"
 waitForPort = 5000
 
 [[workflows.workflow]]
-name = "Enhanced YouTube Bot"
+name = "Music Video Bot"
 author = "agent"
 
 [[workflows.workflow.tasks]]

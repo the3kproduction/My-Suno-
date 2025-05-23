@@ -181,21 +181,30 @@ class EnhancedMusicBot {
             let voiceChannel = interaction.member?.voice?.channel;
             
             if (!voiceChannel) {
-                // Auto-find music channels
+                // List all voice channels for debugging
                 const guild = interaction.guild;
-                const musicChannels = guild.channels.cache.filter(
-                    channel => channel.type === 2 && // Voice channel type
-                    (channel.name.toLowerCase().includes('music') || 
+                const allVoiceChannels = guild.channels.cache.filter(channel => channel.type === 2);
+                console.log('🔍 Available voice channels:', allVoiceChannels.map(c => c.name).join(', '));
+                
+                // Look for your Music Video channel specifically
+                voiceChannel = guild.channels.cache.find(channel => 
+                    channel.type === 2 && 
+                    (channel.name.toLowerCase() === 'music video' ||
+                     channel.name.toLowerCase().includes('music') || 
+                     channel.name.toLowerCase().includes('video') ||
                      channel.name.toLowerCase().includes('general'))
                 );
                 
-                if (musicChannels.size > 0) {
-                    voiceChannel = musicChannels.first();
+                if (voiceChannel) {
                     console.log(`🎵 Auto-joining ${voiceChannel.name}`);
+                    await interaction.editReply(`🎵 Auto-joining **${voiceChannel.name}** voice channel...`);
                 } else {
-                    await interaction.editReply('❌ Please join a voice channel or create a "Music" voice channel!');
+                    const channelList = allVoiceChannels.map(c => c.name).join(', ');
+                    await interaction.editReply(`❌ No suitable voice channel found! Available channels: ${channelList || 'None'}`);
                     return;
                 }
+            } else {
+                await interaction.editReply(`🎵 Joining your voice channel: **${voiceChannel.name}**...`);
             }
 
             // Join the voice channel
