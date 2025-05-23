@@ -25,6 +25,32 @@ class ManualSunoBot {
         this.app.use(express.urlencoded({ extended: true }));
         this.app.use(express.json());
         this.app.use(express.static('public'));
+        
+        // Add AI endpoint
+        this.app.post('/api/ai-generate', async (req, res) => {
+            if (!process.env.OPENAI_API_KEY) {
+                return res.json({ error: 'OpenAI not configured' });
+            }
+            
+            try {
+                const { title } = req.body;
+                const response = await axios.post('https://api.openai.com/v1/chat/completions', {
+                    model: 'gpt-4o',
+                    messages: [{ role: 'user', content: `Generate a catchy description and 5 hashtags for this song: "${title}". Return as JSON with "description" and "hashtags" array.` }],
+                    response_format: { type: "json_object" },
+                    max_tokens: 200
+                }, {
+                    headers: {
+                        'Authorization': `Bearer ${process.env.OPENAI_API_KEY}`,
+                        'Content-Type': 'application/json'
+                    }
+                });
+                
+                res.json(JSON.parse(response.data.choices[0].message.content));
+            } catch (error) {
+                res.json({ error: 'AI generation failed' });
+            }
+        });
     }
 
     async start() {
