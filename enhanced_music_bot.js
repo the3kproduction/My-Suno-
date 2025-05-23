@@ -726,16 +726,20 @@ class EnhancedMusicBot {
             // Create audio resource from stream
             const resource = createAudioResource(stream);
             
-            // Auto-skip when song ends for 24/7 continuous play
-            playlist.player.on(AudioPlayerStatus.Idle, () => {
+            // Remove old listeners to prevent memory leaks
+            playlist.player.removeAllListeners(AudioPlayerStatus.Idle);
+            playlist.player.removeAllListeners('error');
+
+            // Auto-skip when song ends - single listener only
+            playlist.player.once(AudioPlayerStatus.Idle, () => {
                 logger.info(`🎵 Song ended in ${channelType}, auto-skipping to next...`);
-                setTimeout(() => this.skipSong(channelType), 1000);
+                setTimeout(() => this.skipSong(channelType), 2000);
             });
 
-            // Auto-restart on errors for 24/7 reliability
-            playlist.player.on('error', (error) => {
+            // Error handling - single listener only
+            playlist.player.once('error', (error) => {
                 logger.error(`Audio player error in ${channelType}:`, error);
-                setTimeout(() => this.skipSong(channelType), 2000);
+                setTimeout(() => this.skipSong(channelType), 3000);
             });
             
             playlist.player.play(resource);
