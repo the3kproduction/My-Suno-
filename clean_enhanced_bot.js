@@ -1200,8 +1200,15 @@ class EnhancedMusicBot {
             try {
                 console.log('🔍 Testing monitoring system...');
                 
-                // Test message to Discord
-                await this.postSunoToDiscord('Test Song', 'https://suno.com/song/test', 'Monitoring system test - this is working correctly!');
+                // Test message to Discord with better formatting
+                const testData = {
+                    title: 'Monitoring System Test',
+                    url: 'https://suno.com/song/test',
+                    imageUrl: 'https://images.unsplash.com/photo-1493225457124-a3eb161ffa5f?w=400',
+                    description: 'System test - monitoring is working perfectly! 🎵'
+                };
+                
+                await this.postTestToDiscord(testData);
                 
                 res.json({ 
                     success: true, 
@@ -1461,6 +1468,29 @@ class EnhancedMusicBot {
         } catch (error) {
             console.error('❌ Error extracting Suno data:', error);
             return { title: 'Unknown Song', url, imageUrl: null, description: '' };
+        }
+    }
+
+    async postTestToDiscord(testData) {
+        try {
+            const channel = await this.client.channels.fetch(this.sunoChannelId);
+            
+            const embed = new EmbedBuilder()
+                .setAuthor({ name: 'Suno', iconURL: 'https://images.crunchbase.com/image/upload/c_lpad,h_170,w_170,f_auto,b_white,q_auto:eco,dpr_1/erkxwhl1gd48xfhe2yld' })
+                .setTitle(testData.title)
+                .setURL(testData.url)
+                .setDescription(testData.description)
+                .setImage(testData.imageUrl)
+                .setColor('#4F46E5')
+                .setTimestamp();
+
+            const message = `🎵 New Suno song: **${testData.title}** — ${testData.url}`;
+            
+            await channel.send({ content: message, embeds: [embed] });
+            console.log(`✅ Posted test to Discord: ${testData.title}`);
+        } catch (error) {
+            console.error('❌ Discord test posting error:', error);
+            throw error;
         }
     }
 
