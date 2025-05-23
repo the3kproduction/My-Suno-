@@ -42,6 +42,87 @@ class EnhancedMusicBot {
         };
 
         this.sunoChannelId = process.env.DISCORD_CHANNEL_ID;
+        
+        // Multiple Suno profiles to monitor
+        this.sunoProfiles = [
+            {
+                id: process.env.SUNO_PROFILE_ID,
+                name: 'Main Profile',
+                lastChecked: new Date()
+            }
+            // Add more profiles here as needed
+        ];
+        
+        // Track posted songs to avoid duplicates
+        this.postedSongs = new Set();
+        
+        // Start monitoring all profiles
+        this.startProfileMonitoring();
+    }
+
+    startProfileMonitoring() {
+        // Check all profiles every 5 minutes
+        setInterval(() => {
+            this.checkAllProfilesForNewSongs();
+        }, 5 * 60 * 1000); // 5 minutes
+        
+        // Initial check after 10 seconds
+        setTimeout(() => {
+            this.checkAllProfilesForNewSongs();
+        }, 10000);
+    }
+
+    async checkAllProfilesForNewSongs() {
+        console.log(`🔍 Checking ${this.sunoProfiles.length} Suno profiles for new songs...`);
+        
+        for (const profile of this.sunoProfiles) {
+            try {
+                await this.checkProfileForNewSongs(profile);
+            } catch (error) {
+                console.error(`❌ Error checking profile ${profile.name}:`, error);
+            }
+        }
+    }
+
+    async checkProfileForNewSongs(profile) {
+        try {
+            // Get latest songs from this profile
+            const songs = await this.getSunoProfileSongs(profile.id);
+            
+            for (const song of songs) {
+                // Check if we've already posted this song
+                if (!this.postedSongs.has(song.id)) {
+                    console.log(`🎵 New song found from ${profile.name}: ${song.title}`);
+                    
+                    // Post to Discord
+                    await this.postSunoToDiscord(song.title, song.url, `New from ${profile.name}`);
+                    
+                    // Mark as posted
+                    this.postedSongs.add(song.id);
+                }
+            }
+            
+            profile.lastChecked = new Date();
+        } catch (error) {
+            console.error(`❌ Error checking profile ${profile.name}:`, error);
+        }
+    }
+
+    async getSunoProfileSongs(profileId) {
+        try {
+            // This would connect to Suno's API to get latest songs
+            // For now, returning empty array - we'll need the actual Suno API endpoint
+            const response = await axios.get(`https://studio-api.suno.ai/api/feed/?ids=${profileId}`, {
+                headers: {
+                    'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36'
+                }
+            });
+            
+            return response.data || [];
+        } catch (error) {
+            console.error('❌ Error fetching Suno profile songs:', error);
+            return [];
+        }
     }
 
     async start() {
@@ -652,6 +733,30 @@ class EnhancedMusicBot {
             text-shadow: 0 2px 5px rgba(0,0,0,0.3);
         }
         
+        .profile-card {
+            background: rgba(255,255,255,0.1);
+            padding: 20px; border-radius: 12px;
+            border: 1px solid rgba(255,255,255,0.2);
+            transition: all 0.3s ease;
+        }
+        
+        .profile-card:hover {
+            background: rgba(255,255,255,0.2);
+            transform: translateY(-2px);
+            box-shadow: 0 8px 16px rgba(0,0,0,0.1);
+        }
+        
+        .profile-card h4 {
+            color: #ff6b6b;
+            font-size: 1.3rem;
+            margin-bottom: 10px;
+        }
+        
+        .profile-card p {
+            margin-bottom: 5px;
+            font-size: 0.9rem;
+        }
+        
         .status-text {
             padding: 12px; 
             border-radius: 8px; 
@@ -737,6 +842,32 @@ class EnhancedMusicBot {
             <div id="youtubeStatus" style="margin-top: 15px;"></div>
         </div>
 
+        <!-- Suno Profile Monitoring -->
+        <div class="section">
+            <h2>👥 Suno Profile Monitoring</h2>
+            <div class="grid">
+                ${this.sunoProfiles.map(profile => `
+                    <div class="profile-card">
+                        <h4>${profile.name}</h4>
+                        <p><strong>Profile ID:</strong> ${profile.id}</p>
+                        <p><strong>Last Checked:</strong> ${profile.lastChecked.toLocaleTimeString()}</p>
+                        <p><strong>Status:</strong> <span style="color: #4ecdc4;">✅ Active</span></p>
+                    </div>
+                `).join('')}
+            </div>
+            <form id="addProfileForm">
+                <div class="form-group">
+                    <label>Add New Suno Profile</label>
+                    <input type="text" id="profileId" placeholder="Suno Profile ID" required>
+                </div>
+                <div class="form-group">
+                    <input type="text" id="profileName" placeholder="Profile Name" required>
+                </div>
+                <button type="submit" class="btn">➕ Add Profile</button>
+            </form>
+            <div id="profileStatus" style="margin-top: 15px;"></div>
+        </div>
+
         <!-- Suno Song Posting -->
         <div class="section">
             <h2>🎵 Post Suno Song</h2>
@@ -779,6 +910,35 @@ class EnhancedMusicBot {
     </div>
 
     <script>
+        // Add profile form submission
+        document.getElementById('addProfileForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const status = document.getElementById('profileStatus');
+            
+            try {
+                const response = await fetch('/add-profile', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        profileId: document.getElementById('profileId').value,
+                        profileName: document.getElementById('profileName').value
+                    })
+                });
+                
+                const result = await response.json();
+                
+                if (result.success) {
+                    status.innerHTML = '<p style="color: #4ecdc4;">✅ ' + result.message + '</p>';
+                    document.getElementById('addProfileForm').reset();
+                    setTimeout(() => location.reload(), 2000);
+                } else {
+                    status.innerHTML = '<p style="color: #ff6b6b;">❌ ' + result.error + '</p>';
+                }
+            } catch (error) {
+                status.innerHTML = '<p style="color: #ff6b6b;">❌ Failed to add profile</p>';
+            }
+        });
+
         // YouTube form submission
         document.getElementById('youtubeForm').addEventListener('submit', async (e) => {
             e.preventDefault();
@@ -890,6 +1050,40 @@ class EnhancedMusicBot {
             } catch (error) {
                 console.error('❌ YouTube loading error:', error);
                 res.json({ success: false, error: 'Failed to load YouTube content. Make sure the URL is valid.' });
+            }
+        });
+
+        // Add Suno profile endpoint
+        this.app.post('/add-profile', async (req, res) => {
+            try {
+                const { profileId, profileName } = req.body;
+                
+                if (!profileId || !profileName) {
+                    return res.json({ success: false, error: 'Profile ID and name are required' });
+                }
+
+                // Check if profile already exists
+                const exists = this.sunoProfiles.find(p => p.id === profileId);
+                if (exists) {
+                    return res.json({ success: false, error: 'Profile already being monitored' });
+                }
+
+                // Add new profile
+                this.sunoProfiles.push({
+                    id: profileId,
+                    name: profileName,
+                    lastChecked: new Date()
+                });
+
+                console.log(`✅ Added new Suno profile: ${profileName} (${profileId})`);
+                
+                res.json({ 
+                    success: true, 
+                    message: `Added profile: ${profileName}` 
+                });
+            } catch (error) {
+                console.error('❌ Add profile error:', error);
+                res.json({ success: false, error: 'Failed to add profile' });
             }
         });
 
