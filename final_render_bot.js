@@ -512,18 +512,22 @@ class EnhancedMusicBot {
         // Post Suno song endpoint
         this.app.post('/post-suno', async (req, res) => {
             try {
-                const { sunoUrl } = req.body;
+                const { sunoUrl, songTitle, songDescription } = req.body;
                 
                 if (!sunoUrl) {
                     return res.json({ success: false, error: 'Suno URL is required' });
                 }
 
-                console.log(`🎵 Posting Suno song: ${sunoUrl}`);
-                await this.postSunoToDiscord('Manual Post', sunoUrl, 'Manually posted via dashboard');
+                if (!songTitle) {
+                    return res.json({ success: false, error: 'Song title is required' });
+                }
+
+                console.log(`🎵 Posting Suno song: ${songTitle} - ${sunoUrl}`);
+                await this.postSunoToDiscord(songTitle, sunoUrl, songDescription || 'Manually posted via dashboard');
                 
                 res.json({ 
                     success: true, 
-                    message: 'Song posted to Discord successfully!' 
+                    message: `Song "${songTitle}" posted to Discord successfully!` 
                 });
             } catch (error) {
                 console.error('❌ Post Suno error:', error);
@@ -755,8 +759,12 @@ class EnhancedMusicBot {
         try {
             const channel = await this.client.channels.fetch(this.sunoChannelId);
             
-            // Extract real song data from Suno
+            // Extract artwork data (still try to get images)
             const songData = await this.extractSunoData(url);
+            
+            // Use manual title instead of extracted title
+            const finalTitle = title || songData.title || 'Unknown Song';
+            const finalDescription = description || songData.description || 'Fresh beats from Suno AI!';
             
             // Create premium embed with beautiful formatting
             const embed = new EmbedBuilder()
@@ -764,7 +772,7 @@ class EnhancedMusicBot {
                     name: '🎵 Suno AI Music', 
                     iconURL: 'https://images.crunchbase.com/image/upload/c_lpad,h_170,w_170,f_auto,b_white,q_auto:eco,dpr_1/erkxwhl1gd48xfhe2yld' 
                 })
-                .setTitle(`🔥 ${songData.title}`)
+                .setTitle(`🔥 ${finalTitle}`)
                 .setURL(url)
                 .setColor(0x7C3AED) // Premium purple color
                 .setTimestamp()
@@ -773,11 +781,7 @@ class EnhancedMusicBot {
                 });
 
             // Add beautiful description
-            if (songData.description) {
-                embed.setDescription(`🎶 **${songData.description}**\n\n🔗 [Listen on Suno](${url})`);
-            } else {
-                embed.setDescription(`🎶 **Fresh beats from Suno AI!**\n\n🔗 [Listen on Suno](${url})`);
-            }
+            embed.setDescription(`🎶 **${finalDescription}**\n\n🔗 [Listen on Suno](${url})`);
 
             // Add large artwork - use default if no image found
             if (songData.imageUrl) {
@@ -794,7 +798,7 @@ class EnhancedMusicBot {
             embed.addFields([
                 { 
                     name: '🎤 Song Title', 
-                    value: songData.title, 
+                    value: finalTitle, 
                     inline: false 
                 },
                 { 
@@ -817,7 +821,7 @@ class EnhancedMusicBot {
             await message.react('💎');
             await message.react('🎯');
             
-            console.log(`✅ Posted premium Suno song to Discord: ${songData.title}`);
+            console.log(`✅ Posted premium Suno song to Discord: ${finalTitle}`);
         } catch (error) {
             console.error('❌ Discord posting error:', error);
             throw error;
@@ -1316,8 +1320,16 @@ class EnhancedMusicBot {
                 <h2>🎵 Post Suno Song</h2>
                 <form id="sunoForm">
                     <div class="form-group">
+                        <label>Song Title</label>
+                        <input type="text" id="songTitle" placeholder="Enter the song title..." required>
+                    </div>
+                    <div class="form-group">
                         <label>Suno Song URL</label>
                         <input type="text" id="sunoUrl" placeholder="https://suno.com/song/..." required>
+                    </div>
+                    <div class="form-group">
+                        <label>Description (Optional)</label>
+                        <textarea id="songDescription" placeholder="Add a description..." rows="3"></textarea>
                     </div>
                     <button type="submit" class="btn">🎵 Post to Discord</button>
                 </form>
@@ -1482,9 +1494,15 @@ class EnhancedMusicBot {
                         
                         try {
                             const sunoUrl = urlInput.value.trim();
+                            const songTitle = document.getElementById('songTitle').value.trim();
+                            const songDescription = document.getElementById('songDescription').value.trim();
                             
                             if (!sunoUrl) {
                                 throw new Error('Please enter a Suno URL');
+                            }
+                            
+                            if (!songTitle) {
+                                throw new Error('Please enter a song title');
                             }
                             
                             console.log('Posting Suno URL:', sunoUrl);
@@ -1496,7 +1514,9 @@ class EnhancedMusicBot {
                                     'Accept': 'application/json'
                                 },
                                 body: JSON.stringify({
-                                    sunoUrl: sunoUrl
+                                    sunoUrl: sunoUrl,
+                                    songTitle: songTitle,
+                                    songDescription: songDescription
                                 })
                             });
                             
