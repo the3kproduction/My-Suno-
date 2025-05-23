@@ -195,8 +195,8 @@ class EnhancedMusicBot {
                 return;
             }
             await rest.put(
-              Routes.applicationCommands(this.client.application.id),
-              { body: commands }
+                Routes.applicationCommands(this.client.application.id),
+                { body: commands }
             );
 
 
@@ -1141,8 +1141,4 @@ class EnhancedMusicBot {
 
 // Start the bot
 const bot = new EnhancedMusicBot();
-<<<<<<< HEAD
 bot.start().catch(console.error);
-=======
-bot.start().catch(console.error);
->>>>>>> 419805a (Transform bot into enhanced music experience with new features)
