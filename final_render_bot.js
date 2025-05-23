@@ -376,9 +376,16 @@ class EnhancedMusicBot {
                 });
             }
             
-            const stream = audioSource;
+            const resource = createAudioResource(audioSource, {
+                inputType: StreamType.Arbitrary,
+                inlineVolume: true
+            });
             
-            const resource = createAudioResource(stream);
+            // Set volume to maximum to ensure audibility
+            if (resource.volume) {
+                resource.volume.setVolume(1.0);
+            }
+            
             this.player.play(resource);
             
             console.log('🎵 Audio resource created and playing');
