@@ -1,8 +1,9 @@
 {
   "name": "workspace",
   "version": "1.0.0",
-  "main": "index.js",
+  "main": "render_ready_bot.js",
   "scripts": {
+    "start": "node render_ready_bot.js",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "keywords": [],
@@ -10,11 +11,15 @@
   "license": "ISC",
   "description": "",
   "dependencies": {
+    "@discordjs/voice": "^0.18.0",
+    "@discordjs/opus": "^0.10.0",
     "axios": "^1.9.0",
     "discord.js": "^14.19.3",
     "dotenv": "^16.5.0",
     "express": "^5.1.0",
     "openai": "^4.103.0",
-    "puppeteer": "^24.9.0"
+    "opusscript": "^0.0.8",
+    "puppeteer": "^24.9.0",
+    "ytdl-core": "^4.11.5"
   }
 }
