@@ -1082,9 +1082,99 @@ class EnhancedMusicBot {
             color: #6b7280;
             margin-top: 4px;
         }
+
+        .video-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 20px;
+        }
+
+        .video-container {
+            background: #f9fafb;
+            border-radius: 12px;
+            padding: 16px;
+            border: 1px solid #e5e7eb;
+        }
+
+        .video-wrapper {
+            position: relative;
+            background: #000;
+            border-radius: 8px;
+            overflow: hidden;
+        }
+
+        .video-wrapper iframe {
+            width: 100%;
+            height: 200px;
+            border: none;
+        }
+
+        .no-video {
+            height: 200px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            text-align: center;
+        }
+
+        .no-video .placeholder {
+            font-size: 3rem;
+            margin-bottom: 12px;
+            opacity: 0.7;
+        }
+
+        .no-video .subtitle {
+            font-size: 0.9rem;
+            opacity: 0.8;
+            margin-top: 4px;
+        }
+
+        .video-controls {
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            background: linear-gradient(transparent, rgba(0,0,0,0.8));
+            padding: 12px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .btn-volume {
+            background: rgba(255,255,255,0.9);
+            color: #333;
+            border: none;
+            padding: 8px 16px;
+            border-radius: 6px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+
+        .btn-volume:hover {
+            background: white;
+            transform: scale(1.05);
+        }
+
+        .video-info {
+            color: white;
+            font-size: 0.9rem;
+            max-width: 200px;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            white-space: nowrap;
+        }
         
         @media (max-width: 768px) {
             .grid {
+                grid-template-columns: 1fr;
+            }
+
+            .video-grid {
                 grid-template-columns: 1fr;
             }
             
@@ -1138,6 +1228,68 @@ class EnhancedMusicBot {
             </form>
         </div>
         
+        <!-- Live Video Streams -->
+        <div class="card full-width">
+            <h2 style="margin-bottom: 20px; color: #374151;">📺 Live Video Streams</h2>
+            <div class="video-grid">
+                <!-- Music Videos Stream -->
+                <div class="video-container">
+                    <h3 style="color: #374151; margin-bottom: 12px;">🎬 Music Videos</h3>
+                    <div class="video-wrapper">
+                        ${currentMusicSong ? `
+                            <iframe 
+                                id="musicVideo"
+                                src="https://www.youtube.com/embed/${currentMusicSong.id}?autoplay=1&mute=1&controls=1&rel=0&modestbranding=1"
+                                frameborder="0" 
+                                allow="autoplay; encrypted-media; picture-in-picture"
+                                allowfullscreen>
+                            </iframe>
+                            <div class="video-controls">
+                                <button class="btn-volume" onclick="toggleMute('musicVideo')" id="musicMute">🔊 Unmute</button>
+                                <div class="video-info">
+                                    <strong>${currentMusicSong.title}</strong>
+                                </div>
+                            </div>
+                        ` : `
+                            <div class="no-video">
+                                <div class="placeholder">🎬</div>
+                                <p>No music video playing</p>
+                                <p class="subtitle">Load a playlist to see live video</p>
+                            </div>
+                        `}
+                    </div>
+                </div>
+
+                <!-- Lyric Videos Stream -->
+                <div class="video-container">
+                    <h3 style="color: #374151; margin-bottom: 12px;">🎤 Lyric Videos</h3>
+                    <div class="video-wrapper">
+                        ${currentLyricSong ? `
+                            <iframe 
+                                id="lyricVideo"
+                                src="https://www.youtube.com/embed/${currentLyricSong.id}?autoplay=1&mute=1&controls=1&rel=0&modestbranding=1"
+                                frameborder="0" 
+                                allow="autoplay; encrypted-media; picture-in-picture"
+                                allowfullscreen>
+                            </iframe>
+                            <div class="video-controls">
+                                <button class="btn-volume" onclick="toggleMute('lyricVideo')" id="lyricMute">🔊 Unmute</button>
+                                <div class="video-info">
+                                    <strong>${currentLyricSong.title}</strong>
+                                </div>
+                            </div>
+                        ` : `
+                            <div class="no-video">
+                                <div class="placeholder">🎤</div>
+                                <p>No lyric video playing</p>
+                                <p class="subtitle">Load a playlist to see live video</p>
+                            </div>
+                        `}
+                    </div>
+                </div>
+            </div>
+        </div>
+
         <!-- YouTube Content -->
         <div class="grid">
             <!-- Music Videos -->
@@ -1285,6 +1437,32 @@ class EnhancedMusicBot {
             }
             showLoading(false);
         });
+
+        // Video control functions
+        function toggleMute(videoId) {
+            const iframe = document.getElementById(videoId);
+            const button = document.getElementById(videoId === 'musicVideo' ? 'musicMute' : 'lyricMute');
+            
+            if (!iframe) return;
+            
+            const currentSrc = iframe.src;
+            if (currentSrc.includes('mute=1')) {
+                // Unmute the video
+                iframe.src = currentSrc.replace('mute=1', 'mute=0');
+                button.textContent = '🔇 Mute';
+                button.style.background = 'rgba(255,107,107,0.9)';
+            } else {
+                // Mute the video
+                iframe.src = currentSrc.replace('mute=0', 'mute=1');
+                button.textContent = '🔊 Unmute';
+                button.style.background = 'rgba(255,255,255,0.9)';
+            }
+        }
+
+        // Auto-refresh video streams to sync with current playing song
+        setInterval(() => {
+            window.location.reload();
+        }, 15000); // Refresh every 15 seconds to sync videos
         
         async function loadContent(channelType) {
             const inputId = channelType === 'music' ? 'musicContent' : 'lyricContent';
