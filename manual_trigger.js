@@ -1,10 +1,12 @@
 const express = require('express');
 const { Client, GatewayIntentBits, SlashCommandBuilder, REST, Routes } = require('discord.js');
 const axios = require('axios');
+const path = require('path');
 const config = require('./config/config');
 const DiscordService = require('./services/discordService');
-const Storage = require('./utils/storage');
+const DatabaseStorage = require('./server/storage');
 const logger = require('./utils/logger');
+const { initializeDatabase } = require('./server/db');
 
 class ManualSunoBot {
     constructor() {
@@ -16,16 +18,18 @@ class ManualSunoBot {
         });
         
         this.discordService = new DiscordService(this.client);
-        this.storage = new Storage();
+        this.storage = new DatabaseStorage();
         this.app = express();
         this.isReady = false;
         
         this.app.use(express.urlencoded({ extended: true }));
         this.app.use(express.json());
+        this.app.use(express.static('public'));
     }
 
     async start() {
         try {
+            await initializeDatabase();
             await this.storage.init();
             await this.client.login(config.discord.token);
             this.setupEventHandlers();
