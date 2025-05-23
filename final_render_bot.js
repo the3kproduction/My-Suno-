@@ -1626,7 +1626,7 @@ class EnhancedMusicBot {
                     const result = await response.json();
                     if (result.success) {
                         alert('✅ Profile approved and added to monitoring!');
-                        updateDashboard();
+                        window.location.reload();
                     } else {
                         alert('❌ Failed to approve profile: ' + result.error);
                     }
@@ -1646,7 +1646,7 @@ class EnhancedMusicBot {
                     const result = await response.json();
                     if (result.success) {
                         alert('❌ Profile request denied and removed');
-                        updateDashboard();
+                        window.location.reload();
                     } else {
                         alert('❌ Failed to deny profile: ' + result.error);
                     }
