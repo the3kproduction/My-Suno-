@@ -4,7 +4,12 @@ const { joinVoiceChannel, createAudioPlayer, createAudioResource, AudioPlayerSta
 const ytdl = require('ytdl-core');
 const express = require('express');
 const axios = require('axios');
+const puppeteer = require('puppeteer');
+const OpenAI = require('openai');
 require('dotenv').config();
+
+// Initialize OpenAI for screenshot analysis
+const openai = new OpenAI({ apiKey: process.env.OPENAI_API_KEY });
 
 class EnhancedMusicBot {
     constructor() {
