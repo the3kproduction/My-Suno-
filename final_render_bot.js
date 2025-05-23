@@ -1116,6 +1116,61 @@ class EnhancedMusicBot {
             window.addEventListener('scroll', requestTick);
             updateBackgroundOnScroll();
 
+            // YouTube form submission
+            document.getElementById('youtubeForm').addEventListener('submit', async (e) => {
+                e.preventDefault();
+                const status = document.getElementById('youtubeStatus');
+                
+                try {
+                    const response = await fetch('/load-youtube', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({
+                            url: document.getElementById('youtubeUrl').value
+                        })
+                    });
+                    
+                    const result = await response.json();
+                    
+                    if (result.success) {
+                        status.innerHTML = '<p style="color: #4ecdc4;">✅ ' + result.message + '</p>';
+                        document.getElementById('youtubeForm').reset();
+                        setTimeout(() => location.reload(), 2000);
+                    } else {
+                        status.innerHTML = '<p style="color: #ff6b6b;">❌ ' + result.error + '</p>';
+                    }
+                } catch (error) {
+                    status.innerHTML = '<p style="color: #ff6b6b;">❌ Failed to load content</p>';
+                }
+            });
+
+            // Suno form submission
+            document.getElementById('sunoForm').addEventListener('submit', async (e) => {
+                e.preventDefault();
+                const status = document.getElementById('sunoStatus');
+                
+                try {
+                    const response = await fetch('/post-suno', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({
+                            sunoUrl: document.getElementById('sunoUrl').value
+                        })
+                    });
+                    
+                    const result = await response.json();
+                    
+                    if (result.success) {
+                        status.innerHTML = '<p style="color: #4ecdc4;">✅ ' + result.message + '</p>';
+                        document.getElementById('sunoForm').reset();
+                    } else {
+                        status.innerHTML = '<p style="color: #ff6b6b;">❌ ' + result.error + '</p>';
+                    }
+                } catch (error) {
+                    status.innerHTML = '<p style="color: #ff6b6b;">❌ Failed to post song</p>';
+                }
+            });
+
             document.getElementById('requestProfileForm').addEventListener('submit', async (e) => {
                 e.preventDefault();
                 const status = document.getElementById('requestStatus');
