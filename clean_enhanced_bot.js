@@ -548,10 +548,57 @@ class EnhancedMusicBot {
         
         body {
             font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            background: linear-gradient(-45deg, #667eea, #764ba2, #ff6b6b, #4ecdc4);
-            background-size: 400% 400%;
-            animation: gentleGradient 25s ease infinite;
+            background: linear-gradient(-45deg, #667eea, #764ba2, #ff6b6b, #4ecdc4, #45b7d1, #96ceb4, #feca57, #ff9ff3);
+            background-size: 800% 800%;
+            animation: gentleGradient 30s ease infinite;
             min-height: 100vh; color: white; padding: 20px;
+            position: relative;
+            overflow-x: hidden;
+        }
+
+        /* Dynamic scroll-based background */
+        body::before {
+            content: '';
+            position: fixed;
+            top: 0; left: 0; width: 100%; height: 100%;
+            background: linear-gradient(45deg, 
+                rgba(102, 126, 234, 0.4) 0%,
+                rgba(118, 75, 162, 0.4) 25%,
+                rgba(255, 107, 107, 0.4) 50%,
+                rgba(78, 205, 196, 0.4) 75%,
+                rgba(150, 206, 180, 0.4) 100%
+            );
+            background-size: 600% 600%;
+            animation: scrollGradient 20s ease infinite;
+            z-index: -2;
+            opacity: 0.8;
+        }
+
+        /* Floating particles */
+        body::after {
+            content: '';
+            position: fixed;
+            top: 0; left: 0; width: 100%; height: 100%;
+            background-image: 
+                radial-gradient(circle at 25% 25%, rgba(255, 255, 255, 0.1) 0%, transparent 50%),
+                radial-gradient(circle at 75% 75%, rgba(78, 205, 196, 0.2) 0%, transparent 50%),
+                radial-gradient(circle at 50% 50%, rgba(255, 107, 107, 0.1) 0%, transparent 50%);
+            animation: floatParticles 15s ease-in-out infinite;
+            z-index: -1;
+        }
+
+        @keyframes scrollGradient {
+            0% { background-position: 0% 0%; transform: rotate(0deg); }
+            25% { background-position: 100% 100%; transform: rotate(90deg); }
+            50% { background-position: 0% 100%; transform: rotate(180deg); }
+            75% { background-position: 100% 0%; transform: rotate(270deg); }
+            100% { background-position: 0% 0%; transform: rotate(360deg); }
+        }
+
+        @keyframes floatParticles {
+            0%, 100% { transform: translateY(0px) translateX(0px) scale(1); opacity: 0.6; }
+            33% { transform: translateY(-30px) translateX(20px) scale(1.1); opacity: 0.8; }
+            66% { transform: translateY(30px) translateX(-20px) scale(0.9); opacity: 0.7; }
         }
         
         .container { max-width: 1200px; margin: 0 auto; }
@@ -888,7 +935,7 @@ class EnhancedMusicBot {
                         `).join('')}
                     </div>
                 </div>
-            ` : ''}
+            ` : ``}
             
             <!-- User Submission Form -->
             <div style="margin-top: 40px;">
@@ -1026,6 +1073,35 @@ class EnhancedMusicBot {
                 alert('❌ Rejection failed');
             }
         }
+
+        // Dynamic scroll-based background color changes
+        function updateBackgroundOnScroll() {
+            const scrollPercent = window.scrollY / (document.documentElement.scrollHeight - window.innerHeight);
+            const hue = Math.floor(scrollPercent * 360);
+            const saturation = 70 + (scrollPercent * 30);
+            const lightness = 20 + (scrollPercent * 15);
+            
+            document.body.style.filter = `hue-rotate(${hue}deg) saturate(${saturation}%) brightness(${lightness + 80}%)`;
+            
+            // Update particle opacity based on scroll
+            const particles = document.querySelector('body::after');
+            document.documentElement.style.setProperty('--particle-opacity', 0.3 + (scrollPercent * 0.4));
+        }
+
+        // Smooth scroll color transitions
+        let ticking = false;
+        function requestTick() {
+            if (!ticking) {
+                requestAnimationFrame(updateBackgroundOnScroll);
+                ticking = true;
+                setTimeout(() => { ticking = false; }, 16);
+            }
+        }
+
+        window.addEventListener('scroll', requestTick);
+
+        // Initialize background
+        updateBackgroundOnScroll();
 
         // Request profile form submission
         document.getElementById('requestProfileForm').addEventListener('submit', async (e) => {
