@@ -605,17 +605,38 @@ class EnhancedMusicBot {
         try {
             console.log('🔍 Extracting Suno data from:', url);
             
-            const response = await axios.get(url, {
-                headers: {
-                    'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36',
-                    'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,*/*;q=0.8',
-                    'Accept-Language': 'en-US,en;q=0.5',
-                    'Accept-Encoding': 'gzip, deflate, br',
-                    'Connection': 'keep-alive',
-                    'Upgrade-Insecure-Requests': '1'
-                }
-            });
-            const html = response.data;
+            // Try with puppeteer for JavaScript-heavy pages
+            let html;
+            try {
+                const puppeteer = require('puppeteer');
+                const browser = await puppeteer.launch({ 
+                    headless: true,
+                    args: ['--no-sandbox', '--disable-setuid-sandbox']
+                });
+                const page = await browser.newPage();
+                await page.setUserAgent('Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36');
+                await page.goto(url, { waitUntil: 'networkidle2', timeout: 15000 });
+                
+                // Wait for content to load
+                await page.waitForTimeout(3000);
+                
+                html = await page.content();
+                await browser.close();
+                console.log('✅ Used Puppeteer for enhanced extraction');
+            } catch (puppeteerError) {
+                console.log('⚠️ Puppeteer failed, falling back to axios');
+                const response = await axios.get(url, {
+                    headers: {
+                        'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36',
+                        'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,*/*;q=0.8',
+                        'Accept-Language': 'en-US,en;q=0.5',
+                        'Accept-Encoding': 'gzip, deflate, br',
+                        'Connection': 'keep-alive',
+                        'Upgrade-Insecure-Requests': '1'
+                    }
+                });
+                html = response.data;
+            }
             
             let title = 'Unknown Song';
             let imageUrl = null;
