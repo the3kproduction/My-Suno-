@@ -25,12 +25,11 @@ class EnhancedMusicBot {
         this.clientId = this.client.user?.id;
         this.sunoChannelId = process.env.DISCORD_CHANNEL_ID;
         
-        // Music queues for different channels
+        // Single music queue (simplified)
         this.musicQueue = [];
-        this.lyricsQueue = [];
-        this.currentSong = { music: null, lyrics: null };
-        this.connections = { music: null, lyrics: null };
-        this.players = { music: null, lyrics: null };
+        this.currentSong = null;
+        this.connection = null;
+        this.player = null;
         
         // YouTube integration
         this.currentVideoId = null;
@@ -118,51 +117,19 @@ class EnhancedMusicBot {
                 .addStringOption(option =>
                     option.setName('url')
                         .setDescription('YouTube URL')
-                        .setRequired(true))
-                .addStringOption(option =>
-                    option.setName('type')
-                        .setDescription('Channel type')
-                        .setRequired(true)
-                        .addChoices(
-                            { name: 'Music Videos', value: 'music' },
-                            { name: 'Lyric Videos', value: 'lyrics' }
-                        )),
+                        .setRequired(true)),
             
             new SlashCommandBuilder()
                 .setName('play')
-                .setDescription('Play current queue')
-                .addStringOption(option =>
-                    option.setName('type')
-                        .setDescription('Channel type')
-                        .setRequired(true)
-                        .addChoices(
-                            { name: 'Music Videos', value: 'music' },
-                            { name: 'Lyric Videos', value: 'lyrics' }
-                        )),
+                .setDescription('Play current queue'),
                         
             new SlashCommandBuilder()
                 .setName('skip')
-                .setDescription('Skip current song')
-                .addStringOption(option =>
-                    option.setName('type')
-                        .setDescription('Channel type')
-                        .setRequired(true)
-                        .addChoices(
-                            { name: 'Music Videos', value: 'music' },
-                            { name: 'Lyric Videos', value: 'lyrics' }
-                        )),
+                .setDescription('Skip current song'),
                         
             new SlashCommandBuilder()
                 .setName('stop')
                 .setDescription('Stop playback and clear queue')
-                .addStringOption(option =>
-                    option.setName('type')
-                        .setDescription('Channel type')
-                        .setRequired(true)
-                        .addChoices(
-                            { name: 'Music Videos', value: 'music' },
-                            { name: 'Lyric Videos', value: 'lyrics' }
-                        ))
         ];
 
         const rest = new REST({ version: '10' }).setToken(this.token);
@@ -186,22 +153,21 @@ class EnhancedMusicBot {
             if (!interaction.isChatInputCommand()) return;
 
             const { commandName, options } = interaction;
-            const channelType = options.getString('type');
 
             try {
                 switch (commandName) {
                     case 'load':
                         const url = options.getString('url');
-                        await this.handleLoad(interaction, url, channelType);
+                        await this.handleLoad(interaction, url);
                         break;
                     case 'play':
-                        await this.handlePlay(interaction, channelType);
+                        await this.handlePlay(interaction);
                         break;
                     case 'skip':
-                        await this.handleSkip(interaction, channelType);
+                        await this.handleSkip(interaction);
                         break;
                     case 'stop':
-                        await this.handleStop(interaction, channelType);
+                        await this.handleStop(interaction);
                         break;
                 }
             } catch (error) {
@@ -213,16 +179,15 @@ class EnhancedMusicBot {
         });
     }
 
-    async handleLoad(interaction, url, channelType) {
+    async handleLoad(interaction, url) {
         await interaction.deferReply();
         
         try {
             if (url.includes('playlist')) {
                 const songs = await this.getPlaylistSongs(url);
-                const queue = channelType === 'music' ? this.musicQueue : this.lyricsQueue;
-                queue.push(...songs);
+                this.musicQueue.push(...songs);
                 
-                await interaction.editReply(`✅ Added ${songs.length} songs to ${channelType} queue!`);
+                await interaction.editReply(`✅ Added ${songs.length} songs to music queue!`);
             } else {
                 const videoId = this.extractVideoId(url);
                 if (!videoId) {
@@ -230,10 +195,10 @@ class EnhancedMusicBot {
                     return;
                 }
                 
-                const queue = channelType === 'music' ? this.musicQueue : this.lyricsQueue;
-                queue.push({ title: 'YouTube Video', videoId, url });
+                this.musicQueue.push({ title: 'YouTube Video', videoId, url });
+                this.currentVideoId = videoId;
                 
-                await interaction.editReply(`✅ Added video to ${channelType} queue!`);
+                await interaction.editReply(`✅ Added video to music queue!`);
             }
         } catch (error) {
             await interaction.editReply('❌ Failed to load content');
@@ -277,41 +242,41 @@ class EnhancedMusicBot {
         return match ? match[1] : null;
     }
 
-    async handlePlay(interaction, channelType) {
+    async handlePlay(interaction) {
         await interaction.deferReply();
         
         try {
-            await this.joinVoiceChannel(interaction, channelType);
-            await this.playCurrentSong(channelType);
-            await interaction.editReply(`▶️ Playing ${channelType} queue!`);
+            await this.joinVoiceChannel(interaction);
+            await this.playCurrentSong();
+            await interaction.editReply(`▶️ Playing music queue!`);
         } catch (error) {
             await interaction.editReply('❌ Failed to start playback');
         }
     }
 
-    async handleSkip(interaction, channelType) {
+    async handleSkip(interaction) {
         await interaction.deferReply();
         
         try {
-            await this.skipSong(channelType);
-            await interaction.editReply(`⏭️ Skipped ${channelType} song!`);
+            await this.skipSong();
+            await interaction.editReply(`⏭️ Skipped song!`);
         } catch (error) {
             await interaction.editReply('❌ Failed to skip song');
         }
     }
 
-    async handleStop(interaction, channelType) {
+    async handleStop(interaction) {
         await interaction.deferReply();
         
         try {
-            this.stopPlayback(channelType);
-            await interaction.editReply(`⏹️ Stopped ${channelType} playback!`);
+            this.stopPlayback();
+            await interaction.editReply(`⏹️ Stopped playback!`);
         } catch (error) {
             await interaction.editReply('❌ Failed to stop playback');
         }
     }
 
-    async joinVoiceChannel(interaction, channelType) {
+    async joinVoiceChannel(interaction) {
         const voiceChannel = interaction.member.voice.channel;
         if (!voiceChannel) {
             throw new Error('You need to be in a voice channel!');
@@ -323,19 +288,17 @@ class EnhancedMusicBot {
             adapterCreator: interaction.guild.voiceAdapterCreator,
         });
 
-        this.connections[channelType] = connection;
-        this.players[channelType] = createAudioPlayer();
-        connection.subscribe(this.players[channelType]);
+        this.connection = connection;
+        this.player = createAudioPlayer();
+        connection.subscribe(this.player);
     }
 
-    async playCurrentSong(channelType) {
-        const queue = channelType === 'music' ? this.musicQueue : this.lyricsQueue;
-        const player = this.players[channelType];
+    async playCurrentSong() {
+        if (this.musicQueue.length === 0 || !this.player) return;
         
-        if (queue.length === 0 || !player) return;
-        
-        const song = queue.shift();
-        this.currentSong[channelType] = song;
+        const song = this.musicQueue.shift();
+        this.currentSong = song;
+        this.currentVideoId = song.videoId;
         
         try {
             const stream = ytdl(song.url, { 
@@ -344,38 +307,33 @@ class EnhancedMusicBot {
             });
             
             const resource = createAudioResource(stream);
-            player.play(resource);
+            this.player.play(resource);
             
-            player.on(AudioPlayerStatus.Idle, () => {
-                this.playCurrentSong(channelType);
+            this.player.on(AudioPlayerStatus.Idle, () => {
+                this.playCurrentSong();
             });
             
         } catch (error) {
             console.error('❌ Playback error:', error);
-            this.playCurrentSong(channelType);
+            this.playCurrentSong();
         }
     }
 
-    async skipSong(channelType) {
-        const player = this.players[channelType];
-        if (player) {
-            player.stop();
+    async skipSong() {
+        if (this.player) {
+            this.player.stop();
         }
     }
 
-    stopPlayback(channelType) {
-        const player = this.players[channelType];
-        const connection = this.connections[channelType];
+    stopPlayback() {
+        if (this.player) this.player.stop();
+        if (this.connection) this.connection.destroy();
         
-        if (player) player.stop();
-        if (connection) connection.destroy();
-        
-        const queue = channelType === 'music' ? this.musicQueue : this.lyricsQueue;
-        queue.length = 0;
-        
-        this.currentSong[channelType] = null;
-        this.connections[channelType] = null;
-        this.players[channelType] = null;
+        this.musicQueue.length = 0;
+        this.currentSong = null;
+        this.connection = null;
+        this.player = null;
+        this.currentVideoId = null;
     }
 
     setupWebServer() {
@@ -419,6 +377,64 @@ class EnhancedMusicBot {
             } catch (error) {
                 console.error('❌ Manual check error:', error);
                 res.json({ success: false, message: '❌ Check failed: ' + error.message });
+            }
+        });
+
+        // Post Suno song endpoint
+        this.app.post('/post-suno', async (req, res) => {
+            try {
+                const { sunoUrl } = req.body;
+                
+                if (!sunoUrl) {
+                    return res.json({ success: false, error: 'Suno URL is required' });
+                }
+
+                console.log(`🎵 Posting Suno song: ${sunoUrl}`);
+                await this.postSunoToDiscord('Manual Post', sunoUrl, 'Manually posted via dashboard');
+                
+                res.json({ 
+                    success: true, 
+                    message: 'Song posted to Discord successfully!' 
+                });
+            } catch (error) {
+                console.error('❌ Post Suno error:', error);
+                res.json({ success: false, error: 'Failed to post song to Discord' });
+            }
+        });
+
+        // Load YouTube content endpoint
+        this.app.post('/load-youtube', async (req, res) => {
+            try {
+                const { url } = req.body;
+                
+                if (!url) {
+                    return res.json({ success: false, error: 'YouTube URL is required' });
+                }
+
+                if (url.includes('playlist')) {
+                    const songs = await this.getPlaylistSongs(url);
+                    this.musicQueue.push(...songs);
+                    res.json({ 
+                        success: true, 
+                        message: `Added ${songs.length} songs to queue!` 
+                    });
+                } else {
+                    const videoId = this.extractVideoId(url);
+                    if (!videoId) {
+                        return res.json({ success: false, error: 'Invalid YouTube URL' });
+                    }
+                    
+                    this.musicQueue.push({ title: 'YouTube Video', videoId, url });
+                    this.currentVideoId = videoId;
+                    
+                    res.json({ 
+                        success: true, 
+                        message: 'Video added to queue!' 
+                    });
+                }
+            } catch (error) {
+                console.error('❌ YouTube load error:', error);
+                res.json({ success: false, error: 'Failed to load YouTube content' });
             }
         });
 
@@ -935,6 +951,32 @@ class EnhancedMusicBot {
                     ${currentVideo}
                     <div class="video-overlay"></div>
                 </div>
+            </div>
+
+            <!-- YouTube Loading -->
+            <div class="section">
+                <h2>📺 Load YouTube Content</h2>
+                <form id="youtubeForm">
+                    <div class="form-group">
+                        <label>YouTube URL</label>
+                        <input type="text" id="youtubeUrl" placeholder="https://www.youtube.com/watch?v=..." required>
+                    </div>
+                    <button type="submit" class="btn">📺 Load to Music Queue</button>
+                </form>
+                <div id="youtubeStatus" style="margin-top: 15px;"></div>
+            </div>
+
+            <!-- Suno Song Posting -->
+            <div class="section">
+                <h2>🎵 Post Suno Song</h2>
+                <form id="sunoForm">
+                    <div class="form-group">
+                        <label>Suno Song URL</label>
+                        <input type="text" id="sunoUrl" placeholder="https://suno.com/song/..." required>
+                    </div>
+                    <button type="submit" class="btn">🎵 Post to Discord</button>
+                </form>
+                <div id="sunoStatus" style="margin-top: 15px;"></div>
             </div>
 
             <!-- Suno Profile Monitoring -->
