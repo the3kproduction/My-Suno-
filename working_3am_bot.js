@@ -247,30 +247,31 @@ class Working3AMBot {
 
     async checkCurrentMusic() {
         try {
-            // Look for the music video channel
-            const musicChannelId = '1375615201990283303'; // MUSIC VIDEO channel
-            const musicChannel = this.client.channels.cache.get(musicChannelId);
+            // Look for the new-songs channel specifically
+            const newSongsChannel = this.client.channels.cache.find(ch => 
+                ch.name && ch.name.includes('new-songs')
+            );
             
-            if (!musicChannel) {
-                console.log('Music channel not found, checking all channels...');
-                // Search all guilds for FlaviBot activity
-                for (const guild of this.client.guilds.cache.values()) {
-                    const channels = guild.channels.cache.filter(ch => ch.type === 0); // Text channels
-                    for (const channel of channels.values()) {
-                        const lastMessage = await this.getLastMusicMessage(channel);
-                        if (lastMessage) {
-                            this.updateCurrentSong(lastMessage);
-                            return;
-                        }
+            if (newSongsChannel) {
+                console.log('✅ Found new-songs channel, checking for active player...');
+                const lastMessage = await this.getLastMusicMessage(newSongsChannel);
+                if (lastMessage) {
+                    this.updateCurrentSong(lastMessage);
+                    return;
+                }
+            }
+            
+            // Fallback: Search all guilds for FlaviBot activity
+            console.log('New-songs channel not found, checking all channels...');
+            for (const guild of this.client.guilds.cache.values()) {
+                const channels = guild.channels.cache.filter(ch => ch.type === 0); // Text channels
+                for (const channel of channels.values()) {
+                    const lastMessage = await this.getLastMusicMessage(channel);
+                    if (lastMessage) {
+                        this.updateCurrentSong(lastMessage);
+                        return;
                     }
                 }
-                return;
-            }
-
-            // Get the latest FlaviBot message with music info
-            const lastMessage = await this.getLastMusicMessage(musicChannel);
-            if (lastMessage) {
-                this.updateCurrentSong(lastMessage);
             }
             
         } catch (error) {
