@@ -936,6 +936,44 @@
                 </div>
             </div>
 
+
+
+            <div class="card">
+                <div class="card-header">
+                    <div class="card-icon">🤖</div>
+                    <div class="card-title">Smart Auto-Detection</div>
+                </div>
+                <div class="feature-description">
+                    <p>Your bot automatically extracts the real song title and artwork from Suno URLs using advanced detection technology. No manual input needed!</p>
+                </div>
+            </div>
+
+            <div class="card">
+                <div class="card-header">
+                    <div class="card-icon">⬇️</div>
+                    <div class="card-title">Download Suno Songs</div>
+                </div>
+                <div class="download-section">
+                    <p style="margin-bottom: 20px; opacity: 0.9;">Download your favorite Suno songs as audio or video files. Just paste the Suno link and choose your format!</p>
+                    
+                    <div class="form-group">
+                        <label for="download-url">Suno Song URL</label>
+                        <input type="text" id="download-url" placeholder="https://suno.com/song/..." style="margin-bottom: 15px;">
+                    </div>
+                    
+                    <div class="download-buttons" style="display: flex; gap: 10px; flex-wrap: wrap;">
+                        <button class="btn btn-primary" onclick="downloadAudio()" style="flex: 1; min-width: 140px;">
+                            🎵 Download Audio
+                        </button>
+                        <button class="btn btn-secondary" onclick="downloadVideo()" style="flex: 1; min-width: 140px; background: linear-gradient(135deg, #667eea, #764ba2);">
+                            🎥 Download Video
+                        </button>
+                    </div>
+                    
+                    <div id="download-status" style="margin-top: 15px; font-size: 14px;"></div>
+                </div>
+            </div>
+
             <div class="card">
                 <div class="card-header">
                     <div class="card-icon">🎵</div>
@@ -973,42 +1011,6 @@
                     <div class="detail-row">
                         <strong>Last Check:</strong> <span id="monitoring-last-check">Checking now...</span>
                     </div>
-                </div>
-            </div>
-
-            <div class="card">
-                <div class="card-header">
-                    <div class="card-icon">🤖</div>
-                    <div class="card-title">Smart Auto-Detection</div>
-                </div>
-                <div class="feature-description">
-                    <p>Your bot automatically extracts the real song title and artwork from Suno URLs using advanced detection technology. No manual input needed!</p>
-                </div>
-            </div>
-
-            <div class="card">
-                <div class="card-header">
-                    <div class="card-icon">⬇️</div>
-                    <div class="card-title">Download Suno Songs</div>
-                </div>
-                <div class="download-section">
-                    <p style="margin-bottom: 20px; opacity: 0.9;">Download your favorite Suno songs as audio or video files. Just paste the Suno link and choose your format!</p>
-                    
-                    <div class="form-group">
-                        <label for="download-url">Suno Song URL</label>
-                        <input type="text" id="download-url" placeholder="https://suno.com/song/..." style="margin-bottom: 15px;">
-                    </div>
-                    
-                    <div class="download-buttons" style="display: flex; gap: 10px; flex-wrap: wrap;">
-                        <button class="btn btn-primary" onclick="downloadAudio()" style="flex: 1; min-width: 140px;">
-                            🎵 Download Audio
-                        </button>
-                        <button class="btn btn-secondary" onclick="downloadVideo()" style="flex: 1; min-width: 140px; background: linear-gradient(135deg, #667eea, #764ba2);">
-                            🎥 Download Video
-                        </button>
-                    </div>
-                    
-                    <div id="download-status" style="margin-top: 15px; font-size: 14px;"></div>
                 </div>
             </div>
         </div>
