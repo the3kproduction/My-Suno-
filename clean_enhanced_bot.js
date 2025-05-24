@@ -444,9 +444,60 @@ class EnhancedMusicBot {
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>🎵 Enhanced Music Bot Dashboard</title>
+    <title>3AM VERIFIED - Enhanced Music Bot</title>
     <style>
         * { margin: 0; padding: 0; box-sizing: border-box; }
+        
+        /* Theme Variables */
+        :root {
+            --bg-primary: linear-gradient(-45deg, #667eea, #764ba2, #ff6b6b, #4ecdc4, #45b7d1, #96ceb4, #feca57, #ff9ff3);
+            --bg-secondary: rgba(255, 255, 255, 0.1);
+            --text-primary: #ffffff;
+            --text-secondary: rgba(255, 255, 255, 0.7);
+            --border-color: rgba(255, 255, 255, 0.2);
+            --input-bg: rgba(255, 255, 255, 0.2);
+            --card-bg: rgba(255, 255, 255, 0.15);
+            --shadow: rgba(0, 0, 0, 0.3);
+        }
+        
+        [data-theme="light"] {
+            --bg-primary: linear-gradient(-45deg, #e3f2fd, #f3e5f5, #ffebee, #e0f2f1, #e1f5fe, #f1f8e9, #fff3e0, #fce4ec);
+            --bg-secondary: rgba(0, 0, 0, 0.05);
+            --text-primary: #333333;
+            --text-secondary: #666666;
+            --border-color: rgba(0, 0, 0, 0.1);
+            --input-bg: rgba(0, 0, 0, 0.05);
+            --card-bg: rgba(0, 0, 0, 0.03);
+            --shadow: rgba(0, 0, 0, 0.1);
+        }
+        
+        [data-theme="dark"] {
+            --bg-primary: linear-gradient(-45deg, #2c3e50, #34495e, #7f8c8d, #95a5a6, #bdc3c7, #ecf0f1);
+            --bg-secondary: rgba(255, 255, 255, 0.05);
+            --text-primary: #ecf0f1;
+            --text-secondary: rgba(236, 240, 241, 0.7);
+            --border-color: rgba(255, 255, 255, 0.1);
+            --input-bg: rgba(255, 255, 255, 0.1);
+            --card-bg: rgba(255, 255, 255, 0.05);
+            --shadow: rgba(0, 0, 0, 0.5);
+        }
+        
+        @keyframes crazyBackground {
+            0% { background-position: 0% 50%; }
+            50% { background-position: 100% 50%; }
+            100% { background-position: 0% 50%; }
+        }
+        
+        @keyframes glow {
+            0%, 100% { 
+                box-shadow: 0 0 20px rgba(58, 169, 255, 0.5), 0 0 40px rgba(58, 169, 255, 0.3), 0 0 60px rgba(58, 169, 255, 0.1);
+                text-shadow: 0 0 10px rgba(58, 169, 255, 0.8);
+            }
+            50% { 
+                box-shadow: 0 0 30px rgba(58, 169, 255, 0.8), 0 0 60px rgba(58, 169, 255, 0.5), 0 0 90px rgba(58, 169, 255, 0.3);
+                text-shadow: 0 0 20px rgba(58, 169, 255, 1);
+            }
+        }
         
         @keyframes gentleGradient {
             0% { background-position: 0% 50%; }
@@ -1044,9 +1095,65 @@ class EnhancedMusicBot {
     </style>
 </head>
 <body>
+    <!-- Theme Toggle -->
+    <div style="position: fixed; top: 20px; right: 20px; z-index: 1000;">
+        <div style="display: flex; gap: 10px; background: rgba(255,255,255,0.1); backdrop-filter: blur(10px); border-radius: 25px; padding: 10px;">
+            <button onclick="setTheme('auto')" style="background: linear-gradient(45deg, #667eea, #764ba2); border: none; border-radius: 50%; width: 40px; height: 40px; color: white; cursor: pointer; display: flex; align-items: center; justify-content: center;">🔄</button>
+            <button onclick="setTheme('light')" style="background: linear-gradient(45deg, #fff, #f0f0f0); border: none; border-radius: 50%; width: 40px; height: 40px; color: #333; cursor: pointer; display: flex; align-items: center; justify-content: center;">☀️</button>
+            <button onclick="setTheme('dark')" style="background: linear-gradient(45deg, #2c3e50, #34495e); border: none; border-radius: 50%; width: 40px; height: 40px; color: white; cursor: pointer; display: flex; align-items: center; justify-content: center;">🌙</button>
+        </div>
+    </div>
+
     <div class="container">
-        <div class="header">
-            <h1>🎵 Enhanced Music Bot</h1>
+        <!-- Stunning 3AM VERIFIED Header -->
+        <div class="header" style="text-align: center; padding: 60px 40px; background: transparent; position: relative;">
+            <!-- 3AM VERIFIED Logo -->
+            <div style="display: inline-block; width: 120px; height: 120px; border-radius: 50%; background: linear-gradient(135deg, #667eea, #764ba2); position: relative; margin-bottom: 30px; animation: glow 3s ease-in-out infinite;">
+                <div style="position: absolute; top: 15px; left: 50%; transform: translateX(-50%); color: #3affe8; font-weight: 800; font-size: 24px; text-shadow: 0 0 20px rgba(58, 255, 232, 0.8);">3AM</div>
+                <div style="position: absolute; bottom: 25px; left: 50%; transform: translateX(-50%); color: rgba(255,255,255,0.8); font-size: 12px; font-weight: 600; letter-spacing: 1px;">VERIFIED</div>
+                <div style="position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); width: 30px; height: 30px; border: 3px solid #3affe8; border-radius: 8px; display: flex; align-items: center; justify-content: center; animation: glow 2s ease-in-out infinite;">
+                    <span style="color: #3affe8; font-size: 18px; font-weight: bold;">✓</span>
+                </div>
+            </div>
+            
+            <!-- Enhanced Music Bot Title -->
+            <h1 style="font-size: 4rem; font-weight: 800; background: linear-gradient(45deg, #3affe8, #667eea, #764ba2, #3affe8); background-size: 300% 300%; animation: crazyBackground 6s ease infinite; -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text; text-shadow: 0 0 40px rgba(58, 255, 232, 0.5); margin-bottom: 20px; letter-spacing: 2px;">Enhanced Music Bot</h1>
+            
+            <!-- Subtitle -->
+            <p style="font-size: 1.2rem; color: rgba(255,255,255,0.8); font-weight: 500; margin-bottom: 40px; text-shadow: 0 2px 10px rgba(0,0,0,0.3);">Discord Music Bot with YouTube Integration & Suno Monitoring</p>
+        </div>
+
+        <!-- Live Music Stream Section -->
+        <div class="section" style="background: linear-gradient(135deg, rgba(102, 126, 234, 0.2), rgba(118, 75, 162, 0.2)); border: 2px solid rgba(58, 255, 232, 0.3);">
+            <h2 style="display: flex; align-items: center; gap: 15px; margin-bottom: 30px;">🎵 Live Music Stream</h2>
+            <div id="nowPlayingSection" style="background: rgba(255,255,255,0.1); padding: 25px; border-radius: 15px; margin-bottom: 20px;">
+                <div style="display: flex; align-items: center; gap: 20px;">
+                    <div style="width: 60px; height: 60px; background: linear-gradient(135deg, #ff6b6b, #4ecdc4); border-radius: 12px; display: flex; align-items: center; justify-content: center; font-size: 24px; animation: gentlePulse 3s ease-in-out infinite;">🎵</div>
+                    <div style="flex: 1;">
+                        <div style="color: #ff6b6b; font-size: 12px; font-weight: 600; text-transform: uppercase; letter-spacing: 1px; margin-bottom: 5px;">🔴 Now Playing</div>
+                        <div id="trackInfo" style="font-size: 16px; font-weight: 600; color: white; margin-bottom: 3px;">
+                            <span id="artistName">Listening for music...</span>
+                        </div>
+                        <div style="font-size: 14px; color: rgba(255,255,255,0.7);">
+                            <span>Song: </span><span id="songName">Waiting for track info...</span>
+                        </div>
+                        <div style="font-size: 12px; color: rgba(255,255,255,0.5); margin-top: 5px;">
+                            <span>Source: </span><span id="sourceInfo">Music Video Channel</span> • 
+                            <span>Status: </span><span id="statusInfo" style="color: #4ecdc4;">🔴 Live</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div style="display: flex; gap: 15px; flex-wrap: wrap;">
+                <button onclick="toggleWebsiteMute()" class="btn" style="background: linear-gradient(135deg, #ff6b6b, #ff5252); flex: 1;">🔇 Mute Stream</button>
+                <button onclick="window.open('/refresh', '_blank')" class="btn" style="background: linear-gradient(135d, #4ecdc4, #26d0ce); flex: 1;">🔄 Refresh</button>
+                <button onclick="window.open('https://discord.gg/JFwEY6mrnn', '_blank')" class="btn" style="background: linear-gradient(135deg, #7289da, #5865f2); flex: 1;">💬 Join Discord</button>
+            </div>
+        </div>
+
+        <!-- Manual Suno Posting -->
+        <div class="section">
+            <h2>📝 Post Suno Song</h2>
             <p>Suno Song Posting & YouTube Voice Channels</p>
         </div>
 
