@@ -31,6 +31,20 @@ class EnhancedMusicBot {
         this.currentTrack = null;
         this.audioPlayer = null;
         this.voiceConnection = null;
+        
+        // Music tracking from working version
+        this.musicQueue = [];
+        this.currentSong = null;
+        this.connection = null;
+        this.player = null;
+        
+        // Connection status for dashboard
+        this.connectionStatus = {
+            connected: false,
+            channelName: null,
+            playing: false,
+            currentTrack: null
+        };
     }
 
     async start() {
@@ -778,41 +792,36 @@ class EnhancedMusicBot {
 
         this.app.get('/now-playing', async (req, res) => {
             try {
-                // Check if we have a current track stored
-                if (this.currentTrack) {
+                // Check connection status and current song
+                if (this.connectionStatus.playing && this.connectionStatus.currentTrack) {
                     res.json({
                         success: true,
-                        artist: this.currentTrack.artist || 'Unknown Artist',
-                        song: this.currentTrack.title || this.currentTrack.song || 'Unknown Song',
+                        artist: this.connectionStatus.currentTrack.artist || 'Unknown Artist',
+                        song: this.connectionStatus.currentTrack.title || 'Unknown Song',
                         source: 'FlaviBot Player',
                         status: 'Live',
-                        url: this.currentTrack.url
+                        channel: this.connectionStatus.channelName
                     });
                     return;
                 }
 
-                // Check if bot is in voice channel and playing
-                const guild = this.client.guilds.cache.first();
-                if (guild) {
-                    const botMember = guild.members.cache.get(this.client.user.id);
-                    if (botMember && botMember.voice.channel) {
-                        // Bot is in voice channel
-                        res.json({
-                            success: true,
-                            artist: 'Music Bot',
-                            song: 'Connected to voice channel',
-                            source: 'FlaviBot Player',
-                            status: 'Connected'
-                        });
-                        return;
-                    }
+                // Check if connected but not playing
+                if (this.connectionStatus.connected) {
+                    res.json({
+                        success: true,
+                        artist: 'Connected',
+                        song: `Ready in ${this.connectionStatus.channelName}`,
+                        source: 'FlaviBot Player',
+                        status: 'Connected'
+                    });
+                    return;
                 }
 
-                // No music currently playing
+                // Not connected
                 res.json({
                     success: false,
-                    artist: 'No music playing',
-                    song: 'Start playing music to see live info',
+                    artist: 'Not connected',
+                    song: 'Use /play command to start music',
                     source: 'FlaviBot Player',
                     status: 'Waiting'
                 });
