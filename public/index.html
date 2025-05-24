@@ -905,8 +905,8 @@
         <div class="dashboard-grid">
             <div class="card now-playing">
                 <div class="card-header" style="justify-content: center; text-align: center;">
-                    <div class="card-icon">🎵</div>
-                    <div class="card-title">NOW PLAYING</div>
+                    <div class="card-icon" style="margin-bottom: 5px;">🎵</div>
+                    <div class="card-title" style="margin-bottom: 10px;">NOW PLAYING</div>
                 </div>
                 <div class="song-info centered">
                     <div class="song-artist" id="current-artist">Listening for music...</div>
@@ -1214,7 +1214,22 @@
 
         // Listen on Discord function - opens voice channel where music is playing
         function launchDiscord() {
-            window.open('https://discord.com/channels/@me/1375476962356887614', '_blank');
+            // Try Discord app protocol first, fallback to web if needed
+            const discordAppUrl = 'discord://discord.com/channels/@me/1375476962356887614';
+            const discordWebUrl = 'https://discord.com/channels/@me/1375476962356887614';
+            
+            // Create a temporary link to trigger Discord app
+            const tempLink = document.createElement('a');
+            tempLink.href = discordAppUrl;
+            tempLink.style.display = 'none';
+            document.body.appendChild(tempLink);
+            tempLink.click();
+            document.body.removeChild(tempLink);
+            
+            // Fallback to web version after a short delay if app doesn't open
+            setTimeout(() => {
+                window.open(discordWebUrl, '_blank');
+            }, 1000);
         }
 
         // Launch Suno function
