@@ -239,15 +239,29 @@ class Working3AMBot {
 
         // Current song API endpoint with YouTube info
         this.app.get('/api/current-song', (req, res) => {
-            res.json({
-                success: true,
-                currentSong: this.currentSong || {
-                    artist: "No song playing",
-                    song: "Please start music on FlaviBot",
-                    source: "None",
-                    lastUpdated: Date.now()
-                }
-            });
+            if (this.currentSong && this.currentSong.title) {
+                res.json({
+                    success: true,
+                    song: {
+                        title: this.currentSong.title,
+                        artist: this.currentSong.artist || 'Unknown Artist',
+                        source: 'FlaviBot Player',
+                        spotifyUrl: this.currentSong.spotifyUrl || '',
+                        lastUpdated: this.currentSong.lastUpdated || Date.now()
+                    }
+                });
+            } else {
+                res.json({
+                    success: false,
+                    song: {
+                        title: "Listening for music...",
+                        artist: "Waiting for track info...",
+                        source: "FlaviBot Player",
+                        spotifyUrl: '',
+                        lastUpdated: Date.now()
+                    }
+                });
+            }
         });
 
         // Discord audio stream endpoint
