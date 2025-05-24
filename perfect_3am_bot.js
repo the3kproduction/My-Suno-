@@ -9,7 +9,9 @@ class Enhanced3AMBot {
                 GatewayIntentBits.Guilds,
                 GatewayIntentBits.GuildMessages,
                 GatewayIntentBits.MessageContent,
-                GatewayIntentBits.GuildVoiceStates
+                GatewayIntentBits.GuildVoiceStates,
+                GatewayIntentBits.GuildPresences,
+                GatewayIntentBits.GuildMembers
             ]
         });
         
