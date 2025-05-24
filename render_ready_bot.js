@@ -1657,6 +1657,9 @@ class EnhancedMusicBot {
                         </div>
                         
                         <div style="margin-top: 20px; display: flex; justify-content: center; gap: 15px;">
+                            <button onclick="toggleWebsiteMute()" class="btn" style="background: #f43f5e; padding: 12px 24px; font-size: 16px;">
+                                🔊 Mute Website
+                            </button>
                             <button onclick="refreshNowPlaying()" class="btn" style="background: #4ecdc4; padding: 12px 24px; font-size: 16px;">
                                 🔄 Refresh
                             </button>
@@ -1874,22 +1877,7 @@ class EnhancedMusicBot {
             }
 
             // Live Music Functions
-            let isMuted = false;
-            
-            function toggleMute() {
-                const muteButton = document.getElementById('muteToggle');
-                isMuted = !isMuted;
-                
-                if (isMuted) {
-                    muteButton.innerHTML = '🔇 Unmute Stream';
-                    muteButton.style.background = '#6b7280';
-                    document.getElementById('liveStatus').innerHTML = '🔇 Muted';
-                } else {
-                    muteButton.innerHTML = '🔊 Mute Stream';
-                    muteButton.style.background = '#f43f5e';
-                    document.getElementById('liveStatus').innerHTML = '🔴 Live';
-                }
-            }
+            let isWebsiteMuted = false;
             
             let currentSpotifyUrl = '';
             
@@ -1934,6 +1922,25 @@ class EnhancedMusicBot {
                     window.open(currentSpotifyUrl, '_blank');
                 } else {
                     alert('No Spotify track available!');
+                }
+            }
+            
+            function toggleWebsiteMute() {
+                const spotifyPlayer = document.getElementById('spotifyPlayer');
+                const muteButton = document.querySelector('button[onclick="toggleWebsiteMute()"]');
+                
+                isWebsiteMuted = !isWebsiteMuted;
+                
+                if (isWebsiteMuted) {
+                    spotifyPlayer.style.opacity = '0.3';
+                    spotifyPlayer.style.pointerEvents = 'none';
+                    muteButton.innerHTML = '🔇 Unmute Website';
+                    muteButton.style.background = '#6b7280';
+                } else {
+                    spotifyPlayer.style.opacity = '1';
+                    spotifyPlayer.style.pointerEvents = 'auto';
+                    muteButton.innerHTML = '🔊 Mute Website';
+                    muteButton.style.background = '#f43f5e';
                 }
             }
             
