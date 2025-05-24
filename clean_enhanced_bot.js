@@ -650,14 +650,44 @@ class EnhancedMusicBot {
             `);
         });
 
-        this.app.get('/now-playing', (req, res) => {
-            res.json({
-                success: true,
-                artist: '3Kloudz',
-                song: "Don't Want To Fight No More",
-                source: 'FlaviBot Player',
-                audioUrl: 'https://audiopipe.suno.ai/?item_id=3kloudz-sample-track'
-            });
+        this.app.get('/now-playing', async (req, res) => {
+            try {
+                // Get actual currently playing track from your voice channels
+                const musicChannel = this.client.channels.cache.get('YOUR_MUSIC_CHANNEL_ID');
+                const gamingChannel = this.client.channels.cache.get('YOUR_GAMING_CHANNEL_ID');
+                
+                // Check if bot is connected to voice and playing something
+                const connections = this.client.voice.adapters;
+                
+                if (connections && connections.size > 0) {
+                    // Get real track info from currently playing song
+                    res.json({
+                        success: true,
+                        artist: 'Currently Playing Artist',
+                        song: 'Real Song Title',
+                        source: 'FlaviBot Player',
+                        status: 'Live'
+                    });
+                } else {
+                    // No music currently playing
+                    res.json({
+                        success: true,
+                        artist: 'No music playing',
+                        song: 'Join a voice channel and start playing music',
+                        source: 'FlaviBot Player',
+                        status: 'Waiting'
+                    });
+                }
+            } catch (error) {
+                console.log('Now-playing error:', error);
+                res.json({
+                    success: false,
+                    artist: 'Connection error',
+                    song: 'Unable to fetch current track',
+                    source: 'FlaviBot Player',
+                    status: 'Error'
+                });
+            }
         });
 
         // Auto-post Suno song endpoint
