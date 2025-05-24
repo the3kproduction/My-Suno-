@@ -465,9 +465,10 @@ class Working3AMBot {
                 .trim();
             
             // Extract text from [Artist - Song](link) format
-            const linkMatch = description.match(/\[([^\]]+)\]/);
+            const linkMatch = description.match(/\[([^\]]+)\]\(([^)]+)\)/);
             if (linkMatch) {
                 const songInfo = linkMatch[1]; // Get the text inside brackets
+                const spotifyUrl = linkMatch[2]; // Get the Spotify URL
                 const parts = songInfo.split(' - ');
                 
                 if (parts.length >= 2) {
@@ -476,6 +477,9 @@ class Working3AMBot {
                     // Remove duration if present (like "02:56")
                     song = song.replace(/\s*\d{1,2}:\d{2}\s*$/, '').trim();
                 }
+                
+                // Store the Spotify URL for later use
+                this.currentSpotifyUrl = spotifyUrl;
             } else {
                 // Fallback: try regular "Artist - Song" format
                 const parts = description.split(' - ');
@@ -494,7 +498,8 @@ class Working3AMBot {
                 song: song,
                 source: "FlaviBot Player",
                 lastUpdated: Date.now(),
-                searchQuery: `${artist} ${song}`
+                searchQuery: `${artist} ${song}`,
+                spotifyUrl: this.currentSpotifyUrl || ''
             };
             
             console.log(`🎵 Auto-detected now playing: ${artist} - ${song}`);
