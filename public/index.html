@@ -1155,6 +1155,13 @@
                     el.style.color = '#000000';
                     el.style.backgroundColor = 'rgba(0,0,0,0.05)';
                 });
+                
+                // Fix theme buttons to be dark and visible in light mode
+                document.querySelectorAll('.theme-btn').forEach(btn => {
+                    btn.style.color = '#000000';
+                    btn.style.backgroundColor = 'rgba(0,0,0,0.1)';
+                    btn.style.border = '1px solid #000000';
+                });
             } else {
                 // Restore normal theme
                 document.body.style.background = '';
