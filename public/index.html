@@ -860,33 +860,45 @@
             
             /* MOBILE ONLY - Make profile section half height */
             .container > .card:first-child {
-                height: 120px !important;
-                min-height: 120px !important;
-                overflow: hidden !important;
+                height: 150px !important;
+                min-height: 150px !important;
+                overflow: visible !important;
+                padding: 15px !important;
             }
             
             .container > .card:first-child .card-header {
-                padding-bottom: 8px !important;
-                margin-bottom: 8px !important;
-                gap: 15px !important;
+                padding-bottom: 5px !important;
+                margin-bottom: 5px !important;
+                gap: 12px !important;
+                flex-direction: row !important;
+                align-items: center !important;
             }
             
             .container > .card:first-child button {
-                padding: 8px 16px !important;
-                font-size: 12px !important;
+                padding: 6px 12px !important;
+                font-size: 11px !important;
+                border-radius: 15px !important;
             }
             
             .container > .card:first-child .profile-pic {
-                width: 60px !important;
-                height: 60px !important;
+                width: 50px !important;
+                height: 50px !important;
+                flex-shrink: 0 !important;
             }
             
             .container > .card:first-child h2 {
-                font-size: 18px !important;
+                font-size: 16px !important;
+                margin-bottom: 2px !important;
             }
             
             .container > .card:first-child p {
-                font-size: 14px !important;
+                font-size: 12px !important;
+                margin: 0 !important;
+            }
+            
+            .container > .card:first-child > div:last-child {
+                gap: 8px !important;
+                margin-top: 8px !important;
             }
         }
     </style>
