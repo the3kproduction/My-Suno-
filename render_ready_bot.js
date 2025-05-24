@@ -45,6 +45,9 @@ class EnhancedMusicBot {
         // YouTube integration
         this.currentVideoId = null;
         
+        // Current track info for Live Music Stream
+        this.currentTrack = null;
+        
         // Suno profile monitoring
         this.sunoProfiles = [
             {
@@ -851,12 +854,16 @@ class EnhancedMusicBot {
                                 
                                 // Extract from FlaviBot format: **[Artist - Song Title](link)** - `duration`
                                 if (description && description.includes('**[') && description.includes('](')) {
-                                    const match = description.match(/\*\*\[([^\]]+)\]\([^)]+\)\*\*/);
+                                    const match = description.match(/\*\*\[([^\]]+)\]\(([^)]+)\)\*\*/);
                                     if (match && match[1].includes(' - ')) {
                                         const parts = match[1].split(' - ');
-                                        currentTrack.artist = parts[0].trim();
-                                        currentTrack.song = parts.slice(1).join(' - ').trim();
-                                        currentTrack.source = 'FlaviBot Player';
+                                        this.currentTrack = {
+                                            artist: parts[0].trim(),
+                                            song: parts.slice(1).join(' - ').trim(),
+                                            spotifyUrl: match[2] || null,
+                                            source: 'FlaviBot Player'
+                                        };
+                                        console.log('🎵 Updated current track:', this.currentTrack);
                                         break;
                                     }
                                 }
@@ -929,6 +936,25 @@ class EnhancedMusicBot {
                     artist: 'Error fetching info',
                     song: 'Please check connection',
                     source: 'New Songs Channel'
+                });
+            }
+        });
+
+        // Now playing endpoint for Live Music Stream
+        this.app.get('/now-playing', (req, res) => {
+            if (this.currentTrack) {
+                res.json({
+                    success: true,
+                    artist: this.currentTrack.artist,
+                    song: this.currentTrack.song,
+                    spotifyUrl: this.currentTrack.spotifyUrl,
+                    source: 'Music Video Channel'
+                });
+            } else {
+                res.json({
+                    success: false,
+                    artist: 'Listening for music...',
+                    song: 'Waiting for track info...'
                 });
             }
         });
