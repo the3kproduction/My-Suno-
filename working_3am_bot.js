@@ -145,98 +145,38 @@ class Working3AMBot {
             res.send(htmlContent);
         });
 
+        // Store the current playing song
+        this.currentSong = {
+            artist: "Listening for music...",
+            song: "Waiting for track info...",
+            source: "Music Video Channel",
+            lastUpdated: Date.now()
+        };
+
+        // Start monitoring for FlaviBot's "Now playing" messages
+        this.startMusicMonitoring();
+
         // Working now-playing endpoint that matches reference site
         this.app.get('/now-playing', async (req, res) => {
             try {
-                // Debug: Log what servers our bot can see
-                console.log('Bot is in servers:', this.client.guilds.cache.map(g => `${g.name} (${g.id})`));
+                // Check if song data is recent (within 2 minutes)
+                const isRecent = (Date.now() - this.currentSong.lastUpdated) < 120000;
                 
-                // Try to get music info from Discord
-                const musicVideoChannelId = '1375615201990283303';
-                const musicVideoChannel = this.client.channels.cache.get(musicVideoChannelId);
-                
-                console.log('Looking for channel:', musicVideoChannelId);
-                console.log('Channel found:', musicVideoChannel ? `Yes: ${musicVideoChannel.name}` : 'No');
-                
-                if (!musicVideoChannel) {
-                    // Try to find any guild and look for FlaviBot there
-                    for (const guild of this.client.guilds.cache.values()) {
-                        console.log(`Checking guild: ${guild.name}`);
-                        console.log('Members in guild:', guild.members.cache.map(m => m.user.username));
-                        
-                        const flaviBot = guild.members.cache.find(member => 
-                            member.user.username.toLowerCase().includes('flavi') || 
-                            member.user.displayName.toLowerCase().includes('flavi')
-                        );
-                        
-                        if (flaviBot) {
-                            console.log('Found FlaviBot:', flaviBot.user.username);
-                            console.log('FlaviBot presence:', flaviBot.presence);
-                            
-                            if (flaviBot.presence && flaviBot.presence.activities.length > 0) {
-                                console.log('FlaviBot activities:', flaviBot.presence.activities);
-                                
-                                const activity = flaviBot.presence.activities.find(act => 
-                                    act.type === 2 || // LISTENING
-                                    act.name.toLowerCase().includes('music') ||
-                                    act.name.toLowerCase().includes('spotify')
-                                );
-
-                                if (activity) {
-                                    return res.json({
-                                        success: true,
-                                        artist: activity.state || "Unknown Artist",
-                                        song: activity.details || "Unknown Song",
-                                        source: "FlaviBot Player"
-                                    });
-                                }
-                            }
-                        }
-                    }
-                    
+                if (isRecent && this.currentSong.artist !== "Listening for music...") {
                     return res.json({
-                        success: false,
-                        artist: "Error fetching info",
-                        song: "Please check connection",
-                        source: "New Songs Channel"
+                        success: true,
+                        artist: this.currentSong.artist,
+                        song: this.currentSong.song,
+                        source: this.currentSong.source
                     });
                 }
 
-                // Look for FlaviBot presence in the specific channel's guild
-                const guild = musicVideoChannel.guild;
-                console.log('Guild members:', guild.members.cache.map(m => m.user.username));
-                
-                const flaviBot = guild.members.cache.find(member => 
-                    member.user.username.toLowerCase().includes('flavi') || 
-                    member.user.displayName.toLowerCase().includes('flavi')
-                );
-
-                console.log('FlaviBot found:', flaviBot ? flaviBot.user.username : 'No');
-
-                if (flaviBot && flaviBot.presence && flaviBot.presence.activities.length > 0) {
-                    console.log('FlaviBot activities:', flaviBot.presence.activities);
-                    
-                    const activity = flaviBot.presence.activities.find(act => 
-                        act.type === 2 || // LISTENING
-                        act.name.toLowerCase().includes('music') ||
-                        act.name.toLowerCase().includes('spotify')
-                    );
-
-                    if (activity) {
-                        return res.json({
-                            success: true,
-                            artist: activity.state || "Unknown Artist",
-                            song: activity.details || "Unknown Song",
-                            source: "FlaviBot Player"
-                        });
-                    }
-                }
-
+                // Fallback to default waiting message
                 return res.json({
                     success: false,
-                    artist: "No music playing",
-                    song: "Waiting for track...",
-                    source: "Music Channel"
+                    artist: "Listening for music...",
+                    song: "Waiting for track info...",
+                    source: "Music Video Channel"
                 });
 
             } catch (error) {
@@ -289,6 +229,52 @@ class Working3AMBot {
             } catch (error) {
                 console.error('Error submitting profile request:', error);
                 res.json({ success: false, error: error.message });
+            }
+        });
+    }
+
+    startMusicMonitoring() {
+        console.log('🎵 Starting music monitoring for FlaviBot messages...');
+        
+        // Listen for messages from FlaviBot
+        this.client.on('messageCreate', (message) => {
+            // Check if it's from FlaviBot
+            if (message.author.username && 
+                (message.author.username.toLowerCase().includes('flavi') || 
+                 message.author.displayName?.toLowerCase().includes('flavi'))) {
+                
+                // Look for "Now playing" messages with embeds
+                if (message.embeds && message.embeds.length > 0) {
+                    const embed = message.embeds[0];
+                    
+                    // Check if it contains music info
+                    if (embed.title && embed.title.includes('Now playing')) {
+                        console.log('🎵 Found FlaviBot "Now playing" message:', embed);
+                        
+                        // Extract song info from embed
+                        let song = "Unknown Song";
+                        let artist = "Unknown Artist";
+                        
+                        if (embed.description) {
+                            // Parse format like "Lreds - Tide - 02:56"
+                            const parts = embed.description.split(' - ');
+                            if (parts.length >= 2) {
+                                artist = parts[0].trim();
+                                song = parts[1].trim();
+                            }
+                        }
+                        
+                        // Update current song
+                        this.currentSong = {
+                            artist: artist,
+                            song: song,
+                            source: "FlaviBot Player",
+                            lastUpdated: Date.now()
+                        };
+                        
+                        console.log(`🎵 Updated now playing: ${artist} - ${song}`);
+                    }
+                }
             }
         });
     }
