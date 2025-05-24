@@ -28,6 +28,7 @@
             min-height: 100vh;
             position: relative;
             overflow-x: hidden;
+            transition: background 0.5s ease;
         }
 
         @keyframes gradientShift {
@@ -51,6 +52,23 @@
                 transform: translateY(-100px) rotate(360deg);
                 opacity: 0;
             }
+        }
+
+        @keyframes rotateRect {
+            0% { transform: rotate(0deg) scale(1); }
+            50% { transform: rotate(180deg) scale(1.2); }
+            100% { transform: rotate(360deg) scale(1); }
+        }
+
+        .rotating-rectangle {
+            position: fixed;
+            width: 200px;
+            height: 100px;
+            background: linear-gradient(45deg, rgba(102, 126, 234, 0.3), rgba(240, 147, 251, 0.3));
+            border-radius: 20px;
+            animation: rotateRect 15s linear infinite;
+            pointer-events: none;
+            z-index: 2;
         }
 
         @keyframes glow {
@@ -378,6 +396,10 @@
     </style>
 </head>
 <body>
+    <div class="rotating-rectangle" style="top: 20%; left: 10%; animation-delay: 0s;"></div>
+    <div class="rotating-rectangle" style="top: 60%; right: 15%; animation-delay: 5s;"></div>
+    <div class="rotating-rectangle" style="top: 80%; left: 20%; animation-delay: 10s;"></div>
+    
     <div class="theme-switcher">
         <button class="theme-btn" onclick="setTheme('light')" id="light-btn">☀️ Auto</button>
         <button class="theme-btn" onclick="setTheme('light')" id="light-btn">☀️ Light</button>
@@ -532,6 +554,22 @@
             window.open('https://discord.gg/your-discord-server', '_blank');
         }
 
+        // Scroll-based background changes
+        function updateBackgroundOnScroll() {
+            const scrollPercent = window.pageYOffset / (document.documentElement.scrollHeight - window.innerHeight);
+            const hue1 = 240 + (scrollPercent * 60); // Blue to purple range
+            const hue2 = 300 + (scrollPercent * 60); // Purple to pink range
+            const hue3 = 180 + (scrollPercent * 120); // Cyan to purple range
+            
+            document.body.style.background = `linear-gradient(-45deg, 
+                hsl(${hue1}, 70%, 60%), 
+                hsl(${hue2}, 80%, 70%), 
+                hsl(${hue3}, 60%, 65%), 
+                hsl(${hue1 + 30}, 75%, 68%), 
+                hsl(${hue2 - 20}, 85%, 72%), 
+                hsl(${hue3 + 40}, 65%, 70%))`;
+        }
+
         // Music functions
         async function refreshNowPlaying() {
             try {
@@ -539,10 +577,14 @@
                 const data = await response.json();
                 
                 if (data.success && data.song) {
-                    document.getElementById('artist').textContent = data.song.artist || 'Unknown Artist';
-                    document.getElementById('song').textContent = data.song.title || 'Unknown Song';
-                    document.getElementById('source').textContent = data.song.source || 'FlaviBot Player';
-                    currentSong = data.song.title;
+                    const parts = data.song.title.split(' - ');
+                    const artist = parts[0] || 'Unknown Artist';
+                    const song = parts.slice(1).join(' - ') || 'Unknown Song';
+                    
+                    document.getElementById('artist').textContent = artist;
+                    document.getElementById('song').textContent = song;
+                    document.getElementById('source').textContent = 'FlaviBot Player';
+                    currentSong = song;
                     spotifyUrl = data.song.spotifyUrl || '';
                 } else {
                     document.getElementById('artist').textContent = 'Listening for music...';
@@ -656,6 +698,11 @@
         setInterval(refreshNowPlaying, 15000);
         createFloatingParticles();
         setInterval(createFloatingParticles, 15000);
+        
+        // Add scroll listener for background color changes
+        window.addEventListener('scroll', updateBackgroundOnScroll);
+        // Update background on page load
+        updateBackgroundOnScroll();
     </script>
 </body>
 </html>
