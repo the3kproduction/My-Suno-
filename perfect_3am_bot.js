@@ -2,7 +2,7 @@ const { Client, GatewayIntentBits, REST, Routes, SlashCommandBuilder } = require
 const express = require('express');
 const axios = require('axios');
 
-class EnhancedMusicBot {
+class Enhanced3AMBot {
     constructor() {
         this.client = new Client({
             intents: [
@@ -15,10 +15,7 @@ class EnhancedMusicBot {
         
         this.app = express();
         this.app.use(express.json());
-        this.app.use(express.static('public'));
-        
         this.currentSong = null;
-        this.profileCheckInterval = null;
     }
 
     async start() {
@@ -26,7 +23,6 @@ class EnhancedMusicBot {
         await this.registerSlashCommands();
         this.setupDiscordEvents();
         this.setupWebServer();
-        this.startProfileMonitoring();
         console.log('🎵 3AM VERIFIED Enhanced Music Bot is online!');
     }
 
@@ -42,7 +38,7 @@ class EnhancedMusicBot {
             
             new SlashCommandBuilder()
                 .setName('stop')
-                .setDescription('Stop playing music and leave voice channel')
+                .setDescription('Stop playing music')
         ];
 
         const rest = new REST({ version: '10' }).setToken(process.env.DISCORD_TOKEN);
@@ -58,37 +54,22 @@ class EnhancedMusicBot {
 
             if (commandName === 'play') {
                 const url = options.getString('url');
-                await interaction.reply(`🎵 Processing: ${url}`);
+                await interaction.reply('🎵 Processing: ' + url);
             } else if (commandName === 'stop') {
-                await interaction.reply('⏹️ Stopped music and left voice channel');
+                await interaction.reply('⏹️ Stopped music');
             }
         });
 
         this.client.on('ready', () => {
-            console.log(`✅ Discord bot logged in as ${this.client.user.tag}`);
+            console.log('✅ Discord bot logged in as ' + this.client.user.tag);
         });
 
         this.client.on('error', console.error);
     }
 
-    startProfileMonitoring() {
-        this.profileCheckInterval = setInterval(async () => {
-            await this.checkAllProfilesForNewSongs();
-        }, 3 * 60 * 1000); // Check every 3 minutes
-    }
-
-    async checkAllProfilesForNewSongs() {
-        try {
-            console.log('Checking profiles for new songs...');
-            // Profile monitoring logic would go here
-        } catch (error) {
-            console.error('Error checking profiles:', error);
-        }
-    }
-
     setupWebServer() {
         this.app.get('/', (req, res) => {
-            res.send(`<!DOCTYPE html>
+            const htmlContent = `<!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
@@ -97,7 +78,6 @@ class EnhancedMusicBot {
     <style>
         * { margin: 0; padding: 0; box-sizing: border-box; }
         
-        /* Theme Variables */
         :root {
             --bg-primary: linear-gradient(-45deg, #667eea, #764ba2, #ff6b6b, #4ecdc4, #45b7d1, #96ceb4, #feca57, #ff9ff3);
             --bg-secondary: rgba(255, 255, 255, 0.1);
@@ -145,26 +125,12 @@ class EnhancedMusicBot {
                     0 0 15px #00ffff,
                     0 0 20px #8a2be2;
             }
-            25% { 
-                text-shadow: 
-                    0 0 10px #8a2be2,
-                    0 0 20px #00ffff,
-                    0 0 30px #8a2be2,
-                    0 0 40px #00ffff;
-            }
             50% { 
                 text-shadow: 
                     0 0 15px #00ffff,
                     0 0 25px #8a2be2,
                     0 0 35px #00ffff,
                     0 0 45px #8a2be2;
-            }
-            75% { 
-                text-shadow: 
-                    0 0 10px #8a2be2,
-                    0 0 20px #00ffff,
-                    0 0 30px #8a2be2,
-                    0 0 40px #00ffff;
             }
             100% { 
                 text-shadow: 
@@ -331,7 +297,6 @@ class EnhancedMusicBot {
     </style>
 </head>
 <body>
-    <!-- Theme Toggle -->
     <div class="theme-toggle">
         <button class="theme-btn active" onclick="setTheme('auto')" id="auto-btn">🌓 Auto</button>
         <button class="theme-btn" onclick="setTheme('light')" id="light-btn">☀️ Light</button>
@@ -349,7 +314,6 @@ class EnhancedMusicBot {
             <p>Discord Music Bot with YouTube Integration & Suno Monitoring</p>
         </div>
 
-        <!-- Live Music -->
         <div class="section">
             <h2>🎵 Live Music Stream</h2>
             <div style="background: linear-gradient(135deg, rgba(244, 63, 94, 0.2), rgba(139, 69, 19, 0.2)); border: 2px solid rgba(244, 63, 94, 0.4); padding: 25px; border-radius: 15px;">
@@ -367,7 +331,6 @@ class EnhancedMusicBot {
             </div>
         </div>
 
-        <!-- Premium Suno Monitoring Dashboard -->
         <div class="section" style="background: linear-gradient(135deg, rgba(124, 58, 237, 0.3), rgba(79, 70, 229, 0.3)); border: 2px solid rgba(124, 58, 237, 0.5);">
             <h2>🎵 Premium Suno Monitoring</h2>
             <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 20px; margin: 20px 0;">
@@ -391,7 +354,6 @@ class EnhancedMusicBot {
             </div>
         </div>
 
-        <!-- Suno Song Posting -->
         <div class="section">
             <h2>🎵 Auto-Post Suno Song</h2>
             <form id="sunoForm">
@@ -406,7 +368,6 @@ class EnhancedMusicBot {
     </div>
 
     <script>
-        // Theme System
         function setTheme(theme) {
             const buttons = document.querySelectorAll('.theme-btn');
             buttons.forEach(btn => btn.classList.remove('active'));
@@ -434,10 +395,8 @@ class EnhancedMusicBot {
             }
         }, 60000);
 
-        // Initialize theme
         initTheme();
 
-        // Update live music info
         async function updateLiveMusicInfo() {
             try {
                 const response = await fetch('/api/now-playing');
@@ -463,7 +422,6 @@ class EnhancedMusicBot {
             updateLiveMusicInfo();
         }
 
-        // Suno form handling
         document.getElementById('sunoForm').addEventListener('submit', async (e) => {
             e.preventDefault();
             const url = document.getElementById('sunoUrl').value;
@@ -491,24 +449,23 @@ class EnhancedMusicBot {
             }
         });
 
-        // Update last check time
         function updateLastCheckTime() {
             const now = new Date().toLocaleTimeString();
             document.getElementById('lastCheck').textContent = now;
         }
 
-        // Auto-refresh data
         setInterval(updateLiveMusicInfo, 30000);
         setInterval(updateLastCheckTime, 180000);
         
-        // Initial load
         updateLiveMusicInfo();
         updateLastCheckTime();
     </script>
 </body>
-</html>`);
+</html>`;
+            
+            res.send(htmlContent);
+        });
 
-        // API endpoints
         this.app.get('/api/now-playing', (req, res) => {
             res.json({
                 isPlaying: this.currentSong !== null,
@@ -543,16 +500,13 @@ class EnhancedMusicBot {
     async extractSunoData(url) {
         try {
             console.log('Extracting Suno data from:', url);
-            
             const response = await axios.get(url);
             const html = response.data;
             
-            // Extract title from page
             const titleMatch = html.match(/<title[^>]*>([^<]+)<\/title>/i);
             const title = titleMatch ? titleMatch[1].replace(' | Suno', '') : 'Unknown Song';
             
-            // Try to extract description or use default
-            const description = `🎵 New song from Suno AI! Check it out: ${title}`;
+            const description = '🎵 New song from Suno AI! Check it out: ' + title;
             
             return {
                 success: true,
@@ -578,8 +532,8 @@ class EnhancedMusicBot {
 
             const embed = {
                 color: 0x667eea,
-                title: `🎵 ${title}`,
-                description: description || `New song posted from Suno AI!`,
+                title: '🎵 ' + title,
+                description: description || 'New song posted from Suno AI!',
                 url: url,
                 timestamp: new Date().toISOString(),
                 footer: {
@@ -596,5 +550,5 @@ class EnhancedMusicBot {
     }
 }
 
-const bot = new EnhancedMusicBot();
+const bot = new Enhanced3AMBot();
 bot.start().catch(console.error);

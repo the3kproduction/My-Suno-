@@ -125,7 +125,7 @@ author = "agent"
 
 [[workflows.workflow.tasks]]
 task = "shell.exec"
-args = "node clean_working_bot.js"
+args = "node perfect_3am_bot.js"
 waitForPort = 5000
 
 [deployment]
