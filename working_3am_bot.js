@@ -280,6 +280,18 @@ class Working3AMBot {
 
     async getLastMusicMessage(channel) {
         try {
+            // First try to get the specific message ID you mentioned
+            try {
+                const specificMessage = await channel.messages.fetch('1375699467273244813');
+                if (specificMessage && specificMessage.author.username && 
+                    specificMessage.author.username.toLowerCase().includes('flavi')) {
+                    console.log(`🎵 Found specific FlaviBot message: ${specificMessage.embeds[0]?.description || specificMessage.content}`);
+                    return specificMessage;
+                }
+            } catch (e) {
+                console.log('Specific message not found in this channel, checking recent messages...');
+            }
+            
             const messages = await channel.messages.fetch({ limit: 50 });
             
             // Convert to array and sort by timestamp (newest first)
