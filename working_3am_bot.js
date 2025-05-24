@@ -83,6 +83,10 @@ class Working3AMBot {
             if (!htmlContent.includes('verified-badge')) {
                 // Add logo CSS and HTML if missing
                 const logoCSS = `
+        .header {
+            text-align: center;
+        }
+        
         .verified-badge {
             display: inline-flex;
             align-items: center;
