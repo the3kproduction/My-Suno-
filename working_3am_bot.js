@@ -335,6 +335,103 @@ class Working3AMBot {
                 res.json({ success: false, error: 'YouTube search failed' });
             }
         });
+
+        // Suno posting endpoint
+        this.app.post('/api/suno-post', async (req, res) => {
+            try {
+                const { url } = req.body;
+                
+                if (!url) {
+                    return res.json({ success: false, error: 'URL is required' });
+                }
+
+                // Extract Suno data from the URL
+                const sunoData = await this.extractSunoData(url);
+                
+                if (!sunoData.success) {
+                    return res.json({ success: false, error: sunoData.error });
+                }
+
+                // Post to Discord
+                const result = await this.postSunoToDiscord(sunoData.title, url, sunoData.description);
+                
+                res.json({ success: true, message: 'Successfully posted to Discord!' });
+                
+            } catch (error) {
+                console.error('Error posting Suno song:', error);
+                res.json({ success: false, error: error.message });
+            }
+        });
+    }
+
+    async extractSunoData(url) {
+        try {
+            console.log('Extracting Suno data from:', url);
+            
+            const response = await fetch(url);
+            const html = await response.text();
+            
+            // Extract title from page
+            const titleMatch = html.match(/<title[^>]*>([^<]+)<\/title>/i);
+            const title = titleMatch ? titleMatch[1].replace(' | Suno', '') : 'Unknown Song';
+            
+            // Try to extract description or use default
+            const description = `🎵 New song from Suno AI! Check it out: ${title}`;
+            
+            return {
+                success: true,
+                title: title,
+                description: description,
+                url: url
+            };
+        } catch (error) {
+            console.error('Error extracting Suno data:', error);
+            return {
+                success: false,
+                error: error.message
+            };
+        }
+    }
+
+    async postSunoToDiscord(title, url, description = '') {
+        try {
+            const channel = this.client.channels.cache.get(process.env.DISCORD_CHANNEL_ID);
+            if (!channel) {
+                throw new Error('Discord channel not found');
+            }
+
+            const embed = {
+                color: 0x7c3aed, // Purple color
+                title: title,
+                url: url,
+                description: description,
+                fields: [
+                    {
+                        name: '🎵 Platform',
+                        value: 'Suno AI',
+                        inline: true
+                    },
+                    {
+                        name: '🔗 Link',
+                        value: `[Listen Here](${url})`,
+                        inline: true
+                    }
+                ],
+                footer: {
+                    text: '3AM VERIFIED • Suno AI Music',
+                    icon_url: 'https://cdn.discordapp.com/attachments/1234567890/music-icon.png'
+                },
+                timestamp: new Date().toISOString()
+            };
+
+            await channel.send({ embeds: [embed] });
+            console.log(`✅ Posted Suno song to Discord: ${title}`);
+            return { success: true };
+
+        } catch (error) {
+            console.error('Error posting to Discord:', error);
+            throw error;
+        }
     }
 
     startMusicMonitoring() {
