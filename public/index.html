@@ -992,30 +992,13 @@
                 </div>
             </div>
 
-            <div class="card">
-                <div class="card-header">
-                    <div class="card-icon">🎵</div>
-                    <div class="card-title">Premium Suno Monitoring</div>
-                </div>
-                <div class="stats-grid">
-                    <div class="stat-item">
-                        <div class="stat-value" id="songs-posted">0</div>
-                        <div class="stat-label">Songs Posted</div>
-                        <div class="stat-sublabel">Auto-posted with reactions</div>
+            <!-- Monitoring Status Grid - Two columns side by side -->
+            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 20px; margin-bottom: 20px;">
+                <div class="card">
+                    <div class="card-header">
+                        <div class="card-icon">🔗</div>
+                        <div class="card-title">Active Monitoring Status</div>
                     </div>
-                    <div class="stat-item">
-                        <div class="stat-value" id="profiles-monitored">1</div>
-                        <div class="stat-label">Profiles Monitored</div>
-                        <div class="stat-sublabel">3kloudz actively tracked</div>
-                    </div>
-                </div>
-            </div>
-
-            <div class="card">
-                <div class="card-header">
-                    <div class="card-icon">🔗</div>
-                    <div class="card-title">Active Monitoring Status</div>
-                </div>
                 <div class="monitoring-details">
                     <div class="detail-row">
                         <strong>Primary Profile:</strong> 3kloudz
@@ -1030,8 +1013,27 @@
                         <strong>Last Check:</strong> <span id="monitoring-last-check">Checking now...</span>
                     </div>
                 </div>
+                </div>
+                
+                <div class="card">
+                    <div class="card-header">
+                        <div class="card-icon">🎵</div>
+                        <div class="card-title">Suno Profile Monitoring</div>
+                    </div>
+                    <div class="stats-grid">
+                        <div class="stat-item">
+                            <div class="stat-value" id="songs-posted">0</div>
+                            <div class="stat-label">Songs Posted</div>
+                            <div class="stat-sublabel">Auto-posted with reactions</div>
+                        </div>
+                        <div class="stat-item">
+                            <div class="stat-value" id="profiles-monitored">1</div>
+                            <div class="stat-label">Profiles Monitored</div>
+                            <div class="stat-sublabel">3kloudz actively tracked</div>
+                        </div>
+                    </div>
+                </div>
             </div>
-        </div>
 
         <div class="dashboard-grid">
 
