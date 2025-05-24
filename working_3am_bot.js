@@ -88,7 +88,7 @@ class Working3AMBot {
         }
         
         .verified-badge {
-            display: inline-flex;
+            display: flex;
             align-items: center;
             justify-content: center;
             width: 150px;
