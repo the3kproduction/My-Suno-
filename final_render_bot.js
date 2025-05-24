@@ -26,6 +26,7 @@ class EnhancedMusicBot {
         this.clientId = this.client.user?.id;
         this.sunoChannelId = process.env.DISCORD_CHANNEL_ID;
         this.botHelperChannelId = '1375615201990283304'; // Hidden channel for smart song extraction
+        this.musicVideoChannelId = '1375615201990283303'; // Music Video channel where Flavibot plays
         
         // Single music queue (simplified)
         this.musicQueue = [];
