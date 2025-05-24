@@ -818,14 +818,27 @@ class EnhancedMusicBot {
         // Now Playing endpoint for live music info
         this.app.get('/now-playing', async (req, res) => {
             try {
-                // Check the new-songs channel for music player embeds
+                // Return the stored current track if available
+                if (this.currentTrack) {
+                    res.json({
+                        success: true,
+                        artist: this.currentTrack.artist,
+                        song: this.currentTrack.song,
+                        spotifyUrl: this.currentTrack.spotifyUrl,
+                        source: this.currentTrack.source
+                    });
+                    return;
+                }
+                
+                // Fallback to channel check if no stored track
                 const newSongsChannel = await this.client.channels.fetch(this.sunoChannelId);
                 const messages = await newSongsChannel.messages.fetch({ limit: 10 });
                 
                 let currentTrack = {
                     artist: 'Listening for music...',
                     song: 'Waiting for track info...',
-                    source: 'New Songs Player'
+                    source: 'New Songs Player',
+                    spotifyUrl: null
                 };
                 
                 // Look for music player embeds or messages
@@ -927,6 +940,7 @@ class EnhancedMusicBot {
                     success: true,
                     artist: currentTrack.artist,
                     song: currentTrack.song,
+                    spotifyUrl: currentTrack.spotifyUrl,
                     source: currentTrack.source
                 });
             } catch (error) {
