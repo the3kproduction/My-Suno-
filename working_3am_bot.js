@@ -314,18 +314,29 @@ class Working3AMBot {
             let description = embed.description
                 .replace(/\*\*/g, '') // Remove bold formatting
                 .replace(/<:[^:]+:\d+>/g, '') // Remove Discord emojis
-                .replace(/\[([^\]]+)\]\([^)]+\)/g, '$1') // Convert [text](link) to just text
                 .replace(/Added\s+/i, '') // Remove "Added" prefix
                 .trim();
             
-            // Parse "Artist - Song" format
-            const parts = description.split(' - ');
-            
-            if (parts.length >= 2) {
-                artist = parts[0].trim();
-                song = parts[1].trim();
-                // Remove duration if present (like "02:56")
-                song = song.replace(/\s*\d{1,2}:\d{2}\s*$/, '').trim();
+            // Extract text from [Artist - Song](link) format
+            const linkMatch = description.match(/\[([^\]]+)\]/);
+            if (linkMatch) {
+                const songInfo = linkMatch[1]; // Get the text inside brackets
+                const parts = songInfo.split(' - ');
+                
+                if (parts.length >= 2) {
+                    artist = parts[0].trim();
+                    song = parts[1].trim();
+                    // Remove duration if present (like "02:56")
+                    song = song.replace(/\s*\d{1,2}:\d{2}\s*$/, '').trim();
+                }
+            } else {
+                // Fallback: try regular "Artist - Song" format
+                const parts = description.split(' - ');
+                if (parts.length >= 2) {
+                    artist = parts[0].trim();
+                    song = parts[1].trim();
+                    song = song.replace(/\s*\d{1,2}:\d{2}\s*$/, '').trim();
+                }
             }
         }
         
