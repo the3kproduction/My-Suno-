@@ -180,22 +180,59 @@ class EnhancedMusicBot {
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>3AM VERIFIED Suno Bot</title>
     <style>
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        
+        /* Theme Variables */
+        :root {
+            --bg-primary: linear-gradient(-45deg, #667eea, #764ba2, #ff6b6b, #4ecdc4, #45b7d1, #96ceb4, #feca57, #ff9ff3);
+            --bg-secondary: rgba(255, 255, 255, 0.1);
+            --text-primary: #ffffff;
+            --text-secondary: rgba(255, 255, 255, 0.7);
+            --border-color: rgba(255, 255, 255, 0.2);
+            --input-bg: rgba(255, 255, 255, 0.2);
+            --card-bg: rgba(255, 255, 255, 0.15);
+            --shadow: rgba(0, 0, 0, 0.3);
+        }
+        
+        [data-theme="light"] {
+            --bg-primary: linear-gradient(-45deg, #e3f2fd, #f3e5f5, #ffebee, #e0f2f1, #e1f5fe, #f1f8e9, #fff3e0, #fce4ec);
+            --bg-secondary: rgba(0, 0, 0, 0.05);
+            --text-primary: #333333;
+            --text-secondary: #666666;
+            --border-color: rgba(0, 0, 0, 0.1);
+            --input-bg: rgba(0, 0, 0, 0.05);
+            --card-bg: rgba(255, 255, 255, 0.8);
+            --shadow: rgba(0, 0, 0, 0.1);
+        }
+        
+        [data-theme="dark"] {
+            --bg-primary: linear-gradient(-45deg, #1a1a2e, #16213e, #0f3460, #533483, #2d1b69, #0f0f23, #1a1a2e, #16213e);
+            --bg-secondary: rgba(255, 255, 255, 0.05);
+            --text-primary: #ffffff;
+            --text-secondary: rgba(255, 255, 255, 0.6);
+            --border-color: rgba(255, 255, 255, 0.1);
+            --input-bg: rgba(255, 255, 255, 0.1);
+            --card-bg: rgba(255, 255, 255, 0.1);
+            --shadow: rgba(0, 0, 0, 0.5);
+        }
+        
+        @keyframes gentleGradient {
+            0% { background-position: 0% 50%; }
+            50% { background-position: 100% 50%; }
+            100% { background-position: 0% 50%; }
         }
 
         body {
             font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            background: linear-gradient(-45deg, #667eea, #764ba2, #f093fb, #f5576c, #4facfe, #00f2fe);
-            background-size: 400% 400%;
-            animation: gradientBackground 15s ease infinite;
-            background-attachment: fixed;
-            color: white;
-            min-height: 100vh;
+            background: var(--bg-primary);
+            background-size: 800% 800%;
+            animation: gentleGradient 30s ease infinite;
+            min-height: 100vh; 
+            color: var(--text-primary); 
+            padding: 20px;
+            position: relative;
             overflow-x: hidden;
-            transition: all 0.5s ease;
+            transition: all 0.3s ease;
         }
 
         body.light-theme {
@@ -226,16 +263,36 @@ class EnhancedMusicBot {
             100% { background-position: 0% 50%; }
         }
 
-        .background-animation {
+        .theme-switcher {
             position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background: linear-gradient(-45deg, #667eea, #764ba2, #f093fb, #f5576c, #4facfe, #00f2fe);
-            background-size: 400% 400%;
-            animation: gradientBackground 15s ease infinite;
-            z-index: -1;
+            top: 20px;
+            right: 20px;
+            display: flex;
+            background: var(--card-bg);
+            border-radius: 50px;
+            padding: 4px;
+            backdrop-filter: blur(15px);
+            border: 1px solid var(--border-color);
+            z-index: 1000;
+        }
+
+        .theme-btn {
+            background: transparent;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 50px;
+            color: var(--text-secondary);
+            cursor: pointer;
+            transition: all 0.3s ease;
+            font-size: 14px;
+            font-weight: 600;
+        }
+
+        .theme-btn.active,
+        .theme-btn:hover {
+            background: rgba(255, 255, 255, 0.2);
+            color: var(--text-primary);
+            transform: translateY(-1px);
         }
 
         @keyframes glow {
@@ -375,12 +432,10 @@ class EnhancedMusicBot {
     <div class="background-animation"></div>
     
     <!-- Theme Switcher -->
-    <div style="position: fixed; top: 20px; right: 20px; z-index: 1000;">
-        <div style="display: flex; gap: 0px; background: rgba(255,255,255,0.2); backdrop-filter: blur(15px); border-radius: 25px; padding: 4px;">
-            <button id="autoThemeBtn" onclick="setTheme('auto')" style="background: linear-gradient(45deg, #4CAF50, #45a049); border: none; border-radius: 20px; padding: 8px 16px; color: white; cursor: pointer; font-size: 13px; font-weight: 600; transition: all 0.3s ease;">🌍 Auto</button>
-            <button id="lightThemeBtn" onclick="setTheme('light')" style="background: rgba(255,255,255,0.1); border: none; border-radius: 20px; padding: 8px 16px; color: white; cursor: pointer; font-size: 13px; font-weight: 600; transition: all 0.3s ease;">☀️ Light</button>
-            <button id="darkThemeBtn" onclick="setTheme('dark')" style="background: rgba(255,255,255,0.1); border: none; border-radius: 20px; padding: 8px 16px; color: white; cursor: pointer; font-size: 13px; font-weight: 600; transition: all 0.3s ease;">🌙 Dark</button>
-        </div>
+    <div class="theme-switcher">
+        <button id="auto-btn" class="theme-btn active" onclick="setTheme('auto')">🌍 Auto</button>
+        <button id="light-btn" class="theme-btn" onclick="setTheme('light')">☀️ Light</button>
+        <button id="dark-btn" class="theme-btn" onclick="setTheme('dark')">🌙 Dark</button>
     </div>
 
     <div class="container">
@@ -548,43 +603,39 @@ class EnhancedMusicBot {
     </div>
 
     <script>
-        // Theme switching functionality
+        // Theme System
         function setTheme(theme) {
-            // Clear all button highlights
-            document.getElementById('autoThemeBtn').style.background = 'rgba(255,255,255,0.1)';
-            document.getElementById('lightThemeBtn').style.background = 'rgba(255,255,255,0.1)';
-            document.getElementById('darkThemeBtn').style.background = 'rgba(255,255,255,0.1)';
+            const buttons = document.querySelectorAll('.theme-btn');
+            buttons.forEach(btn => btn.classList.remove('active'));
+            document.getElementById(theme + '-btn').classList.add('active');
             
-            // Highlight active button
             if (theme === 'auto') {
-                document.getElementById('autoThemeBtn').style.background = 'linear-gradient(45deg, #4CAF50, #45a049)';
-            } else if (theme === 'light') {
-                document.getElementById('lightThemeBtn').style.background = 'linear-gradient(45deg, #FFD700, #FFA500)';
-            } else if (theme === 'dark') {
-                document.getElementById('darkThemeBtn').style.background = 'linear-gradient(45deg, #6c757d, #495057)';
-            }
-            
-            // Apply theme changes to background animation element
-            const bgElement = document.querySelector('.background-animation');
-            if (theme === 'light') {
-                bgElement.style.background = 'linear-gradient(-45deg, #ffffff, #f8f9fa, #e9ecef, #dee2e6)';
-                document.body.style.color = '#333';
-            } else if (theme === 'dark') {
-                bgElement.style.background = 'linear-gradient(-45deg, #212529, #343a40, #495057, #6c757d)';
-                document.body.style.color = 'white';
+                // Auto theme based on time of day
+                const hour = new Date().getHours();
+                const autoTheme = (hour >= 6 && hour < 18) ? 'light' : 'dark';
+                document.documentElement.setAttribute('data-theme', autoTheme);
+                localStorage.setItem('theme', 'auto');
             } else {
-                // Auto theme - original animated gradient
-                bgElement.style.background = 'linear-gradient(-45deg, #667eea, #764ba2, #f093fb, #f5576c, #4facfe, #00f2fe)';
-                document.body.style.color = 'white';
+                document.documentElement.setAttribute('data-theme', theme);
+                localStorage.setItem('theme', theme);
             }
-            
-            localStorage.setItem('theme', theme);
-            console.log('Theme set to:', theme);
         }
 
-        // Load saved theme
-        const savedTheme = localStorage.getItem('theme') || 'auto';
-        setTheme(savedTheme);
+        // Initialize theme on page load
+        function initTheme() {
+            const savedTheme = localStorage.getItem('theme') || 'auto';
+            setTheme(savedTheme);
+        }
+
+        // Update auto theme every minute
+        setInterval(() => {
+            if (localStorage.getItem('theme') === 'auto') {
+                setTheme('auto');
+            }
+        }, 60000);
+
+        // Initialize theme
+        initTheme();
 
         // Update live music info
         async function updateLiveMusicInfo() {
