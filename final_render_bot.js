@@ -837,33 +837,16 @@ class EnhancedMusicBot {
                     song: 'Waiting for track info...',
                     source: 'Music Video Channel'
                 });
-                
-                // Look for music player embeds or messages
-                for (const message of messages.values()) {
-                    // Check if message has embeds with music player info
-                    if (message.embeds && message.embeds.length > 0) {
-                        const embed = message.embeds[0];
-                        console.log('🎵 Found embed:', {
-                            author: embed.author?.name,
-                            title: embed.title,
-                            description: embed.description?.substring(0, 100)
-                        });
-                        
-                        // Look for music player patterns in embed
-                        if (embed.author?.name || embed.title || embed.description) {
-                            const author = embed.author?.name || '';
-                            const title = embed.title || '';
-                            const description = embed.description || '';
-                            
-                            // Common music player patterns (including FlaviBot)
-                            if (author.includes('Spotify') || title.includes('Spotify') || 
-                                author.includes('YouTube') || title.includes('YouTube') ||
-                                author.includes('FlaviBot') || title.includes('FlaviBot') ||
-                                author.includes('Now playing') || description.includes('Now playing') || 
-                                description.includes('♪') || title.includes('Now playing')) {
-                                
-                                // Extract from FlaviBot format: **[Artist - Song Title](link)** - `duration`
-                                if (description && description.includes('**[') && description.includes('](')) {
+            } catch (error) {
+                console.error('❌ Now playing error:', error);
+                res.json({
+                    success: false,
+                    artist: 'Connection error',
+                    song: 'Please refresh',
+                    source: 'Music Video Channel'
+                });
+            }
+        });
                                     const match = description.match(/\*\*\[([^\]]+)\]\(([^)]+)\)\*\*/);
                                     if (match && match[1].includes(' - ')) {
                                         const parts = match[1].split(' - ');
