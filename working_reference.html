@@ -434,20 +434,7 @@
                         <p><strong>Source:</strong> <span id="musicSource">Music Video Channel</span></p>
                         <p><strong>Status:</strong> <span id="liveStatus">🔴 Live</span></p>
                         
-                        <!-- YouTube Audio Player -->
-                        <div id="audioPlayerContainer" style="margin: 20px 0; border-radius: 15px; overflow: hidden; background: rgba(0,0,0,0.3); border: 2px solid rgba(244, 63, 94, 0.3);">
-                            <div id="audioPlayer" style="width: 100%; height: 200px; display: flex; align-items: center; justify-content: center; color: rgba(255,255,255,0.7);">
-                                <div style="text-align: center;">
-                                    <div style="font-size: 3rem; margin-bottom: 10px;">🎵</div>
-                                    <div>Click "Play Song" to hear the current track</div>
-                                </div>
-                            </div>
-                        </div>
-                        
                         <div style="margin-top: 20px; display: flex; justify-content: center; gap: 15px; flex-wrap: wrap;">
-                            <button id="playSongBtn" onclick="playCurrentSong()" class="btn" style="background: #22c55e; padding: 12px 24px; font-size: 16px;">
-                                ▶️ Play Song
-                            </button>
                             <button id="muteToggle" onclick="toggleMute()" class="btn" style="background: #f43f5e; padding: 12px 24px; font-size: 16px;">
                                 🔊 Mute Stream
                             </button>
@@ -666,19 +653,23 @@
             
             async function refreshNowPlaying() {
                 try {
-                    const response = await fetch('/api/current-song');
+                    const response = await fetch('/now-playing');
                     const data = await response.json();
                     
-                    if (data.success && data.currentSong) {
-                        document.getElementById('currentArtist').textContent = data.currentSong.artist || 'Unknown Artist';
-                        document.getElementById('currentSong').textContent = data.currentSong.song || 'Unknown Song';
-                        document.getElementById('musicSource').textContent = data.currentSong.source || 'FlaviBot Music Channel';
+                    if (data.success) {
+                        document.getElementById('currentArtist').textContent = data.artist || 'Unknown Artist';
+                        document.getElementById('currentSong').textContent = data.song || 'Unknown Song';
+                        document.getElementById('musicSource').textContent = data.source || 'FlaviBot Music Channel';
                         
-                        // Store current song data for playing
+                        // Store current song data for future use
                         window.currentTrack = {
-                            artist: data.currentSong.artist,
-                            song: data.currentSong.song
+                            artist: data.artist,
+                            song: data.song
                         };
+                    } else {
+                        document.getElementById('currentArtist').textContent = data.artist || 'Listening for music...';
+                        document.getElementById('currentSong').textContent = data.song || 'Waiting for track info...';
+                        document.getElementById('musicSource').textContent = data.source || 'Music Video Channel';
                     }
                 } catch (error) {
                     console.log('Could not fetch now playing info');

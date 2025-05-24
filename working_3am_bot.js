@@ -159,10 +159,10 @@ class Working3AMBot {
         // Working now-playing endpoint that matches reference site
         this.app.get('/now-playing', async (req, res) => {
             try {
-                // Check if song data is recent (within 2 minutes)
-                const isRecent = (Date.now() - this.currentSong.lastUpdated) < 120000;
+                // Check if we have valid song data (extend time to 10 minutes for stability)
+                const isRecent = (Date.now() - this.currentSong.lastUpdated) < 600000;
                 
-                if (isRecent && this.currentSong.artist !== "Listening for music...") {
+                if (this.currentSong.artist !== "Listening for music..." && this.currentSong.artist !== "Unknown Artist") {
                     return res.json({
                         success: true,
                         artist: this.currentSong.artist,
