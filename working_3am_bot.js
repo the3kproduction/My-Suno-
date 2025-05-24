@@ -247,18 +247,16 @@ class Working3AMBot {
 
     async checkCurrentMusic() {
         try {
-            // Look for the new-songs channel specifically
-            const newSongsChannel = this.client.channels.cache.find(ch => 
-                ch.name && ch.name.includes('new-songs')
-            );
+            // Look for the specific channel where FlaviBot is playing
+            const musicChannel = this.client.channels.cache.get('1375419981658849342');
             
-            if (newSongsChannel) {
-                console.log('✅ Found new-songs channel, checking for active player...');
+            if (musicChannel) {
+                console.log('✅ Found FlaviBot music channel, checking for active player...');
                 
-                // Debug: Check all recent messages in new-songs
+                // Debug: Check all recent messages in the channel
                 try {
-                    const debugMessages = await newSongsChannel.messages.fetch({ limit: 10 });
-                    console.log(`🔍 Found ${debugMessages.size} messages in new-songs channel:`);
+                    const debugMessages = await musicChannel.messages.fetch({ limit: 10 });
+                    console.log(`🔍 Found ${debugMessages.size} messages in FlaviBot channel:`);
                     for (const msg of debugMessages.values()) {
                         if (msg.author.username && msg.author.username.toLowerCase().includes('flavi')) {
                             console.log(`  📝 FlaviBot message: ${msg.embeds[0]?.description || msg.content || 'No content'}`);
@@ -268,7 +266,7 @@ class Working3AMBot {
                     console.log('Debug check failed:', e.message);
                 }
                 
-                const lastMessage = await this.getLastMusicMessage(newSongsChannel);
+                const lastMessage = await this.getLastMusicMessage(musicChannel);
                 if (lastMessage) {
                     this.updateCurrentSong(lastMessage);
                     return;
