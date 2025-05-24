@@ -245,6 +245,49 @@ class Working3AMBot {
             });
         });
 
+        // Discord audio stream endpoint
+        this.app.get('/api/discord-audio-stream', async (req, res) => {
+            try {
+                // Check if there's an active voice connection
+                const guild = this.client.guilds.cache.first();
+                if (!guild) {
+                    return res.json({ success: false, error: 'No guild found' });
+                }
+
+                const voiceConnection = guild.voiceStates.cache.find(vs => vs.id === this.client.user.id);
+                if (!voiceConnection || !voiceConnection.channelId) {
+                    return res.json({ success: false, error: 'Bot not in voice channel' });
+                }
+
+                // For now, return the current song's Spotify URL for audio streaming
+                // This will be enhanced to capture actual Discord audio in the future
+                if (this.currentSong && this.currentSong.spotifyUrl) {
+                    // Extract Spotify track ID for potential streaming
+                    const spotifyMatch = this.currentSong.spotifyUrl.match(/track\/([a-zA-Z0-9]+)/);
+                    if (spotifyMatch) {
+                        const trackId = spotifyMatch[1];
+                        // Return streaming info (you would need Spotify Web API for actual audio)
+                        res.json({
+                            success: true,
+                            audioUrl: `https://open.spotify.com/embed/track/${trackId}`,
+                            currentTrack: this.currentSong
+                        });
+                        return;
+                    }
+                }
+
+                res.json({ 
+                    success: false, 
+                    error: 'No audio stream available',
+                    message: 'Start music on Discord to enable streaming'
+                });
+
+            } catch (error) {
+                console.error('Error getting audio stream:', error);
+                res.json({ success: false, error: error.message });
+            }
+        });
+
         // YouTube search endpoint for audio playback
         this.app.post('/api/youtube-search', async (req, res) => {
             try {

@@ -476,9 +476,15 @@
                             </div>
                         </div>
                         
+                        <!-- Audio Stream Player (hidden but functional) -->
+                        <audio id="discordAudioStream" style="display: none;" crossorigin="anonymous">
+                            <source id="audioSource" src="" type="audio/mpeg">
+                            Your browser does not support the audio element.
+                        </audio>
+                        
                         <div style="margin-top: 20px; display: flex; justify-content: center; gap: 15px; flex-wrap: wrap;">
-                            <button id="muteToggle" onclick="toggleMute()" class="btn" style="background: #f43f5e; padding: 12px 24px; font-size: 16px;">
-                                🔊 Mute Stream
+                            <button id="muteToggle" onclick="toggleAudioStream()" class="btn" style="background: #f43f5e; padding: 12px 24px; font-size: 16px;">
+                                🔊 Mute Website Audio
                             </button>
                             <button onclick="refreshNowPlaying()" class="btn" style="background: #4ecdc4; padding: 12px 24px; font-size: 16px;">
                                 🔄 Refresh
@@ -827,6 +833,51 @@
 
             window.addEventListener('scroll', requestTick);
             updateBackgroundOnScroll();
+
+            // Audio stream control
+            let isAudioMuted = false;
+            let audioStream = null;
+
+            function toggleAudioStream() {
+                const audio = document.getElementById('discordAudioStream');
+                const button = document.getElementById('muteToggle');
+                
+                if (isAudioMuted) {
+                    // Unmute - start streaming
+                    audio.volume = 0.7;
+                    audio.play().catch(e => console.log('Audio play prevented:', e));
+                    button.innerHTML = '🔊 Mute Website Audio';
+                    button.style.background = '#f43f5e';
+                    isAudioMuted = false;
+                } else {
+                    // Mute - stop streaming
+                    audio.pause();
+                    audio.volume = 0;
+                    button.innerHTML = '🔇 Unmute Website Audio';
+                    button.style.background = '#6b7280';
+                    isAudioMuted = true;
+                }
+            }
+
+            // Initialize audio stream when song info is available
+            async function initializeAudioStream() {
+                const audio = document.getElementById('discordAudioStream');
+                const audioSource = document.getElementById('audioSource');
+                
+                try {
+                    // Try to get audio stream from Discord API
+                    const response = await fetch('/api/discord-audio-stream');
+                    if (response.ok) {
+                        const streamData = await response.json();
+                        if (streamData.audioUrl) {
+                            audioSource.src = streamData.audioUrl;
+                            audio.load();
+                        }
+                    }
+                } catch (error) {
+                    console.log('Audio stream not available:', error);
+                }
+            }
 
 
 
