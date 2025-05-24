@@ -786,6 +786,102 @@ class EnhancedMusicBot {
             }
         });
 
+        // Remove profile endpoint
+        this.app.post('/remove-profile', async (req, res) => {
+            try {
+                const { index } = req.body;
+                
+                if (index < 0 || index >= this.sunoProfiles.length) {
+                    return res.json({ success: false, error: 'Invalid profile index' });
+                }
+                
+                const profile = this.sunoProfiles[index];
+                
+                // Remove from monitoring list
+                this.sunoProfiles.splice(index, 1);
+                
+                console.log(`🗑️ Removed profile: ${profile.name} (${profile.id})`);
+                
+                res.json({ 
+                    success: true, 
+                    message: `Profile "${profile.name}" removed from monitoring` 
+                });
+            } catch (error) {
+                console.error('❌ Remove profile error:', error);
+                res.json({ success: false, error: 'Failed to remove profile' });
+            }
+        });
+
+        // Now Playing endpoint for live music info
+        this.app.get('/now-playing', async (req, res) => {
+            try {
+                // Try to get the latest message from Music Video channel that might contain song info
+                const musicChannel = await this.client.channels.fetch(this.musicVideoChannelId);
+                const messages = await musicChannel.messages.fetch({ limit: 5 });
+                
+                let currentTrack = {
+                    artist: 'Listening for music...',
+                    song: 'Waiting for track info...',
+                    source: 'Music Video Channel'
+                };
+                
+                // Look for messages that might contain song info (from Flavibot or similar)
+                for (const message of messages.values()) {
+                    // Check if message has embeds with music info
+                    if (message.embeds && message.embeds.length > 0) {
+                        const embed = message.embeds[0];
+                        if (embed.title || embed.description) {
+                            // Try to extract artist and song from embed
+                            const title = embed.title || embed.description || '';
+                            const parts = title.split(' - ');
+                            if (parts.length >= 2) {
+                                currentTrack.artist = parts[0].trim();
+                                currentTrack.song = parts[1].trim();
+                                break;
+                            } else if (title.length > 0) {
+                                currentTrack.song = title.trim();
+                                currentTrack.artist = embed.author?.name || 'Unknown Artist';
+                                break;
+                            }
+                        }
+                    }
+                    
+                    // Check message content for song patterns
+                    const content = message.content;
+                    if (content.includes('Now playing:') || content.includes('♪') || content.includes('🎵')) {
+                        // Extract song info from text
+                        const songMatch = content.match(/(?:Now playing:|♪|🎵)\s*(.+)/i);
+                        if (songMatch) {
+                            const songInfo = songMatch[1].trim();
+                            const parts = songInfo.split(' - ');
+                            if (parts.length >= 2) {
+                                currentTrack.artist = parts[0].trim();
+                                currentTrack.song = parts[1].trim();
+                            } else {
+                                currentTrack.song = songInfo;
+                            }
+                            break;
+                        }
+                    }
+                }
+                
+                res.json({
+                    success: true,
+                    artist: currentTrack.artist,
+                    song: currentTrack.song,
+                    source: currentTrack.source
+                });
+            } catch (error) {
+                console.error('❌ Now playing error:', error);
+                res.json({
+                    success: false,
+                    artist: 'Error fetching info',
+                    song: 'Please check connection',
+                    source: 'Music Video Channel'
+                });
+            }
+        });
+
         this.app.listen(5000, () => {
             console.log('🌟 Web server running on port 5000');
         });
@@ -1444,33 +1540,25 @@ class EnhancedMusicBot {
                 <p>Discord Music Bot with YouTube Integration & Suno Monitoring</p>
             </div>
 
-            <!-- Connection Status -->
+            <!-- Live Music -->
             <div class="section">
-                <h2>🔊 Voice Connection Status</h2>
-                <div class="connection-status">
-                    <div class="status-item">
-                        <span class="status-label">Connection:</span>
-                        <span class="status-value ${this.connectionStatus.connected ? 'connected' : 'disconnected'}">
-                            ${this.connectionStatus.connected ? '✅ Connected' : '❌ Disconnected'}
-                        </span>
-                    </div>
-                    <div class="status-item">
-                        <span class="status-label">Channel:</span>
-                        <span class="status-value">${this.connectionStatus.channelName || 'None'}</span>
-                    </div>
-                    <div class="status-item">
-                        <span class="status-label">Audio Status:</span>
-                        <span class="status-value ${this.connectionStatus.playing ? 'playing' : 'idle'}">
-                            ${this.connectionStatus.playing ? '🎵 Playing' : '⏸️ Idle'}
-                        </span>
-                    </div>
-                    <div class="status-item">
-                        <span class="status-label">Bot Audio:</span>
-                        <span class="status-value ${this.connectionStatus.connected ? (this.connectionStatus.playing ? 'connected' : 'warning') : 'disconnected'}">
-                            ${this.connectionStatus.connected ? 
-                                (this.connectionStatus.playing ? '🔊 Audio Active' : '🔇 Check if unmuted in Discord') : 
-                                '❌ Not Connected'}
-                        </span>
+                <h2>🎵 Live Music Stream</h2>
+                <div class="stats-grid">
+                    <div class="stat-card" style="background: linear-gradient(135deg, rgba(244, 63, 94, 0.2), rgba(139, 69, 19, 0.2)); border: 2px solid rgba(244, 63, 94, 0.4);">
+                        <h3 id="musicStatus" style="color: #f43f5e;">🎶 Now Playing</h3>
+                        <p><strong>Artist:</strong> <span id="currentArtist">Listening for music...</span></p>
+                        <p><strong>Song:</strong> <span id="currentSong">Waiting for track info...</span></p>
+                        <p><strong>Source:</strong> <span id="musicSource">Music Video Channel</span></p>
+                        <p><strong>Status:</strong> <span id="liveStatus">🔴 Live</span></p>
+                        
+                        <div style="margin-top: 20px; display: flex; justify-content: center; gap: 15px;">
+                            <button id="muteToggle" onclick="toggleMute()" class="btn" style="background: #f43f5e; padding: 12px 24px; font-size: 16px;">
+                                🔊 Mute Stream
+                            </button>
+                            <button onclick="refreshNowPlaying()" class="btn" style="background: #4ecdc4; padding: 12px 24px; font-size: 16px;">
+                                🔄 Refresh
+                            </button>
+                        </div>
                     </div>
                 </div>
             </div>
@@ -1526,12 +1614,15 @@ class EnhancedMusicBot {
                     <button onclick="checkNow()" class="btn" style="background: linear-gradient(135deg, #4ecdc4, #44a08d);">⚡ Check Now</button>
                 </div>
                 <div class="grid">
-                    ${this.sunoProfiles.map(profile => `
+                    ${this.sunoProfiles.map((profile, index) => `
                         <div class="profile-card">
                             <h4>${profile.name}</h4>
                             <p><strong>Profile ID:</strong> ${profile.id}</p>
                             <p><strong>Last Checked:</strong> ${profile.lastChecked.toLocaleTimeString()}</p>
                             <p><strong>Status:</strong> <span style="color: #4ecdc4;">✅ Active</span></p>
+                            <div style="margin-top: 15px;">
+                                <button onclick="removeProfile(${index})" class="btn" style="background: #ff6b6b; padding: 8px 16px;">🗑️ Remove</button>
+                            </div>
                         </div>
                     `).join('')}
                 </div>
@@ -1654,6 +1745,64 @@ class EnhancedMusicBot {
                     alert('❌ Error denying profile: ' + error.message);
                 }
             }
+
+            async function removeProfile(index) {
+                if (confirm('Are you sure you want to remove this profile from monitoring?')) {
+                    try {
+                        const response = await fetch('/remove-profile', {
+                            method: 'POST',
+                            headers: { 'Content-Type': 'application/json' },
+                            body: JSON.stringify({ index })
+                        });
+                        
+                        const result = await response.json();
+                        if (result.success) {
+                            alert('🗑️ Profile removed from monitoring!');
+                            window.location.reload();
+                        } else {
+                            alert('❌ Failed to remove profile: ' + result.error);
+                        }
+                    } catch (error) {
+                        alert('❌ Error removing profile: ' + error.message);
+                    }
+                }
+            }
+
+            // Live Music Functions
+            let isMuted = false;
+            
+            function toggleMute() {
+                const muteButton = document.getElementById('muteToggle');
+                isMuted = !isMuted;
+                
+                if (isMuted) {
+                    muteButton.innerHTML = '🔇 Unmute Stream';
+                    muteButton.style.background = '#6b7280';
+                    document.getElementById('liveStatus').innerHTML = '🔇 Muted';
+                } else {
+                    muteButton.innerHTML = '🔊 Mute Stream';
+                    muteButton.style.background = '#f43f5e';
+                    document.getElementById('liveStatus').innerHTML = '🔴 Live';
+                }
+            }
+            
+            async function refreshNowPlaying() {
+                try {
+                    const response = await fetch('/now-playing');
+                    const data = await response.json();
+                    
+                    if (data.success) {
+                        document.getElementById('currentArtist').textContent = data.artist || 'Unknown Artist';
+                        document.getElementById('currentSong').textContent = data.song || 'Unknown Song';
+                        document.getElementById('musicSource').textContent = data.source || 'Music Video Channel';
+                    }
+                } catch (error) {
+                    console.log('Could not fetch now playing info');
+                }
+            }
+            
+            // Auto-refresh now playing every 30 seconds
+            setInterval(refreshNowPlaying, 30000);
 
             // Initialize theme when page loads
             document.addEventListener('DOMContentLoaded', initTheme);
