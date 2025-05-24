@@ -1,633 +1,637 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="en" data-theme="dark">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>3AM VERIFIED - Enhanced Music Bot</title>
+    <title>Enhanced Music Bot</title>
     <style>
-    * { margin: 0; padding: 0; box-sizing: border-box; }
-    
-    /* Theme Variables */
-    :root {
-        --bg-primary: linear-gradient(-45deg, #667eea, #764ba2, #ff6b6b, #4ecdc4, #45b7d1, #96ceb4, #feca57, #ff9ff3);
-        --bg-secondary: rgba(255, 255, 255, 0.1);
-        --text-primary: #ffffff;
-        --text-secondary: rgba(255, 255, 255, 0.7);
-        --border-color: rgba(255, 255, 255, 0.2);
-        --input-bg: rgba(255, 255, 255, 0.2);
-        --card-bg: rgba(255, 255, 255, 0.15);
-        --shadow: rgba(0, 0, 0, 0.3);
-    }
-    
-    [data-theme="light"] {
-        --bg-primary: linear-gradient(-45deg, #e3f2fd, #f3e5f5, #ffebee, #e0f2f1, #e1f5fe, #f1f8e9, #fff3e0, #fce4ec);
-        --bg-secondary: rgba(0, 0, 0, 0.05);
-        --text-primary: #333333;
-        --text-secondary: #666666;
-        --border-color: rgba(0, 0, 0, 0.1);
-        --input-bg: rgba(0, 0, 0, 0.05);
-        --card-bg: rgba(255, 255, 255, 0.8);
-        --shadow: rgba(0, 0, 0, 0.1);
-    }
-    
-    [data-theme="dark"] {
-        --bg-primary: linear-gradient(-45deg, #1a1a2e, #16213e, #0f3460, #533483, #2d1b69, #0f0f23, #1a1a2e, #16213e);
-        --bg-secondary: rgba(255, 255, 255, 0.05);
-        --text-primary: #ffffff;
-        --text-secondary: rgba(255, 255, 255, 0.6);
-        --border-color: rgba(255, 255, 255, 0.1);
-        --input-bg: rgba(255, 255, 255, 0.1);
-        --card-bg: rgba(255, 255, 255, 0.1);
-        --shadow: rgba(0, 0, 0, 0.5);
-    }
-    
-    @keyframes gentleGradient {
-        0% { background-position: 0% 50%; }
-        50% { background-position: 100% 50%; }
-        100% { background-position: 0% 50%; }
-    }
-    
-    @keyframes shimmer {
-        0% { transform: translateX(-100%); }
-        100% { transform: translateX(100%); }
-    }
-    
-    @keyframes scrollGradient {
-        0% { background-position: 0% 50%; }
-        50% { background-position: 100% 50%; }
-        100% { background-position: 0% 50%; }
-    }
-    
-    @keyframes floatParticles {
-        0% { transform: translateY(0px) rotate(0deg); opacity: 0; }
-        10% { opacity: 1; }
-        90% { opacity: 1; }
-        100% { transform: translateY(-100vh) rotate(360deg); opacity: 0; }
-    }
-    
-    body {
-        font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-        line-height: 1.6;
-        color: var(--text-primary);
-        background: var(--bg-primary);
-        background-size: 400% 400%;
-        animation: scrollGradient 15s ease infinite;
-        min-height: 100vh;
-        position: relative;
-        overflow-x: hidden;
-    }
-    
-    body::before {
-        content: '';
-        position: fixed;
-        top: 0;
-        left: 0;
-        width: 100%;
-        height: 100%;
-        background: 
-            radial-gradient(circle at 20% 80%, rgba(120, 119, 198, 0.3) 0%, transparent 50%),
-            radial-gradient(circle at 80% 20%, rgba(255, 119, 198, 0.3) 0%, transparent 50%),
-            radial-gradient(circle at 40% 40%, rgba(120, 219, 255, 0.3) 0%, transparent 50%);
-        pointer-events: none;
-        z-index: -1;
-    }
-    
-    .floating-particle {
-        position: fixed;
-        width: 4px;
-        height: 4px;
-        background: rgba(255, 255, 255, 0.6);
-        border-radius: 50%;
-        pointer-events: none;
-        z-index: 0;
-        animation: floatParticles linear infinite;
-    }
-    
-    .container {
-        max-width: 1200px;
-        margin: 0 auto;
-        padding: 20px;
-        position: relative;
-        z-index: 1;
-    }
-    
-    .header {
-        text-align: center;
-        margin-bottom: 40px;
-        padding: 40px 20px;
-        background: var(--card-bg);
-        border-radius: 20px;
-        backdrop-filter: blur(20px);
-        border: 1px solid var(--border-color);
-        box-shadow: 0 8px 32px var(--shadow);
-    }
-    
-    .verified-badge {
-        display: inline-flex;
-        align-items: center;
-        gap: 8px;
-        background: linear-gradient(135deg, #667eea, #764ba2);
-        color: white;
-        padding: 8px 16px;
-        border-radius: 25px;
-        font-weight: bold;
-        font-size: 14px;
-        box-shadow: 0 4px 15px rgba(102, 126, 234, 0.4);
-        margin-bottom: 20px;
-    }
-    
-    .header-top {
-        display: flex;
-        justify-content: flex-start;
-        align-items: center;
-        margin-bottom: 40px;
-        position: relative;
-    }
-    
-    .header-center {
-        display: flex;
-        justify-content: center;
-        align-items: center;
-        margin-bottom: 20px;
-    }
-    
-    .three-am {
-        font-size: 16px;
-        font-weight: 900;
-        letter-spacing: 1px;
-    }
-    
-    .verified-text {
-        font-size: 12px;
-        opacity: 0.9;
-    }
-    
-    .verified-checkmark {
-        background: rgba(255, 255, 255, 0.2);
-        border-radius: 50%;
-        width: 20px;
-        height: 20px;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        font-size: 12px;
-    }
-    
-    h1 {
-        font-size: 3rem;
-        margin-bottom: 10px;
-        background: linear-gradient(135deg, #667eea, #764ba2);
-        -webkit-background-clip: text;
-        -webkit-text-fill-color: transparent;
-        background-clip: text;
-    }
-    
-    .section {
-        background: var(--card-bg);
-        padding: 30px;
-        margin-bottom: 30px;
-        border-radius: 20px;
-        backdrop-filter: blur(20px);
-        border: 1px solid var(--border-color);
-        box-shadow: 0 8px 32px var(--shadow);
-    }
-    
-    h2 {
-        margin-bottom: 20px;
-        color: var(--text-primary);
-        font-size: 1.5rem;
-    }
-    
-    .stats-grid {
-        display: grid;
-        grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
-        gap: 20px;
-        margin-bottom: 20px;
-    }
-    
-    .btn {
-        background: linear-gradient(135deg, #667eea, #764ba2);
-        color: white;
-        padding: 12px 24px;
-        border: none;
-        border-radius: 10px;
-        cursor: pointer;
-        font-size: 16px;
-        font-weight: 600;
-        transition: all 0.3s ease;
-        box-shadow: 0 4px 15px rgba(102, 126, 234, 0.4);
-    }
-    
-    .btn:hover {
-        transform: translateY(-2px);
-        box-shadow: 0 6px 20px rgba(102, 126, 234, 0.6);
-    }
-    
-    .form-group {
-        margin-bottom: 20px;
-    }
-    
-    label {
-        display: block;
-        margin-bottom: 8px;
-        color: var(--text-primary);
-        font-weight: 600;
-    }
-    
-    input, textarea, select {
-        width: 100%;
-        padding: 12px;
-        border: 1px solid var(--border-color);
-        border-radius: 10px;
-        background: var(--input-bg);
-        color: var(--text-primary);
-        font-size: 16px;
-        backdrop-filter: blur(10px);
-    }
-    
-    input:focus, textarea:focus, select:focus {
-        outline: none;
-        border-color: #667eea;
-        box-shadow: 0 0 20px rgba(102, 126, 234, 0.3);
-    }
-    
-    .theme-toggle {
-        position: fixed;
-        top: 20px;
-        right: 20px;
-        z-index: 1000;
-        display: flex;
-        gap: 10px;
-        background: var(--card-bg);
-        padding: 10px;
-        border-radius: 15px;
-        backdrop-filter: blur(20px);
-        border: 1px solid var(--border-color);
-    }
-    
-    .theme-btn {
-        padding: 8px 16px;
-        border: none;
-        border-radius: 8px;
-        background: transparent;
-        color: var(--text-primary);
-        cursor: pointer;
-        transition: all 0.3s ease;
-        font-size: 14px;
-    }
-    
-    .theme-btn.active {
-        background: linear-gradient(135deg, #667eea, #764ba2);
-        color: white;
-        box-shadow: 0 2px 10px rgba(102, 126, 234, 0.4);
-    }
-    
-    @keyframes pulse {
-        0%, 100% { opacity: 1; }
-        50% { opacity: 0.6; }
-    }
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        :root {
+            --bg-primary: linear-gradient(-45deg, #667eea, #764ba2, #f093fb, #f5576c, #4facfe, #00f2fe);
+            --card-bg: rgba(255, 255, 255, 0.1);
+            --text-primary: #ffffff;
+            --text-secondary: rgba(255, 255, 255, 0.8);
+            --border-color: rgba(255, 255, 255, 0.2);
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: var(--bg-primary);
+            background-size: 400% 400%;
+            animation: gradientShift 15s ease infinite;
+            color: var(--text-primary);
+            min-height: 100vh;
+            position: relative;
+            overflow-x: hidden;
+        }
+
+        @keyframes gradientShift {
+            0% { background-position: 0% 50%; }
+            50% { background-position: 100% 50%; }
+            100% { background-position: 0% 50%; }
+        }
+
+        @keyframes floatUp {
+            0% {
+                transform: translateY(100vh) rotate(0deg);
+                opacity: 0;
+            }
+            10% {
+                opacity: 1;
+            }
+            90% {
+                opacity: 1;
+            }
+            100% {
+                transform: translateY(-100px) rotate(360deg);
+                opacity: 0;
+            }
+        }
+
+        @keyframes glow {
+            0%, 100% { box-shadow: 0 0 20px rgba(102, 126, 234, 0.5); }
+            50% { box-shadow: 0 0 40px rgba(102, 126, 234, 0.8), 0 0 60px rgba(118, 75, 162, 0.6); }
+        }
+
+        .floating-particle {
+            position: fixed;
+            width: 4px;
+            height: 4px;
+            background: rgba(255, 255, 255, 0.6);
+            border-radius: 50%;
+            pointer-events: none;
+            z-index: 1;
+            animation: floatUp 20s linear infinite;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+            position: relative;
+            z-index: 10;
+        }
+
+        .header {
+            text-align: center;
+            margin-bottom: 40px;
+            position: relative;
+        }
+
+        .discord-btn {
+            position: absolute;
+            top: 20px;
+            left: 20px;
+            background: linear-gradient(135deg, #5865f2, #7289da);
+            color: white;
+            border: none;
+            padding: 12px 20px;
+            border-radius: 12px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            z-index: 100;
+        }
+
+        .discord-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 20px rgba(88, 101, 242, 0.4);
+        }
+
+        .verified-badge {
+            display: inline-block;
+            width: 120px;
+            height: 120px;
+            background: linear-gradient(135deg, #667eea, #764ba2);
+            border-radius: 50%;
+            margin: 40px auto 20px;
+            position: relative;
+            animation: glow 3s ease-in-out infinite;
+        }
+
+        .verified-badge::before {
+            content: '';
+            position: absolute;
+            top: 10px;
+            left: 10px;
+            right: 10px;
+            bottom: 10px;
+            background: rgba(0, 0, 0, 0.3);
+            border-radius: 50%;
+        }
+
+        .badge-content {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            text-align: center;
+            z-index: 2;
+        }
+
+        .three-am {
+            font-size: 18px;
+            font-weight: 900;
+            color: #00f2fe;
+            text-shadow: 0 0 10px rgba(0, 242, 254, 0.8);
+        }
+
+        .verified-text {
+            font-size: 10px;
+            font-weight: 600;
+            color: rgba(255, 255, 255, 0.9);
+            margin-top: 2px;
+        }
+
+        .verified-checkmark {
+            position: absolute;
+            bottom: 5px;
+            right: 5px;
+            background: #00f2fe;
+            color: white;
+            width: 25px;
+            height: 25px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 14px;
+            font-weight: bold;
+        }
+
+        .main-title {
+            font-size: 3rem;
+            font-weight: 800;
+            margin: 20px 0 10px;
+            background: linear-gradient(45deg, #00f2fe, #4facfe, #f093fb);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            text-shadow: 0 0 30px rgba(0, 242, 254, 0.5);
+        }
+
+        .subtitle {
+            font-size: 1.2rem;
+            color: var(--text-secondary);
+            margin-bottom: 40px;
+        }
+
+        .section {
+            background: var(--card-bg);
+            backdrop-filter: blur(20px);
+            border: 1px solid var(--border-color);
+            border-radius: 20px;
+            padding: 30px;
+            margin-bottom: 30px;
+            transition: all 0.3s ease;
+        }
+
+        .section:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.2);
+        }
+
+        .section h2 {
+            font-size: 1.8rem;
+            margin-bottom: 20px;
+            color: var(--text-primary);
+        }
+
+        .now-playing {
+            background: linear-gradient(135deg, rgba(240, 147, 251, 0.2), rgba(245, 87, 108, 0.2));
+            border: 1px solid rgba(240, 147, 251, 0.3);
+        }
+
+        .music-info {
+            display: grid;
+            grid-template-columns: auto 1fr;
+            gap: 20px;
+            align-items: center;
+            margin-bottom: 20px;
+        }
+
+        .music-icon {
+            width: 80px;
+            height: 80px;
+            background: linear-gradient(135deg, #f093fb, #f5576c);
+            border-radius: 15px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 2rem;
+        }
+
+        .music-details h3 {
+            color: #00f2fe;
+            font-size: 1.1rem;
+            margin-bottom: 5px;
+        }
+
+        .music-details p {
+            color: var(--text-secondary);
+            margin: 2px 0;
+        }
+
+        .status-live {
+            display: inline-flex;
+            align-items: center;
+            gap: 5px;
+            color: #4ade80;
+            font-weight: 600;
+        }
+
+        .status-live::before {
+            content: '●';
+            animation: pulse 2s infinite;
+        }
+
+        @keyframes pulse {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.5; }
+        }
+
+        .button-group {
+            display: flex;
+            gap: 15px;
+            justify-content: center;
+            flex-wrap: wrap;
+        }
+
+        .btn {
+            padding: 12px 24px;
+            border: none;
+            border-radius: 12px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            color: white;
+        }
+
+        .btn-refresh {
+            background: linear-gradient(135deg, #4facfe, #00f2fe);
+        }
+
+        .btn-spotify {
+            background: linear-gradient(135deg, #1db954, #1ed760);
+        }
+
+        .btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 20px rgba(0, 0, 0, 0.3);
+        }
+
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 20px;
+            margin-bottom: 20px;
+        }
+
+        .stat-card {
+            background: rgba(255, 255, 255, 0.1);
+            padding: 20px;
+            border-radius: 15px;
+            text-align: center;
+            border: 1px solid rgba(255, 255, 255, 0.2);
+        }
+
+        .stat-number {
+            font-size: 2.5rem;
+            font-weight: 800;
+            margin-bottom: 5px;
+        }
+
+        .stat-card:nth-child(1) .stat-number { color: #f093fb; }
+        .stat-card:nth-child(2) .stat-number { color: #4ade80; }
+
+        .input-group {
+            margin-bottom: 20px;
+        }
+
+        .input-group label {
+            display: block;
+            margin-bottom: 8px;
+            color: var(--text-primary);
+            font-weight: 600;
+        }
+
+        .input-group input, .input-group textarea {
+            width: 100%;
+            padding: 12px 16px;
+            border: 1px solid var(--border-color);
+            border-radius: 10px;
+            background: rgba(255, 255, 255, 0.1);
+            color: var(--text-primary);
+            font-size: 16px;
+        }
+
+        .input-group input:focus, .input-group textarea:focus {
+            outline: none;
+            border-color: #4facfe;
+            box-shadow: 0 0 0 3px rgba(79, 172, 254, 0.2);
+        }
+
+        .theme-switcher {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            display: flex;
+            gap: 10px;
+            z-index: 1000;
+        }
+
+        .theme-btn {
+            padding: 8px 12px;
+            border: none;
+            border-radius: 8px;
+            background: rgba(255, 255, 255, 0.2);
+            color: white;
+            cursor: pointer;
+            font-size: 12px;
+        }
+
+        @media (max-width: 768px) {
+            .container {
+                padding: 15px;
+            }
+            
+            .main-title {
+                font-size: 2rem;
+            }
+            
+            .discord-btn {
+                position: relative;
+                top: auto;
+                left: auto;
+                margin-bottom: 20px;
+            }
+            
+            .button-group {
+                flex-direction: column;
+            }
+        }
     </style>
 </head>
 <body>
-    <!-- Theme Toggle -->
-    <div class="theme-toggle">
-        <button class="theme-btn active" onclick="setTheme('auto')" id="auto-btn">🌓 Auto</button>
+    <div class="theme-switcher">
+        <button class="theme-btn" onclick="setTheme('light')" id="light-btn">☀️ Auto</button>
         <button class="theme-btn" onclick="setTheme('light')" id="light-btn">☀️ Light</button>
         <button class="theme-btn" onclick="setTheme('dark')" id="dark-btn">🌙 Dark</button>
     </div>
 
     <div class="container">
         <div class="header">
-            <div class="header-top">
-                <button onclick="joinDiscord()" class="discord-btn" style="background: linear-gradient(135deg, #5865f2, #7289da); padding: 12px 24px; font-size: 16px; font-weight: 600; box-shadow: 0 4px 15px rgba(88, 101, 242, 0.4); border: none; border-radius: 12px; color: white; cursor: pointer; transition: all 0.3s ease; transform: translateY(0);">
-                    💬 Join Discord
-                </button>
-            </div>
-            <div class="header-center">
-                <div class="verified-badge">
+            <button onclick="joinDiscord()" class="discord-btn">
+                💬 Join Discord
+            </button>
+            
+            <div class="verified-badge">
+                <div class="badge-content">
                     <div class="three-am">3AM</div>
                     <div class="verified-text">VERIFIED</div>
-                    <div class="verified-checkmark">✓</div>
                 </div>
+                <div class="verified-checkmark">✓</div>
             </div>
-            <h1>Enhanced Music Bot</h1>
-            <p>Discord Music Bot with YouTube Integration & Suno Monitoring</p>
+            
+            <h1 class="main-title">Enhanced Music Bot</h1>
+            <p class="subtitle">Discord Music Bot with YouTube Integration & Suno Monitoring</p>
         </div>
 
         <!-- Live Music Stream -->
-        <div class="section">
+        <div class="section now-playing">
             <h2>🎵 Live Music Stream</h2>
-            <div class="stats-grid">
-                <div class="stat-card" style="background: linear-gradient(135deg, rgba(244, 63, 94, 0.15), rgba(139, 92, 246, 0.15)); border: 2px solid rgba(244, 63, 94, 0.3); backdrop-filter: blur(15px); position: relative; overflow: hidden;">
-                    <!-- Animated background effect -->
-                    <div style="position: absolute; top: 0; left: 0; right: 0; bottom: 0; background: linear-gradient(45deg, transparent, rgba(244, 63, 94, 0.1), transparent); animation: shimmer 3s infinite; pointer-events: none;"></div>
-                    
-                    <!-- Header with glow effect -->
-                    <div style="text-align: center; margin-bottom: 25px; position: relative; z-index: 2;">
-                        <h3 style="color: #f43f5e; margin: 0; font-size: 1.8rem; text-shadow: 0 0 20px rgba(244, 63, 94, 0.8), 0 0 40px rgba(244, 63, 94, 0.4);">
-                            🎶 Live Music Stream
-                        </h3>
-                        <div style="height: 2px; background: linear-gradient(90deg, transparent, #f43f5e, #8b5cf6, #f43f5e, transparent); margin: 10px auto; width: 250px; border-radius: 2px; box-shadow: 0 0 10px rgba(244, 63, 94, 0.5);"></div>
-                    </div>
-                    
-                    <div style="position: relative; z-index: 2;">
-                        <!-- Artist Display -->
-                        <div style="display: flex; align-items: center; margin-bottom: 18px; padding: 15px; background: rgba(0,0,0,0.3); border-radius: 12px; border-left: 4px solid #f43f5e; backdrop-filter: blur(10px); box-shadow: 0 4px 15px rgba(0,0,0,0.2);">
-                            <div style="width: 50px; height: 50px; background: linear-gradient(135deg, #f43f5e, #ec4899); border-radius: 50%; display: flex; align-items: center; justify-content: center; margin-right: 15px; box-shadow: 0 0 20px rgba(244, 63, 94, 0.6);">
-                                <span style="font-size: 20px;">🎤</span>
-                            </div>
-                            <div style="flex: 1;">
-                                <h4 style="color: #f43f5e; margin: 0; font-size: 0.9rem; text-transform: uppercase; letter-spacing: 1px; text-shadow: 0 0 10px rgba(244, 63, 94, 0.5);">Artist</h4>
-                                <div style="color: white; font-size: 1.1rem; font-weight: 600; margin-top: 4px;" id="currentArtist">Listening for music...</div>
-                            </div>
-                        </div>
-
-                        <!-- Track Display -->
-                        <div style="display: flex; align-items: center; margin-bottom: 18px; padding: 15px; background: rgba(0,0,0,0.3); border-radius: 12px; border-left: 4px solid #8b5cf6; backdrop-filter: blur(10px); box-shadow: 0 4px 15px rgba(0,0,0,0.2);">
-                            <div style="width: 50px; height: 50px; background: linear-gradient(135deg, #8b5cf6, #7c3aed); border-radius: 50%; display: flex; align-items: center; justify-content: center; margin-right: 15px; box-shadow: 0 0 20px rgba(139, 92, 246, 0.6);">
-                                <span style="font-size: 20px;">🎵</span>
-                            </div>
-                            <div style="flex: 1;">
-                                <h4 style="color: #8b5cf6; margin: 0; font-size: 0.9rem; text-transform: uppercase; letter-spacing: 1px; text-shadow: 0 0 10px rgba(139, 92, 246, 0.5);">Track</h4>
-                                <div style="color: white; font-size: 1.1rem; font-weight: 600; margin-top: 4px;" id="currentSong">Waiting for track info...</div>
-                            </div>
-                        </div>
-
-                        <!-- Source Display -->
-                        <div style="display: flex; align-items: center; margin-bottom: 18px; padding: 15px; background: rgba(0,0,0,0.3); border-radius: 12px; border-left: 4px solid #14b8a6; backdrop-filter: blur(10px); box-shadow: 0 4px 15px rgba(0,0,0,0.2);">
-                            <div style="width: 50px; height: 50px; background: linear-gradient(135deg, #14b8a6, #0891b2); border-radius: 50%; display: flex; align-items: center; justify-content: center; margin-right: 15px; box-shadow: 0 0 20px rgba(20, 184, 166, 0.6);">
-                                <span style="font-size: 20px;">📡</span>
-                            </div>
-                            <div style="flex: 1;">
-                                <h4 style="color: #14b8a6; margin: 0; font-size: 0.9rem; text-transform: uppercase; letter-spacing: 1px; text-shadow: 0 0 10px rgba(20, 184, 166, 0.5);">Source</h4>
-                                <div style="color: white; font-size: 1.1rem; font-weight: 600; margin-top: 4px;" id="musicSource">FlaviBot Music Channel</div>
-                            </div>
-                        </div>
-
-                        <!-- Status Display -->
-                        <div style="display: flex; align-items: center; margin-bottom: 25px; padding: 15px; background: rgba(0,0,0,0.3); border-radius: 12px; border-left: 4px solid #22c55e; backdrop-filter: blur(10px); box-shadow: 0 4px 15px rgba(0,0,0,0.2);">
-                            <div style="width: 50px; height: 50px; background: linear-gradient(135deg, #22c55e, #16a34a); border-radius: 50%; display: flex; align-items: center; justify-content: center; margin-right: 15px; box-shadow: 0 0 20px rgba(34, 197, 94, 0.6);">
-                                <span style="font-size: 20px;">🟢</span>
-                            </div>
-                            <div style="flex: 1;">
-                                <h4 style="color: #22c55e; margin: 0; font-size: 0.9rem; text-transform: uppercase; letter-spacing: 1px; text-shadow: 0 0 10px rgba(34, 197, 94, 0.5);">Status</h4>
-                                <div style="color: white; font-size: 1.1rem; font-weight: 600; margin-top: 4px;" id="liveStatus">🔴 Live</div>
-                            </div>
-                        </div>
-                        
-                        <!-- Control Buttons -->
-                        <div style="display: flex; justify-content: center; gap: 15px; flex-wrap: wrap;">
-                            <button onclick="joinDiscord()" style="background: linear-gradient(135deg, #5865f2, #7289da); padding: 12px 24px; font-size: 14px; font-weight: 600; box-shadow: 0 4px 15px rgba(88, 101, 242, 0.4); border: none; border-radius: 10px; color: white; cursor: pointer; transition: all 0.3s ease; transform: translateY(0);">
-                                💬 Join Discord
-                            </button>
-                            <button onclick="refreshNowPlaying()" style="background: linear-gradient(135deg, #14b8a6, #0891b2); padding: 12px 24px; font-size: 14px; font-weight: 600; box-shadow: 0 4px 15px rgba(20, 184, 166, 0.4); border: none; border-radius: 10px; color: white; cursor: pointer; transition: all 0.3s ease; transform: translateY(0);">
-                                🔄 Refresh Now Playing
-                            </button>
-                            <button onclick="openSpotify()" style="background: linear-gradient(135deg, #22c55e, #16a34a); padding: 12px 24px; font-size: 14px; font-weight: 600; box-shadow: 0 4px 15px rgba(34, 197, 94, 0.4); border: none; border-radius: 10px; color: white; cursor: pointer; transition: all 0.3s ease; transform: translateY(0);">
-                                🎵 Open on Spotify
-                            </button>
-                        </div>
-                    </div>
+            <div class="music-info">
+                <div class="music-icon">🎵</div>
+                <div class="music-details">
+                    <h3 class="status-live">NOW PLAYING</h3>
+                    <p><strong>Artist:</strong> <span id="artist">Listening for music...</span></p>
+                    <p><strong>Song:</strong> <span id="song">Waiting for track info...</span></p>
+                    <p><strong>Source:</strong> <span id="source">FlaviBot Player</span></p>
+                    <p><strong>Status:</strong> <span class="status-live">🔴 Live</span></p>
                 </div>
+            </div>
+            <div class="button-group">
+                <button class="btn btn-refresh" onclick="refreshNowPlaying()">🔄 Refresh</button>
+                <button class="btn btn-spotify" onclick="openSpotify()">🎵 Open on Spotify</button>
             </div>
         </div>
 
-        <!-- Premium Suno Monitoring - Moved before Profile Monitoring -->
+        <!-- Premium Suno Monitoring -->
         <div class="section">
             <h2>🎵 Premium Suno Monitoring</h2>
             <div class="stats-grid">
-                <div style="background: rgba(78,205,196,0.2); padding: 20px; border-radius: 15px; text-align: center; border: 1px solid rgba(78,205,196,0.3);">
-                    <h3 style="margin-top: 0; color: #4ecdc4;">🎵 Songs Posted</h3>
-                    <div style="font-size: 3rem; font-weight: bold; color: #4ecdc4; margin: 10px 0;">0</div>
-                    <p style="margin-bottom: 0; opacity: 0.8;">Auto-posted with reactions</p>
+                <div class="stat-card">
+                    <div class="stat-number" id="songs-posted">0</div>
+                    <div>Songs Posted</div>
+                    <small>Auto-posted with reactions</small>
                 </div>
-                <div style="background: rgba(255,100,100,0.2); padding: 20px; border-radius: 15px; text-align: center; border: 1px solid rgba(255,100,100,0.3);">
-                    <h3 style="margin-top: 0; color: #f87171;">👥 Profiles Monitored</h3>
-                    <div style="font-size: 3rem; font-weight: bold; color: #f87171; margin: 10px 0;">1</div>
-                    <p style="margin-bottom: 0; opacity: 0.8;">3kloudz actively tracked</p>
+                <div class="stat-card">
+                    <div class="stat-number" id="profiles-monitored">1</div>
+                    <div>Profiles Monitored</div>
+                    <small>3kloudz actively tracked</small>
                 </div>
             </div>
-            <div style="background: rgba(255,255,255,0.1); padding: 20px; border-radius: 15px; margin-top: 20px; border: 1px solid rgba(255,255,255,0.2);">
-                <h3 style="margin-top: 0;">🔗 Active Monitoring Status</h3>
+            
+            <div class="stat-card" style="margin-bottom: 20px;">
+                <h3>🔗 Active Monitoring Status</h3>
                 <p><strong>Primary Profile:</strong> 3kloudz</p>
                 <p><strong>Check Frequency:</strong> Every 3 minutes</p>
-                <p><strong>Status:</strong> <span style="color: #4ade80; font-weight: bold;">🟢 ACTIVE</span></p>
-                <p><strong>Last Check:</strong> <span id="lastCheck">Checking now...</span></p>
-                <div style="background: rgba(255,255,255,0.1); padding: 15px; border-radius: 10px; margin-top: 15px; border: 1px solid rgba(255,255,255,0.2);">
-                    <h4 style="margin-top: 0; color: #4ade80;">🤖 How Premium Monitoring Works</h4>
-                    <p style="margin-bottom: 10px; opacity: 0.9;"><strong>Step 1:</strong> Bot automatically monitors the 3kloudz Suno profile 24/7</p>
-                    <p style="margin-bottom: 10px; opacity: 0.9;"><strong>Step 2:</strong> When a new song is detected, bot extracts full metadata and artwork</p>
-                    <p style="margin-bottom: 10px; opacity: 0.9;"><strong>Step 3:</strong> Bot posts the song to Discord with rich formatting and reactions</p>
-                    <p style="margin-bottom: 0; opacity: 0.9;"><strong>Step 4:</strong> No manual intervention needed - completely automated process!</p>
-                </div>
+                <p><strong>Status:</strong> <span class="status-live">🟢 ACTIVE</span></p>
+                <p><strong>Last Check:</strong> <span id="last-check">Checking now...</span></p>
             </div>
         </div>
 
-        <!-- Suno Auto-Post -->
+        <!-- Auto-Post Suno Song -->
         <div class="section">
-            <h2>🎵 Suno Auto-Post</h2>
-            <form onsubmit="submitSunoUrl(event)">
-                <div class="form-group">
-                    <label>Suno Song URL</label>
-                    <input type="text" id="sunoUrl" placeholder="https://suno.com/song/..." required>
-                </div>
-                <button type="submit" class="btn">🤖 Auto-Post with Smart Detection</button>
-            </form>
-            <div id="sunoStatus" style="margin-top: 15px;"></div>
-            <div style="background: rgba(255,255,255,0.1); padding: 15px; border-radius: 10px; margin-top: 15px; border: 1px solid rgba(255,255,255,0.2);">
-                <h4 style="margin-top: 0; color: #4ade80;">🤖 Smart Auto-Detection</h4>
-                <p style="margin-bottom: 0; opacity: 0.9;">Your bot automatically extracts the real song title and artwork from Suno URLs using advanced detection technology. No manual input needed!</p>
+            <h2>🎵 Auto-Post Suno Song</h2>
+            <div class="input-group">
+                <label for="suno-url">Suno Song URL</label>
+                <input type="url" id="suno-url" placeholder="https://suno.com/song/..." />
+            </div>
+            <div class="button-group">
+                <button class="btn btn-refresh" onclick="autoPost()">🚀 Auto-Post with Smart Detection</button>
+            </div>
+            
+            <div style="background: rgba(0, 242, 254, 0.1); border: 1px solid rgba(0, 242, 254, 0.3); border-radius: 10px; padding: 15px; margin-top: 20px;">
+                <h4 style="color: #00f2fe; margin-bottom: 10px;">🤖 Smart Auto-Detection</h4>
+                <p style="color: rgba(255, 255, 255, 0.8);">Your bot automatically extracts the real song title and artwork from Suno URLs using advanced detection technology. No manual input needed!</p>
             </div>
         </div>
 
         <!-- Suno Profile Monitoring -->
         <div class="section">
             <h2>👥 Suno Profile Monitoring</h2>
-            <div class="admin-controls" style="margin-bottom: 30px;">
-                <button onclick="testMonitoring()" class="btn" style="background: linear-gradient(135deg, #667eea, #764ba2);">🔍 Test Monitoring</button>
-                <button onclick="checkNow()" class="btn" style="background: linear-gradient(135deg, #4ecdc4, #44a08d);">⚡ Check Now</button>
+            
+            <div style="background: rgba(79, 172, 254, 0.1); border: 1px solid rgba(79, 172, 254, 0.3); border-radius: 10px; padding: 20px; margin-bottom: 20px;">
+                <h3>Sample Artist</h3>
+                <p><strong>Profile ID:</strong> 3kloudz</p>
+                <p><strong>Last Checked:</strong> 2:04:35 AM</p>
+                <p><strong>Status:</strong> <span class="status-live">🟢 Active</span></p>
+                <button class="btn" style="background: linear-gradient(135deg, #f093fb, #f5576c); margin-top: 10px;">Remove</button>
             </div>
-            <div class="grid">
-                <div class="profile-card">
-                    <h4>Sample Artist</h4>
-                    <p><strong>Profile ID:</strong> 3kloudz</p>
-                    <p><strong>Last Checked:</strong> 4:29:13 AM</p>
-                    <p><strong>Status:</strong> <span style="color: #4ecdc4;">✅ Active</span></p>
-                </div>
-            </div>
-        </div>
 
-        <!-- Request Profile Monitoring -->
-        <div class="section">
-            <h2>📝 Request Profile Monitoring</h2>
-            <form onsubmit="submitProfileRequest(event)">
-                <div class="form-group">
-                    <label>Artist Name</label>
-                    <input type="text" id="artistName" placeholder="Enter artist name" required>
-                </div>
-                <div class="form-group">
-                    <label>Suno Profile URL</label>
-                    <input type="text" id="profileUrl" placeholder="https://suno.com/@username" required>
-                </div>
-                <div class="form-group">
-                    <label>Reason for Request</label>
-                    <textarea id="requestReason" placeholder="Why should we monitor this profile?" rows="3" required></textarea>
-                </div>
-                <button type="submit" class="btn">📋 Submit Request</button>
-            </form>
-            <div id="requestStatus" style="margin-top: 15px;"></div>
+            <h3>📝 Request Profile Monitoring</h3>
+            <p style="margin-bottom: 20px; color: var(--text-secondary);">To request monitoring for a Suno profile, please follow these steps:</p>
+            
+            <ol style="margin-bottom: 20px; color: var(--text-secondary); line-height: 1.6;">
+                <li>Find the Suno profile you want to monitor</li>
+                <li>Copy the profile ID from the URL</li>
+                <li>Fill out the form below with accurate information</li>
+                <li>Submit your request for review</li>
+            </ol>
+            
+            <div class="input-group">
+                <label for="profile-id">Suno Profile ID</label>
+                <input type="text" id="profile-id" placeholder="Enter Suno Profile ID" />
+            </div>
+            
+            <div class="input-group">
+                <label for="artist-name">Artist/Profile Name</label>
+                <input type="text" id="artist-name" placeholder="Artist or profile name" />
+            </div>
+            
+            <div class="input-group">
+                <label for="user-name">Your Name (Optional)</label>
+                <input type="text" id="user-name" placeholder="Your name" />
+            </div>
+            
+            <div class="input-group">
+                <label for="request-reason">Reason for Request (Optional)</label>
+                <textarea id="request-reason" rows="3" placeholder="Why should this profile be monitored?"></textarea>
+            </div>
+            
+            <div class="button-group">
+                <button class="btn btn-refresh" onclick="submitRequest()">📝 Submit Request</button>
+            </div>
         </div>
     </div>
 
     <script>
-        // Theme System
+        // Global variables
+        let currentSong = '';
+        let spotifyUrl = '';
+
+        // Theme management
         function setTheme(theme) {
-            const buttons = document.querySelectorAll('.theme-btn');
-            buttons.forEach(btn => btn.classList.remove('active'));
-            document.getElementById(theme + '-btn').classList.add('active');
-            
-            if (theme === 'auto') {
-                const hour = new Date().getHours();
-                const autoTheme = (hour >= 6 && hour < 18) ? 'light' : 'dark';
-                document.documentElement.setAttribute('data-theme', autoTheme);
-                localStorage.setItem('theme', 'auto');
-            } else {
-                document.documentElement.setAttribute('data-theme', theme);
-                localStorage.setItem('theme', theme);
-            }
+            document.documentElement.setAttribute('data-theme', theme);
+            localStorage.setItem('theme', theme);
         }
 
         function initTheme() {
-            const savedTheme = localStorage.getItem('theme') || 'auto';
+            const savedTheme = localStorage.getItem('theme') || 'dark';
             setTheme(savedTheme);
         }
 
-        setInterval(() => {
-            if (localStorage.getItem('theme') === 'auto') {
-                setTheme('auto');
-            }
-        }, 60000);
-
-        async function refreshNowPlaying() {
-            try {
-                const response = await fetch('/now-playing');
-                const data = await response.json();
-                
-                if (data.success) {
-                    document.getElementById('currentArtist').textContent = data.artist || 'Unknown Artist';
-                    document.getElementById('currentSong').textContent = data.song || 'Unknown Song';
-                    document.getElementById('musicSource').textContent = data.source || 'FlaviBot Music Channel';
-                    
-                    window.currentTrack = {
-                        artist: data.artist,
-                        song: data.song
-                    };
-                } else {
-                    document.getElementById('currentArtist').textContent = data.artist || 'Listening for music...';
-                    document.getElementById('currentSong').textContent = data.song || 'Waiting for track info...';
-                    document.getElementById('musicSource').textContent = 'FlaviBot Music Channel';
-                }
-            } catch (error) {
-                console.error('Error refreshing now playing:', error);
-                document.getElementById('currentArtist').textContent = 'Connection Error';
-                document.getElementById('currentSong').textContent = 'Could not fetch song info';
-            }
+        // Discord functionality
+        function joinDiscord() {
+            window.open('https://discord.gg/your-discord-server', '_blank');
         }
 
-        function joinDiscord() {
-            window.open('https://discord.gg/your-server', '_blank');
+        // Music functions
+        async function refreshNowPlaying() {
+            try {
+                const response = await fetch('/api/current-song');
+                const data = await response.json();
+                
+                if (data.success && data.song) {
+                    document.getElementById('artist').textContent = data.song.artist || 'Unknown Artist';
+                    document.getElementById('song').textContent = data.song.title || 'Unknown Song';
+                    document.getElementById('source').textContent = data.song.source || 'FlaviBot Player';
+                    currentSong = data.song.title;
+                    spotifyUrl = data.song.spotifyUrl || '';
+                } else {
+                    document.getElementById('artist').textContent = 'Listening for music...';
+                    document.getElementById('song').textContent = 'Waiting for track info...';
+                }
+            } catch (error) {
+                console.error('Error fetching current song:', error);
+                document.getElementById('artist').textContent = 'Connection error';
+                document.getElementById('song').textContent = 'Unable to fetch song info';
+            }
         }
 
         function openSpotify() {
-            if (window.currentTrack && window.currentTrack.artist && window.currentTrack.song) {
-                const query = encodeURIComponent(`${window.currentTrack.artist} ${window.currentTrack.song}`);
-                window.open(`https://open.spotify.com/search/${query}`, '_blank');
+            if (spotifyUrl) {
+                window.open(spotifyUrl, '_blank');
             } else {
-                window.open('https://open.spotify.com/', '_blank');
+                alert('No Spotify URL available for current song');
             }
         }
 
-        async function submitSunoUrl(event) {
-            event.preventDefault();
-            const url = document.getElementById('sunoUrl').value;
-            const status = document.getElementById('sunoStatus');
-            
-            status.innerHTML = '🔄 Processing Suno URL...';
-            
+        // Suno functions
+        async function autoPost() {
+            const url = document.getElementById('suno-url').value;
+            if (!url) {
+                alert('Please enter a Suno URL');
+                return;
+            }
+
             try {
-                const response = await fetch('/post-suno', {
+                const response = await fetch('/api/auto-post', {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify({ url })
                 });
                 
-                const result = await response.json();
-                
-                if (result.success) {
-                    status.innerHTML = `✅ Successfully posted: ${result.title}`;
-                    document.getElementById('sunoUrl').value = '';
+                const data = await response.json();
+                if (data.success) {
+                    alert('Song posted successfully!');
+                    document.getElementById('suno-url').value = '';
                 } else {
-                    status.innerHTML = `❌ Error: ${result.error}`;
+                    alert('Error posting song: ' + data.error);
                 }
             } catch (error) {
-                status.innerHTML = '❌ Network error occurred';
+                alert('Network error: ' + error.message);
             }
         }
 
-        async function submitProfileRequest(event) {
-            event.preventDefault();
-            const artistName = document.getElementById('artistName').value;
-            const profileUrl = document.getElementById('profileUrl').value;
-            const reason = document.getElementById('requestReason').value;
-            const status = document.getElementById('requestStatus');
-            
-            status.innerHTML = '📤 Submitting request...';
-            
+        async function submitRequest() {
+            const profileId = document.getElementById('profile-id').value;
+            const artistName = document.getElementById('artist-name').value;
+            const userName = document.getElementById('user-name').value;
+            const reason = document.getElementById('request-reason').value;
+
+            if (!profileId || !artistName) {
+                alert('Please fill in the required fields');
+                return;
+            }
+
             try {
-                const response = await fetch('/request-profile', {
+                const response = await fetch('/api/request-monitoring', {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ artistName, profileUrl, reason })
+                    body: JSON.stringify({
+                        profileId,
+                        artistName,
+                        userName,
+                        reason
+                    })
                 });
                 
-                const result = await response.json();
-                
-                if (result.success) {
-                    status.innerHTML = '✅ Request submitted successfully!';
-                    document.getElementById('artistName').value = '';
-                    document.getElementById('profileUrl').value = '';
-                    document.getElementById('requestReason').value = '';
+                const data = await response.json();
+                if (data.success) {
+                    alert('Request submitted successfully!');
+                    // Clear form
+                    document.getElementById('profile-id').value = '';
+                    document.getElementById('artist-name').value = '';
+                    document.getElementById('user-name').value = '';
+                    document.getElementById('request-reason').value = '';
                 } else {
-                    status.innerHTML = `❌ Error: ${result.error}`;
+                    alert('Error submitting request: ' + data.error);
                 }
             } catch (error) {
-                status.innerHTML = '❌ Network error occurred';
-            }
-        }
-
-        async function testMonitoring() {
-            try {
-                const response = await fetch('/test-monitoring');
-                const result = await response.json();
-                alert(result.message || 'Test completed');
-            } catch (error) {
-                alert('Test failed: ' + error.message);
-            }
-        }
-
-        async function checkNow() {
-            try {
-                const response = await fetch('/check-now');
-                const result = await response.json();
-                alert(result.message || 'Check completed');
-            } catch (error) {
-                alert('Check failed: ' + error.message);
+                alert('Network error: ' + error.message);
             }
         }
 
         // Create floating particles
         function createFloatingParticles() {
-            for (let i = 0; i < 50; i++) {
+            for (let i = 0; i < 30; i++) {
                 setTimeout(() => {
                     const particle = document.createElement('div');
                     particle.className = 'floating-particle';
