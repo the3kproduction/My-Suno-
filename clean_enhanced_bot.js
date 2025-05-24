@@ -526,9 +526,9 @@ class EnhancedMusicBot {
                     document.getElementById('songName').textContent = data.song;
                     document.getElementById('sourceInfo').textContent = data.source || 'FlaviBot Player';
                 } else {
-                    document.getElementById('artistName').textContent = '3Kloudz';
-                    document.getElementById('songName').textContent = "Don't Want To Fight No More";
-                    document.getElementById('sourceInfo').textContent = 'FlaviBot Player';
+                    document.getElementById('artistName').textContent = data.artist || 'Not connected';
+                    document.getElementById('songName').textContent = data.song || 'Use Discord commands to start music';
+                    document.getElementById('sourceInfo').textContent = data.source || 'FlaviBot Player';
                 }
             } catch (error) {
                 console.log('Live music update error:', error);
