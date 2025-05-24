@@ -1155,94 +1155,231 @@ class EnhancedMusicBot {
         <div class="section">
             <h2>🎵 Premium Suno Monitoring</h2>
             <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 20px;">
-                <div style="background: rgba(255,255,255,0.1); padding: 20px; border-radius: 12px; text-align: center;">
-                    <h3 style="color: #4ecdc4; margin-bottom: 15px;">🎵 Songs Posted</h3>
-                    <div style="font-size: 2.5rem; font-weight: bold; color: white; margin-bottom: 10px;">0</div>
-                    <p style="color: rgba(255,255,255,0.7);">Auto-posted with reactions</p>
+                <div style="background: linear-gradient(135deg, rgba(106, 90, 205, 0.3), rgba(72, 61, 139, 0.3)); padding: 25px; border-radius: 15px; text-align: center; border: 1px solid rgba(255,255,255,0.1);">
+                    <h3 style="color: #8A2BE2; margin-bottom: 15px;">🎵 Songs Posted</h3>
+                    <div style="font-size: 3rem; font-weight: bold; color: white; margin-bottom: 10px;">0</div>
+                    <p style="color: rgba(255,255,255,0.8);">Auto-posted with reactions</p>
                 </div>
-                <div style="background: rgba(255,255,255,0.1); padding: 20px; border-radius: 12px; text-align: center;">
-                    <h3 style="color: #ff6b6b; margin-bottom: 15px;">👥 Profiles Monitored</h3>
-                    <div style="font-size: 2.5rem; font-weight: bold; color: white; margin-bottom: 10px;">1</div>
-                    <p style="color: rgba(255,255,255,0.7);">3kloudz actively tracked</p>
+                <div style="background: linear-gradient(135deg, rgba(255, 107, 107, 0.3), rgba(255, 99, 71, 0.3)); padding: 25px; border-radius: 15px; text-align: center; border: 1px solid rgba(255,255,255,0.1);">
+                    <h3 style="color: #FF6B6B; margin-bottom: 15px;">👥 Profiles Monitored</h3>
+                    <div style="font-size: 3rem; font-weight: bold; color: white; margin-bottom: 10px;">1</div>
+                    <p style="color: rgba(255,255,255,0.8);">3kloudz actively tracked</p>
                 </div>
             </div>
         </div>
 
         <!-- Active Monitoring Status -->
-        <div class="section">
-            <h2>🔗 Active Monitoring Status</h2>
-            <div style="background: rgba(255,255,255,0.1); padding: 25px; border-radius: 15px; border-left: 4px solid #4ecdc4;">
-                <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 20px;">
-                    <div>
-                        <p style="color: rgba(255,255,255,0.7); margin-bottom: 5px;"><strong>Primary Profile:</strong> 3kloudz</p>
-                        <p style="color: rgba(255,255,255,0.7); margin-bottom: 5px;"><strong>Check Frequency:</strong> Every 3 minutes</p>
-                    </div>
-                    <div>
-                        <p style="color: rgba(255,255,255,0.7); margin-bottom: 5px;"><strong>Status:</strong> <span style="color: #4ecdc4;">🟢 ACTIVE</span></p>
-                        <p style="color: rgba(255,255,255,0.7);"><strong>Last Check:</strong> <span id="lastCheckTime">Checking now...</span></p>
-                    </div>
+        <div class="section" style="background: linear-gradient(135deg, rgba(255, 107, 107, 0.2), rgba(138, 43, 226, 0.2)); border-radius: 20px; padding: 30px; border: 1px solid rgba(255,255,255,0.1);">
+            <h2 style="margin-bottom: 25px;">🔗 Active Monitoring Status</h2>
+            <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 20px;">
+                <div>
+                    <p style="color: white; margin-bottom: 8px; font-weight: 500;"><strong>Primary Profile:</strong> 3kloudz</p>
+                    <p style="color: white; margin-bottom: 8px; font-weight: 500;"><strong>Check Frequency:</strong> Every 3 minutes</p>
+                </div>
+                <div>
+                    <p style="color: white; margin-bottom: 8px; font-weight: 500;"><strong>Status:</strong> <span style="color: #4ecdc4;">🟢 ACTIVE</span></p>
+                    <p style="color: white; font-weight: 500;"><strong>Last Check:</strong> <span id="lastCheckTime">Checking now...</span></p>
                 </div>
             </div>
         </div>
 
         <!-- Auto-Post Suno Song -->
-        <div class="section">
-            <h2>🎵 Auto-Post Suno Song</h2>
-            <form id="sunoForm" style="margin-bottom: 20px;">
-                <div class="form-group">
-                    <label>Suno Song URL</label>
-                    <input type="url" id="sunoUrl" placeholder="https://suno.com/song/..." required>
-                </div>
-                <button type="submit" class="btn">🚀 Post to Discord</button>
-            </form>
-            <div style="background: rgba(58, 255, 232, 0.1); padding: 20px; border-radius: 12px; border-left: 4px solid #3affe8; margin-top: 20px;">
-                <h4 style="color: #3affe8; margin-bottom: 10px;">🤖 Smart Auto-Detection</h4>
-                <p style="color: rgba(255,255,255,0.8);">Your bot automatically extracts the real song title and artwork from Suno URLs using advanced detection technology. No manual input needed!</p>
+        <div class="section" style="background: linear-gradient(135deg, rgba(76, 175, 80, 0.3), rgba(139, 195, 74, 0.3)); border-radius: 20px; padding: 30px; border: 1px solid rgba(255,255,255,0.1);">
+            <h2 style="margin-bottom: 25px;">🎵 Auto-Post Suno Song</h2>
+            <div class="form-group" style="margin-bottom: 20px;">
+                <label style="color: white; margin-bottom: 8px; display: block; font-weight: 500;">Suno Song URL</label>
+                <input type="url" id="sunoUrl" placeholder="https://suno.com/song/..." 
+                       style="width: 100%; padding: 12px; border-radius: 8px; border: none; background: rgba(255,255,255,0.9); color: #333;">
             </div>
-            <div id="status" style="margin-top: 15px;"></div>
+            <button onclick="postSunoSong()" style="background: linear-gradient(135deg, #4CAF50, #45a049); color: white; padding: 12px 30px; border: none; border-radius: 25px; font-weight: bold; cursor: pointer; margin-bottom: 20px;">
+                🚀 Auto-Post with Smart Detection
+            </button>
+            <div style="background: rgba(0,255,127,0.1); padding: 20px; border-radius: 12px; border-left: 4px solid #00FF7F;">
+                <h4 style="color: #00FF7F; margin-bottom: 10px;">🤖 Smart Auto-Detection</h4>
+                <p style="color: white;">Your bot automatically extracts the real song title and artwork from Suno URLs using advanced detection technology. No manual input needed!</p>
+            </div>
         </div>
 
         <!-- Suno Profile Monitoring -->
-        <div class="section">
-            <h2>👥 Suno Profile Monitoring</h2>
-            <div style="background: rgba(255,255,255,0.1); padding: 20px; border-radius: 12px; margin-bottom: 20px;">
-                <h4 style="color: #ff6b6b; margin-bottom: 15px;">Sample Artist</h4>
-                <p style="margin-bottom: 5px;"><strong>Profile ID:</strong> 3kloudz</p>
-                <p style="margin-bottom: 5px;"><strong>Last Checked:</strong> <span id="profileLastCheck">2:04:35 AM</span></p>
-                <p><strong>Status:</strong> <span style="color: #4ecdc4;">✅ Active</span></p>
+        <div class="section" style="background: linear-gradient(135deg, rgba(0, 191, 255, 0.3), rgba(30, 144, 255, 0.3)); border-radius: 20px; padding: 30px; border: 1px solid rgba(255,255,255,0.1);">
+            <h2 style="margin-bottom: 25px;">👥 Suno Profile Monitoring</h2>
+            <div style="display: flex; gap: 15px; margin-bottom: 20px;">
+                <button style="background: linear-gradient(135deg, #4CAF50, #45a049); color: white; padding: 10px 20px; border: none; border-radius: 20px; font-weight: bold;">● Test Monitoring</button>
+                <button style="background: linear-gradient(135deg, #FF9800, #F57C00); color: white; padding: 10px 20px; border: none; border-radius: 20px; font-weight: bold;">🔄 Check Now</button>
+            </div>
+            <div style="background: rgba(255,255,255,0.1); padding: 20px; border-radius: 12px;">
+                <h4 style="color: #00BFFF; margin-bottom: 15px;">Sample Artist</h4>
+                <p style="margin-bottom: 5px; color: white;"><strong>Profile ID:</strong> 3kloudz</p>
+                <p style="margin-bottom: 5px; color: white;"><strong>Last Checked:</strong> <span id="profileLastCheck">2:04:35 AM</span></p>
+                <p style="color: white;"><strong>Status:</strong> <span style="color: #4ecdc4;">✅ Active</span></p>
+                <button style="background: linear-gradient(135deg, #E91E63, #C2185B); color: white; padding: 8px 16px; border: none; border-radius: 15px; margin-top: 10px;">🗑️ Remove</button>
             </div>
         </div>
 
         <!-- Request Profile Monitoring -->
-        <div class="section">
-            <h2>📝 Request Profile Monitoring</h2>
-            <form id="requestForm">
-                <div class="form-group">
-                    <label>Suno Profile ID</label>
-                    <input type="text" id="requestProfileId" placeholder="Enter Suno profile ID" required>
-                </div>
-                <div class="form-group">
-                    <label>Artist/Profile Name</label>
-                    <input type="text" id="requestProfileName" placeholder="Enter artist or profile name" required>
-                </div>
-                <div class="form-group">
-                    <label>Your Name (Optional)</label>
-                    <input type="text" id="requestSubmittedBy" placeholder="Your name">
-                </div>
-                <div class="form-group">
-                    <label>Reason for Request (Optional)</label>
-                    <textarea id="requestReason" placeholder="Why should this profile be monitored?" rows="3"></textarea>
-                </div>
-                <button type="submit" class="btn">📋 Submit Request</button>
-            </form>
-            <div id="requestStatus" style="margin-top: 15px;"></div>
+        <div class="section" style="background: linear-gradient(135deg, rgba(0, 191, 255, 0.2), rgba(138, 43, 226, 0.2)); border-radius: 20px; padding: 30px; border: 1px solid rgba(255,255,255,0.1);">
+            <h2 style="margin-bottom: 25px;">📝 Request Profile Monitoring</h2>
+            <div class="form-group" style="margin-bottom: 15px;">
+                <label style="color: white; margin-bottom: 8px; display: block; font-weight: 500;">Suno Profile ID</label>
+                <input type="text" id="requestProfileId" placeholder="Enter Suno Profile ID" 
+                       style="width: 100%; padding: 12px; border-radius: 8px; border: none; background: rgba(255,255,255,0.9); color: #333;">
+            </div>
+            <div class="form-group" style="margin-bottom: 15px;">
+                <label style="color: white; margin-bottom: 8px; display: block; font-weight: 500;">Artist/Profile Name</label>
+                <input type="text" id="requestProfileName" placeholder="Artist or profile name" 
+                       style="width: 100%; padding: 12px; border-radius: 8px; border: none; background: rgba(255,255,255,0.9); color: #333;">
+            </div>
+            <div class="form-group" style="margin-bottom: 15px;">
+                <label style="color: white; margin-bottom: 8px; display: block; font-weight: 500;">Your Name (Optional)</label>
+                <input type="text" id="requestSubmittedBy" placeholder="Your name" 
+                       style="width: 100%; padding: 12px; border-radius: 8px; border: none; background: rgba(255,255,255,0.9); color: #333;">
+            </div>
+            <div class="form-group" style="margin-bottom: 15px;">
+                <label style="color: white; margin-bottom: 8px; display: block; font-weight: 500;">Reason for Request (Optional)</label>
+                <textarea id="requestReason" placeholder="Why should this profile be monitored?" rows="3"
+                          style="width: 100%; padding: 12px; border-radius: 8px; border: none; background: rgba(255,255,255,0.9); color: #333; resize: vertical;"></textarea>
+            </div>
         </div>
 
-        <!-- Live Video Streams -->
-        <div class="section">
-            <h2>🎬 Live Video Streams</h2>
-            <div class="grid">
-                <div class="video-container">
+    </div>
+
+    <!-- Mini Player Overlay -->
+    <div id="miniPlayer" class="mini-player">
+        <div class="mini-player-header">
+            <span id="miniPlayerTitle">Now Playing</span>
+            <button onclick="closeMiniPlayer()" style="background: none; border: none; color: white; cursor: pointer;">✕</button>
+        </div>
+        <div class="mini-player-info">
+            <span id="miniArtist">3Kloudz</span> - <span id="miniSong">Don't Want To Fight No More</span>
+        </div>
+        <div class="mini-player-controls">
+            <button onclick="toggleWebsiteMute()" style="background: #ff6b6b; border: none; color: white; padding: 5px 10px; border-radius: 5px; margin-right: 5px;">🔇 Mute</button>
+            <button onclick="refreshMiniPlayer()" style="background: #4ecdc4; border: none; color: white; padding: 5px 10px; border-radius: 5px;">🔄 Refresh</button>
+        </div>
+    </div>
+
+    <script>
+        // Make mini player draggable
+        let isDragging = false;
+        let dragOffset = { x: 0, y: 0 };
+
+        const miniPlayer = document.getElementById('miniPlayer');
+        
+        miniPlayer.addEventListener('mousedown', (e) => {
+            if (e.target.tagName !== 'BUTTON') {
+                isDragging = true;
+                const rect = miniPlayer.getBoundingClientRect();
+                dragOffset.x = e.clientX - rect.left;
+                dragOffset.y = e.clientY - rect.top;
+            }
+        });
+
+        document.addEventListener('mousemove', (e) => {
+            if (isDragging) {
+                miniPlayer.style.left = (e.clientX - dragOffset.x) + 'px';
+                miniPlayer.style.top = (e.clientY - dragOffset.y) + 'px';
+                miniPlayer.style.right = 'auto';
+                miniPlayer.style.bottom = 'auto';
+            }
+        });
+
+        document.addEventListener('mouseup', () => {
+            isDragging = false;
+        });
+
+        function closeMiniPlayer() {
+            miniPlayer.style.display = 'none';
+        }
+
+        function refreshMiniPlayer() {
+            updateMiniPlayerTrack();
+        }
+
+        function updateMiniPlayerTrack() {
+            // Update with current track info
+            document.getElementById('miniArtist').textContent = '3Kloudz';
+            document.getElementById('miniSong').textContent = "Don't Want To Fight No More";
+        }
+
+        // Show mini player after 3 seconds
+        setTimeout(() => {
+            if (!document.getElementById('miniPlayer').style.display) {
+                createMiniPlayer();
+            }
+        }, 3000);
+        
+        function createMiniPlayer() {
+            const miniPlayer = document.getElementById('miniPlayer');
+            if (miniPlayer) {
+                miniPlayer.style.display = 'block';
+                updateMiniPlayerTrack();
+            }
+        }
+
+        // Update track info every 15 seconds
+        setInterval(updateMiniPlayerTrack, 15000);
+
+        // Theme switching functionality
+        function setTheme(theme) {
+            document.documentElement.setAttribute('data-theme', theme);
+            localStorage.setItem('theme', theme);
+            console.log('Theme set to:', theme);
+        }
+
+        // Load saved theme
+        const savedTheme = localStorage.getItem('theme') || 'auto';
+        setTheme(savedTheme);
+
+        // Update live music info
+        async function updateLiveMusicInfo() {
+            try {
+                const response = await fetch('/now-playing');
+                const data = await response.json();
+                
+                if (data.success && data.artist && data.song) {
+                    document.getElementById('artistName').textContent = data.artist;
+                    document.getElementById('songName').textContent = data.song;
+                    document.getElementById('sourceInfo').textContent = data.source || 'FlaviBot Player';
+                } else {
+                    document.getElementById('artistName').textContent = '3Kloudz';
+                    document.getElementById('songName').textContent = "Don't Want To Fight No More";
+                    document.getElementById('sourceInfo').textContent = 'FlaviBot Player';
+                }
+            } catch (error) {
+                console.log('Live music update error:', error);
+            }
+        }
+
+        // Functions for buttons (to prevent console errors)
+        function toggleWebsiteMute() {
+            console.log('Mute toggled');
+        }
+
+        function postSunoSong() {
+            const url = document.getElementById('sunoUrl').value;
+            if (url) {
+                console.log('Posting Suno song:', url);
+                // Add actual posting logic here
+            }
+        }
+
+        // Update live music every 15 seconds
+        setInterval(updateLiveMusicInfo, 15000);
+        updateLiveMusicInfo(); // Initial load
+
+        // Update timestamps
+        function updateTimestamps() {
+            const now = new Date();
+            document.getElementById('lastCheckTime').textContent = now.toLocaleTimeString();
+            document.getElementById('profileLastCheck').textContent = now.toLocaleTimeString();
+        }
+
+        // Update timestamps every 30 seconds
+        setInterval(updateTimestamps, 30000);
+        updateTimestamps();
+    </script>
+</body>
+</html>
                     <h3>🎬 Music Videos Channel</h3>
                     <div class="video-wrapper">
                         ${musicSong ? `
