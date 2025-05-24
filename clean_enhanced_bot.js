@@ -272,10 +272,10 @@ class EnhancedMusicBot {
 <body>
     <!-- Theme Switcher -->
     <div class="theme-switcher">
-        <div style="display: flex; gap: 5px; background: rgba(0,0,0,0.4); backdrop-filter: blur(10px); border-radius: 15px; padding: 8px;">
-            <button id="autoThemeBtn" onclick="setTheme('auto')" style="background: linear-gradient(45deg, #667eea, #764ba2); border: none; border-radius: 10px; padding: 8px 12px; color: white; cursor: pointer; font-size: 11px; font-weight: bold; transition: all 0.3s ease;">AUTO</button>
-            <button id="lightThemeBtn" onclick="setTheme('light')" style="background: rgba(255,255,255,0.2); border: none; border-radius: 10px; padding: 8px 12px; color: white; cursor: pointer; font-size: 11px; font-weight: bold; transition: all 0.3s ease;">LIGHT</button>
-            <button id="darkThemeBtn" onclick="setTheme('dark')" style="background: rgba(255,255,255,0.2); border: none; border-radius: 10px; padding: 8px 12px; color: white; cursor: pointer; font-size: 11px; font-weight: bold; transition: all 0.3s ease;">DARK</button>
+        <div style="display: flex; gap: 8px; background: rgba(255,255,255,0.15); backdrop-filter: blur(20px); border-radius: 25px; padding: 8px; position: fixed; top: 20px; right: 20px; z-index: 1000;">
+            <button id="autoThemeBtn" onclick="setTheme('auto')" style="background: linear-gradient(45deg, #4CAF50, #45a049); border: none; border-radius: 18px; padding: 8px 16px; color: white; cursor: pointer; font-size: 12px; font-weight: 600; transition: all 0.3s ease; display: flex; align-items: center; gap: 5px;">🌍 Auto</button>
+            <button id="lightThemeBtn" onclick="setTheme('light')" style="background: rgba(255,255,255,0.2); border: none; border-radius: 18px; padding: 8px 16px; color: white; cursor: pointer; font-size: 12px; font-weight: 600; transition: all 0.3s ease; display: flex; align-items: center; gap: 5px;">☀️ Light</button>
+            <button id="darkThemeBtn" onclick="setTheme('dark')" style="background: rgba(255,255,255,0.2); border: none; border-radius: 18px; padding: 8px 16px; color: white; cursor: pointer; font-size: 12px; font-weight: 600; transition: all 0.3s ease; display: flex; align-items: center; gap: 5px;">🌙 Dark</button>
         </div>
     </div>
 
@@ -452,21 +452,44 @@ class EnhancedMusicBot {
             document.getElementById('darkThemeBtn').style.background = 'rgba(255,255,255,0.2)';
             
             // Highlight active button
-            const activeBtn = document.getElementById(theme + 'ThemeBtn');
-            if (activeBtn) {
-                activeBtn.style.background = 'linear-gradient(45deg, #667eea, #764ba2)';
+            if (theme === 'auto') {
+                document.getElementById('autoThemeBtn').style.background = 'linear-gradient(45deg, #4CAF50, #45a049)';
+            } else if (theme === 'light') {
+                document.getElementById('lightThemeBtn').style.background = 'linear-gradient(45deg, #FFD700, #FFA500)';
+            } else if (theme === 'dark') {
+                document.getElementById('darkThemeBtn').style.background = 'linear-gradient(45deg, #2c3e50, #34495e)';
             }
             
-            // Remove all theme classes
-            document.body.classList.remove('light-theme', 'dark-theme', 'auto-theme');
-            
-            // Apply theme class
+            // Apply theme changes to body
             if (theme === 'light') {
-                document.body.classList.add('light-theme');
+                document.body.style.background = 'linear-gradient(-45deg, #f8f9fa, #e9ecef, #dee2e6, #ced4da)';
+                document.body.style.color = '#333';
+                document.body.style.animation = 'none';
+                // Update sections
+                document.querySelectorAll('.section').forEach(section => {
+                    section.style.background = 'rgba(255,255,255,0.9)';
+                    section.style.color = '#333';
+                });
             } else if (theme === 'dark') {
-                document.body.classList.add('dark-theme');
+                document.body.style.background = 'linear-gradient(-45deg, #1a1a1a, #2d2d2d, #404040, #1a1a1a)';
+                document.body.style.color = 'white';
+                document.body.style.animation = 'none';
+                // Update sections
+                document.querySelectorAll('.section').forEach(section => {
+                    section.style.background = 'rgba(0,0,0,0.5)';
+                    section.style.color = 'white';
+                });
             } else {
-                document.body.classList.add('auto-theme');
+                // Auto theme - original colorful gradient
+                document.body.style.background = 'linear-gradient(-45deg, #667eea, #764ba2, #f093fb, #f5576c, #4facfe, #00f2fe)';
+                document.body.style.backgroundSize = '400% 400%';
+                document.body.style.animation = 'gradientBackground 15s ease infinite';
+                document.body.style.color = 'white';
+                // Update sections
+                document.querySelectorAll('.section').forEach(section => {
+                    section.style.background = 'rgba(255,255,255,0.1)';
+                    section.style.color = 'white';
+                });
             }
             
             localStorage.setItem('theme', theme);
