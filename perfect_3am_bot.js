@@ -153,6 +153,49 @@ class Enhanced3AMBot {
             overflow-x: hidden;
             transition: all 0.3s ease;
         }
+
+        body::before {
+            content: '';
+            position: fixed;
+            top: 0; left: 0; width: 100%; height: 100%;
+            background: linear-gradient(45deg, 
+                rgba(138, 43, 226, 0.4) 0%,
+                rgba(0, 255, 255, 0.3) 25%,
+                rgba(138, 43, 226, 0.4) 50%,
+                rgba(0, 255, 255, 0.3) 75%,
+                rgba(138, 43, 226, 0.4) 100%
+            );
+            background-size: 600% 600%;
+            animation: scrollGradient 20s ease infinite;
+            z-index: -2;
+            opacity: 0.8;
+        }
+
+        body::after {
+            content: '';
+            position: fixed;
+            top: 0; left: 0; width: 100%; height: 100%;
+            background-image: 
+                radial-gradient(circle at 25% 25%, rgba(0, 255, 255, 0.1) 0%, transparent 50%),
+                radial-gradient(circle at 75% 75%, rgba(138, 43, 226, 0.2) 0%, transparent 50%),
+                radial-gradient(circle at 50% 50%, rgba(0, 255, 255, 0.1) 0%, transparent 50%);
+            animation: floatParticles 15s ease-in-out infinite;
+            z-index: -1;
+        }
+
+        @keyframes scrollGradient {
+            0% { background-position: 0% 0%; transform: rotate(0deg); }
+            25% { background-position: 100% 100%; transform: rotate(90deg); }
+            50% { background-position: 0% 100%; transform: rotate(180deg); }
+            75% { background-position: 100% 0%; transform: rotate(270deg); }
+            100% { background-position: 0% 0%; transform: rotate(360deg); }
+        }
+
+        @keyframes floatParticles {
+            0%, 100% { transform: translateY(0px) translateX(0px) scale(1); opacity: 0.6; }
+            33% { transform: translateY(-30px) translateX(20px) scale(1.1); opacity: 0.8; }
+            66% { transform: translateY(30px) translateX(-20px) scale(0.9); opacity: 0.7; }
+        }
         
         .container { max-width: 1200px; margin: 0 auto; position: relative; z-index: 10; }
         
