@@ -881,9 +881,14 @@
                     <h2 style="margin: 0; color: #00ff88; font-size: 24px; font-weight: bold;">Brought to you by 3Kloudz</h2>
                     <p style="margin: 5px 0 0 0; color: rgba(255,255,255,0.8); font-size: 16px;">AI Music Producer & Artist</p>
                 </div>
-                <button onclick="window.open('https://suno.com/@3kloudz', '_blank')" style="background: linear-gradient(135deg, #667eea, #764ba2); color: white; border: none; padding: 12px 24px; border-radius: 25px; font-weight: bold; cursor: pointer; transition: all 0.3s ease; font-size: 14px; box-shadow: 0 4px 15px rgba(102, 126, 234, 0.3);">
-                    🎵 Visit My Suno Page
-                </button>
+                <div style="display: flex; gap: 12px; flex-wrap: wrap;">
+                    <button onclick="window.open('https://suno.com/@3kloudz', '_blank')" style="background: linear-gradient(135deg, #667eea, #764ba2); color: white; border: none; padding: 12px 24px; border-radius: 25px; font-weight: bold; cursor: pointer; transition: all 0.3s ease; font-size: 14px; box-shadow: 0 4px 15px rgba(102, 126, 234, 0.3);">
+                        🎵 Visit My Suno Page
+                    </button>
+                    <button onclick="joinDiscord()" style="background: linear-gradient(135deg, #5865f2, #4752c4); color: white; border: none; padding: 12px 24px; border-radius: 25px; font-weight: bold; cursor: pointer; transition: all 0.3s ease; font-size: 14px; box-shadow: 0 4px 15px rgba(88, 101, 242, 0.3);">
+                        💬 Join Discord
+                    </button>
+                </div>
             </div>
         </div>
 
@@ -1309,7 +1314,7 @@
     </div>
 
     <!-- Small Bottom Logo that follows the page with pulsating effects -->
-    <div class="bottom-logo">
+    <div class="bottom-logo" onclick="joinDiscord()" style="cursor: pointer;" title="Join our Discord server!">
         <div class="logo-glow-outer"></div>
         <div class="logo-glow-middle"></div>
         <div class="logo-glow-inner"></div>
@@ -1484,6 +1489,12 @@
         // Open Discord function
         function openDiscord() {
             // Open Discord in a new tab
+            window.open('https://discord.gg/JFwEY6mrnn', '_blank');
+        }
+
+        // Join Discord function
+        function joinDiscord() {
+            // Open Discord invite link in a new tab
             window.open('https://discord.gg/JFwEY6mrnn', '_blank');
         }
 
