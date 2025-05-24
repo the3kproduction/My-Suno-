@@ -940,24 +940,7 @@ class EnhancedMusicBot {
             }
         });
 
-        // Now playing endpoint for Live Music Stream
-        this.app.get('/now-playing', (req, res) => {
-            if (this.currentTrack) {
-                res.json({
-                    success: true,
-                    artist: this.currentTrack.artist,
-                    song: this.currentTrack.song,
-                    spotifyUrl: this.currentTrack.spotifyUrl,
-                    source: 'Music Video Channel'
-                });
-            } else {
-                res.json({
-                    success: false,
-                    artist: 'Listening for music...',
-                    song: 'Waiting for track info...'
-                });
-            }
-        });
+
 
         const port = process.env.PORT || 10000;
         this.app.listen(port, '0.0.0.0', () => {
@@ -2017,6 +2000,77 @@ class EnhancedMusicBot {
 
             window.addEventListener('scroll', requestTick);
             updateBackgroundOnScroll();
+
+            // Live Music Stream Functions
+            let currentSpotifyUrl = null;
+
+            async function refreshNowPlaying() {
+                try {
+                    const response = await fetch('/now-playing');
+                    const data = await response.json();
+                    
+                    console.log('Live music data:', data);
+                    
+                    if (data.success) {
+                        document.getElementById('currentArtist').textContent = data.artist;
+                        document.getElementById('currentSong').textContent = data.song;
+                        document.getElementById('musicSource').textContent = data.source || 'Music Video Channel';
+                        document.getElementById('liveStatus').textContent = '🟢 Playing';
+                        document.getElementById('musicStatus').style.color = '#10b981';
+                        
+                        // Update Spotify player if URL available
+                        if (data.spotifyUrl && data.spotifyUrl !== currentSpotifyUrl) {
+                            currentSpotifyUrl = data.spotifyUrl;
+                            const trackId = data.spotifyUrl.split('/track/')[1]?.split('?')[0];
+                            if (trackId) {
+                                const embedUrl = \`https://open.spotify.com/embed/track/\${trackId}?utm_source=generator&theme=0\`;
+                                document.getElementById('spotifyEmbed').src = embedUrl;
+                                document.getElementById('spotifyPlayer').style.display = 'block';
+                            }
+                        }
+                    } else {
+                        document.getElementById('currentArtist').textContent = 'Listening for music...';
+                        document.getElementById('currentSong').textContent = 'Waiting for track info...';
+                        document.getElementById('liveStatus').textContent = '🔴 Waiting';
+                        document.getElementById('musicStatus').style.color = '#f43f5e';
+                        document.getElementById('spotifyPlayer').style.display = 'none';
+                    }
+                } catch (error) {
+                    console.error('Error fetching live music:', error);
+                    document.getElementById('currentArtist').textContent = 'Connection error';
+                    document.getElementById('currentSong').textContent = 'Please refresh';
+                    document.getElementById('liveStatus').textContent = '❌ Error';
+                }
+            }
+
+            function toggleWebsiteMute() {
+                const iframe = document.getElementById('spotifyEmbed');
+                const btn = event.target;
+                
+                if (iframe.style.display === 'none') {
+                    iframe.style.display = 'block';
+                    btn.textContent = '🔊 Mute Website';
+                    btn.style.background = '#f43f5e';
+                } else {
+                    iframe.style.display = 'none';
+                    btn.textContent = '🔇 Unmute Website';
+                    btn.style.background = '#6b7280';
+                }
+            }
+
+            function openSpotify() {
+                if (currentSpotifyUrl) {
+                    window.open(currentSpotifyUrl, '_blank');
+                } else {
+                    alert('No Spotify URL available for current track');
+                }
+            }
+
+            // Auto-refresh live music every 15 seconds
+            setInterval(refreshNowPlaying, 15000);
+            
+            // Initial load
+            refreshNowPlaying();
 
 
 
