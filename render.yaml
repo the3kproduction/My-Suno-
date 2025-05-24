@@ -8,3 +8,5 @@ services:
     envVars:
       - key: NODE_ENV
         value: production
+      - key: BOT_VERSION
+        value: enhanced-live-music-v2
