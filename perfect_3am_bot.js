@@ -468,34 +468,81 @@ class Enhanced3AMBot {
 
         this.app.get('/api/now-playing', async (req, res) => {
             try {
-                // Get the new song channel where FlaviBot is playing
-                const newSongChannel = this.client.channels.cache.get(process.env.DISCORD_CHANNEL_ID);
-                if (!newSongChannel) {
+                // Get the Music Video channel where FlaviBot plays
+                const musicVideoChannelId = '1375615201990283303';
+                const musicVideoChannel = this.client.channels.cache.get(musicVideoChannelId);
+                
+                if (!musicVideoChannel) {
                     return res.json({
                         isPlaying: false,
-                        artist: 'Channel not found',
-                        title: 'Unable to connect',
-                        source: 'Discord Channel'
+                        artist: 'Music Video channel not found',
+                        title: 'Unable to connect to FlaviBot',
+                        source: 'Music Video Channel'
                     });
                 }
 
-                // Look for FlaviBot in the server
-                const guild = newSongChannel.guild;
+                // Look for FlaviBot in the Music Video channel
+                const guild = musicVideoChannel.guild;
                 const flaviBot = guild.members.cache.find(member => 
                     member.user.username.toLowerCase().includes('flavi') || 
-                    member.user.displayName.toLowerCase().includes('flavi')
+                    member.user.displayName.toLowerCase().includes('flavi') ||
+                    member.user.username.toLowerCase().includes('music') ||
+                    member.user.bot === true
                 );
 
                 if (!flaviBot) {
                     return res.json({
                         isPlaying: false,
-                        artist: 'FlaviBot not found',
-                        title: 'Bot not in server',
-                        source: 'Discord Channel'
+                        artist: 'FlaviBot not found in server',
+                        title: 'Bot not connected',
+                        source: 'Music Video Channel'
                     });
                 }
 
-                // Check FlaviBot's activities for music info
+                // Check if FlaviBot is in the Music Video voice channel and playing
+                const voiceState = flaviBot.voice;
+                if (voiceState?.channel && voiceState.channel.id === musicVideoChannelId) {
+                    // Get recent messages from the Music Video channel to extract current song
+                    const messages = await musicVideoChannel.messages.fetch({ limit: 10 });
+                    const botMessage = messages.find(msg => 
+                        msg.author.id === flaviBot.id && 
+                        (msg.content.includes('Now playing') || msg.content.includes('🎵') || msg.embeds.length > 0)
+                    );
+
+                    if (botMessage && botMessage.embeds.length > 0) {
+                        const embed = botMessage.embeds[0];
+                        return res.json({
+                            isPlaying: true,
+                            artist: embed.author?.name || embed.fields?.find(f => f.name.includes('Artist'))?.value || 'Unknown Artist',
+                            title: embed.title || embed.description || 'Unknown Song',
+                            source: 'FlaviBot Music Player',
+                            channel: voiceState.channel.name
+                        });
+                    } else if (botMessage) {
+                        // Parse text message for song info
+                        const content = botMessage.content;
+                        const songMatch = content.match(/(?:Now playing|🎵)\s*:?\s*(.+?)(?:\s*-\s*(.+))?$/i);
+                        if (songMatch) {
+                            return res.json({
+                                isPlaying: true,
+                                artist: songMatch[2] || 'Unknown Artist',
+                                title: songMatch[1] || 'Unknown Song',
+                                source: 'FlaviBot Music Player',
+                                channel: voiceState.channel.name
+                            });
+                        }
+                    }
+
+                    return res.json({
+                        isPlaying: true,
+                        artist: 'FlaviBot',
+                        title: 'Music playing in voice channel',
+                        source: 'FlaviBot Music Player',
+                        channel: voiceState.channel.name
+                    });
+                }
+
+                // Check FlaviBot's Rich Presence activities
                 const activities = flaviBot.presence?.activities || [];
                 const musicActivity = activities.find(activity => 
                     activity.type === 2 || // LISTENING activity type
@@ -506,47 +553,28 @@ class Enhanced3AMBot {
                 );
 
                 if (musicActivity) {
-                    // Extract song info from activity
-                    const artist = musicActivity.state || musicActivity.details || 'Unknown Artist';
-                    const title = musicActivity.details || musicActivity.name || 'Unknown Song';
-                    const source = musicActivity.name || 'Music Player';
-
                     return res.json({
                         isPlaying: true,
-                        artist: artist,
-                        title: title,
-                        source: source,
-                        activity: musicActivity
+                        artist: musicActivity.state || 'Unknown Artist',
+                        title: musicActivity.details || musicActivity.name || 'Unknown Song',
+                        source: musicActivity.name || 'FlaviBot Player'
                     });
                 }
 
-                // Check if FlaviBot is in a voice channel (playing music)
-                const voiceState = flaviBot.voice;
-                if (voiceState?.channel) {
-                    return res.json({
-                        isPlaying: true,
-                        artist: 'FlaviBot',
-                        title: 'Playing in voice channel',
-                        source: voiceState.channel.name,
-                        channel: voiceState.channel.name
-                    });
-                }
-
-                // No music activity detected
                 return res.json({
                     isPlaying: false,
                     artist: 'No music playing',
-                    title: 'Waiting for track...',
-                    source: 'Music Channel'
+                    title: 'Waiting for FlaviBot...',
+                    source: 'Music Video Channel'
                 });
 
             } catch (error) {
                 console.error('Error getting FlaviBot music info:', error);
                 res.json({
                     isPlaying: false,
-                    artist: 'Error loading data',
-                    title: 'Connection issue',
-                    source: 'Discord Channel'
+                    artist: 'Connection error',
+                    title: 'Unable to fetch data',
+                    source: 'Music Video Channel'
                 });
             }
         });
