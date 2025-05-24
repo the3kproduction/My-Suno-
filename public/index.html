@@ -902,7 +902,118 @@
             </div>
         </div>
 
-        <div class="dashboard-grid">
+        <!-- Top Row: 3 panels side by side -->
+        <div style="display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 20px; margin-bottom: 20px;">
+            <!-- Panel 1: Active Monitoring Status -->
+            <div class="card">
+                <div class="card-header">
+                    <div class="card-icon">🔗</div>
+                    <div class="card-title">Active Monitoring Status</div>
+                </div>
+                <div class="monitoring-details">
+                    <div class="detail-row">
+                        <strong>Primary Profile:</strong> 3kloudz
+                    </div>
+                    <div class="detail-row">
+                        <strong>Check Frequency:</strong> Every 3 minutes
+                    </div>
+                    <div class="detail-row">
+                        <strong>Status:</strong> <span class="status-active">🟢 ACTIVE</span>
+                    </div>
+                    <div class="detail-row">
+                        <strong>Last Check:</strong> <span id="monitoring-last-check">7:29:32 AM</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Panel 2: Suno Profile Monitoring -->
+            <div class="card">
+                <div class="card-header">
+                    <div class="card-icon">🎵</div>
+                    <div class="card-title">Suno Profile Monitoring</div>
+                </div>
+                <div class="stats-grid">
+                    <div class="stat-item">
+                        <div class="stat-value" id="songs-posted">0</div>
+                        <div class="stat-label">Songs Posted</div>
+                        <div class="stat-sublabel">Auto-posted with reactions</div>
+                    </div>
+                    <div class="stat-item">
+                        <div class="stat-value" id="profiles-monitored">1</div>
+                        <div class="stat-label">Profiles Monitored</div>
+                        <div class="stat-sublabel">3kloudz actively tracked</div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Panel 3: Suno Profile Monitoring (User Profile) -->
+            <div class="card">
+                <div class="card-header">
+                    <div class="card-icon">👥</div>
+                    <div class="card-title">Suno Profile Monitoring</div>
+                </div>
+                <div class="profile-card">
+                    <div class="profile-info">
+                        <div class="profile-name">Sample Artist</div>
+                        <div class="profile-detail">
+                            <strong>Profile ID:</strong> 3kloudz
+                        </div>
+                        <div class="profile-detail">
+                            <strong>Last Checked:</strong> <span id="profile-last-check">7:29:32 AM</span>
+                        </div>
+                        <div class="profile-detail">
+                            <strong>Status:</strong> <span class="status-active">🟢 Active</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Bottom Row: 1 full-width panel -->
+        <div style="margin-bottom: 20px;">
+            <!-- Panel 4: Request Profile Monitoring -->
+            <div class="card">
+                <div class="card-header">
+                    <div class="card-icon">📝</div>
+                    <div class="card-title">Request Profile Monitoring</div>
+                </div>
+                <div class="request-info">
+                    <p>To request monitoring for a Suno profile, please follow these steps:</p>
+                    <ol>
+                        <li>Find the Suno profile you want to monitor</li>
+                        <li>Copy the profile ID from the URL</li>
+                        <li>Fill out the form below with accurate information</li>
+                        <li>Submit your request for review</li>
+                    </ol>
+                </div>
+                <div class="form-container">
+                    <div style="display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 15px; margin-bottom: 15px;">
+                        <div class="form-group">
+                            <label for="profile-id">Suno Profile ID</label>
+                            <input type="text" id="profile-id" placeholder="Enter Suno Profile ID">
+                        </div>
+                        <div class="form-group">
+                            <label for="artist-name">Artist/Profile Name</label>
+                            <input type="text" id="artist-name" placeholder="Artist or profile name">
+                        </div>
+                        <div class="form-group">
+                            <label for="your-name">Your Name (Optional)</label>
+                            <input type="text" id="your-name" placeholder="Your name">
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label for="request-reason">Reason for Request (Optional)</label>
+                        <textarea id="request-reason" placeholder="Why should this profile be monitored?"></textarea>
+                    </div>
+                    <button class="btn btn-primary" onclick="submitProfileRequest()" style="width: 100%;">
+                        <span>📤</span>
+                        Submit Request
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <div class="dashboard-grid" style="display: none;">
             <div class="card now-playing">
                 <div class="card-header" style="justify-content: center; text-align: center;">
                     <div class="card-icon" style="margin-bottom: 5px;">🎵</div>
