@@ -20,7 +20,6 @@
     "openai": "^4.103.0",
     "opusscript": "^0.0.8",
     "pg": "^8.16.0",
-    "puppeteer": "^24.9.0",
-    "youtube-dl-exec": "^3.0.21"
+    "puppeteer": "^24.9.0"
   }
 }
