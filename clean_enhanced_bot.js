@@ -137,6 +137,18 @@ class EnhancedMusicBot {
             100% { background-position: 0% 50%; }
         }
 
+        .background-animation {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(-45deg, #667eea, #764ba2, #f093fb, #f5576c, #4facfe, #00f2fe);
+            background-size: 400% 400%;
+            animation: gradientBackground 15s ease infinite;
+            z-index: -1;
+        }
+
         @keyframes glow {
             0%, 100% { 
                 box-shadow: 0 0 20px rgba(58, 255, 232, 0.5), 0 0 40px rgba(58, 255, 232, 0.3), 0 0 60px rgba(58, 255, 232, 0.1);
@@ -270,6 +282,9 @@ class EnhancedMusicBot {
     </style>
 </head>
 <body>
+    <!-- Background Animation -->
+    <div class="background-animation"></div>
+    
     <!-- Theme Switcher -->
     <div style="position: fixed; top: 20px; right: 20px; z-index: 1000;">
         <div style="display: flex; gap: 0px; background: rgba(255,255,255,0.2); backdrop-filter: blur(15px); border-radius: 25px; padding: 4px;">
@@ -460,24 +475,18 @@ class EnhancedMusicBot {
                 document.getElementById('darkThemeBtn').style.background = 'linear-gradient(45deg, #6c757d, #495057)';
             }
             
-            // Apply theme changes to body
-            const body = document.body;
+            // Apply theme changes to background animation element
+            const bgElement = document.querySelector('.background-animation');
             if (theme === 'light') {
-                body.style.background = 'linear-gradient(-45deg, #ffffff, #f8f9fa, #e9ecef, #dee2e6)';
-                body.style.backgroundSize = '400% 400%';
-                body.style.animation = 'gradientBackground 15s ease infinite';
-                body.style.color = '#333';
+                bgElement.style.background = 'linear-gradient(-45deg, #ffffff, #f8f9fa, #e9ecef, #dee2e6)';
+                document.body.style.color = '#333';
             } else if (theme === 'dark') {
-                body.style.background = 'linear-gradient(-45deg, #212529, #343a40, #495057, #6c757d)';
-                body.style.backgroundSize = '400% 400%';
-                body.style.animation = 'gradientBackground 15s ease infinite';
-                body.style.color = 'white';
+                bgElement.style.background = 'linear-gradient(-45deg, #212529, #343a40, #495057, #6c757d)';
+                document.body.style.color = 'white';
             } else {
                 // Auto theme - original animated gradient
-                body.style.background = 'linear-gradient(-45deg, #667eea, #764ba2, #f093fb, #f5576c, #4facfe, #00f2fe)';
-                body.style.backgroundSize = '400% 400%';
-                body.style.animation = 'gradientBackground 15s ease infinite';
-                body.style.color = 'white';
+                bgElement.style.background = 'linear-gradient(-45deg, #667eea, #764ba2, #f093fb, #f5576c, #4facfe, #00f2fe)';
+                document.body.style.color = 'white';
             }
             
             localStorage.setItem('theme', theme);
