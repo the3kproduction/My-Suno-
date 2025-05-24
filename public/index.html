@@ -946,22 +946,17 @@
                 <div class="download-section">
                     <p style="margin-bottom: 20px; opacity: 0.9;">Download your favorite Suno songs as audio or video files. Just paste the Suno link and choose your format!</p>
                     
-                    <div class="form-group">
-                        <label for="download-url">Suno Song URL</label>
-                        <input type="text" id="download-url" placeholder="https://suno.com/song/..." style="margin-bottom: 15px;">
-                    </div>
-                    
                     <div class="download-buttons" style="display: flex; gap: 10px; flex-wrap: wrap;">
-                        <button class="btn btn-primary" onclick="downloadAudio()" style="flex: 1; min-width: 140px;">
-                            🎵 Copy URL & Open Downloader
+                        <button class="btn btn-primary" onclick="window.open('https://sunodownloader.io', '_blank')" style="flex: 1; min-width: 140px;">
+                            🎵 Audio Downloader
                         </button>
-                        <button class="btn btn-secondary" onclick="downloadVideo()" style="flex: 1; min-width: 140px; background: linear-gradient(135deg, #667eea, #764ba2);">
-                            🎥 Copy URL & Open Video Downloader
+                        <button class="btn btn-secondary" onclick="window.open('https://sunodownloader.io/suno-video-downloader', '_blank')" style="flex: 1; min-width: 140px; background: linear-gradient(135deg, #667eea, #764ba2);">
+                            🎥 Video Downloader
                         </button>
                     </div>
                     
                     <div style="margin-top: 10px; font-size: 12px; color: #888; text-align: center;">
-                        Paste your Suno URL above, click a button to copy it and open the downloader site, then paste (Ctrl+V) to download
+                        Click a button to open the Suno downloader website, then paste your Suno URL there to download
                     </div>
                     
                     <div id="download-status" style="margin-top: 15px; font-size: 14px;"></div>
