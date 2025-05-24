@@ -178,7 +178,7 @@ class EnhancedMusicBot {
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>3AM VERIFIED Suno Bot</title>
+    <title>3AM VERIFIED - Enhanced Music Bot</title>
     <style>
         * { margin: 0; padding: 0; box-sizing: border-box; }
         
@@ -221,6 +221,44 @@ class EnhancedMusicBot {
             50% { background-position: 100% 50%; }
             100% { background-position: 0% 50%; }
         }
+        
+        @keyframes crazyTextGlow {
+            0% { 
+                text-shadow: 
+                    0 0 5px #00ffff,
+                    0 0 10px #8a2be2,
+                    0 0 15px #00ffff,
+                    0 0 20px #8a2be2;
+            }
+            25% { 
+                text-shadow: 
+                    0 0 10px #8a2be2,
+                    0 0 20px #00ffff,
+                    0 0 30px #8a2be2,
+                    0 0 40px #00ffff;
+            }
+            50% { 
+                text-shadow: 
+                    0 0 15px #00ffff,
+                    0 0 25px #8a2be2,
+                    0 0 35px #00ffff,
+                    0 0 45px #8a2be2;
+            }
+            75% { 
+                text-shadow: 
+                    0 0 10px #8a2be2,
+                    0 0 20px #00ffff,
+                    0 0 30px #8a2be2,
+                    0 0 40px #00ffff;
+            }
+            100% { 
+                text-shadow: 
+                    0 0 5px #00ffff,
+                    0 0 10px #8a2be2,
+                    0 0 15px #00ffff,
+                    0 0 20px #8a2be2;
+            }
+        }
 
         body {
             font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
@@ -234,10 +272,292 @@ class EnhancedMusicBot {
             overflow-x: hidden;
             transition: all 0.3s ease;
         }
+        
+        .container { max-width: 1200px; margin: 0 auto; position: relative; z-index: 10; }
+        
+        .header {
+            text-align: center;
+            margin-bottom: 50px;
+            position: relative;
+        }
 
-        body.light-theme {
-            background: linear-gradient(-45deg, #f8f9fa, #e9ecef, #dee2e6, #ced4da) !important;
-            color: #333 !important;
+        .verified-badge {
+            display: inline-flex;
+            align-items: center;
+            background: linear-gradient(135deg, #8a2be2, #00ffff);
+            padding: 15px 30px;
+            border-radius: 50px;
+            margin-bottom: 20px;
+            box-shadow: 
+                0 0 30px rgba(138, 43, 226, 0.6),
+                0 0 50px rgba(0, 255, 255, 0.4),
+                inset 0 0 20px rgba(255, 255, 255, 0.2);
+            animation: verifiedPulse 3s ease-in-out infinite;
+            border: 2px solid rgba(255, 255, 255, 0.3);
+        }
+
+        .three-am {
+            font-size: 1.8rem;
+            font-weight: 900;
+            color: #00ffff;
+            margin-right: 10px;
+            animation: crazyTextGlow 2s ease-in-out infinite;
+        }
+
+        .verified-text {
+            font-size: 1.8rem;
+            font-weight: 900;
+            color: #8a2be2;
+            margin-right: 10px;
+            animation: crazyTextGlow 2s ease-in-out infinite reverse;
+        }
+
+        .verified-checkmark {
+            width: 35px;
+            height: 35px;
+            border: 2px solid #00ffff;
+            border-radius: 8px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: #00ffff;
+            font-size: 1.5rem;
+            box-shadow: 0 0 15px #00ffff;
+        }
+
+        @keyframes verifiedPulse {
+            0%, 100% { 
+                box-shadow: 
+                    0 0 20px #8a2be2,
+                    inset 0 0 20px rgba(138, 43, 226, 0.5);
+            }
+            50% { 
+                box-shadow: 
+                    0 0 40px #8a2be2,
+                    0 0 60px #00ffff,
+                    inset 0 0 30px rgba(138, 43, 226, 0.8);
+            }
+        }
+        
+        .section { 
+            background: var(--bg-secondary); 
+            backdrop-filter: blur(20px);
+            padding: 40px; margin-bottom: 40px; 
+            border-radius: 20px; 
+            border: 1px solid var(--border-color);
+            box-shadow: 0 20px 40px var(--shadow);
+            transition: all 0.3s ease;
+        }
+
+        .theme-toggle {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            z-index: 1000;
+            background: var(--card-bg);
+            border-radius: 50px;
+            padding: 10px;
+            border: 2px solid var(--border-color);
+            backdrop-filter: blur(10px);
+            display: flex;
+            gap: 5px;
+        }
+
+        .theme-btn {
+            padding: 8px 12px;
+            border: none;
+            border-radius: 25px;
+            background: transparent;
+            color: var(--text-secondary);
+            cursor: pointer;
+            font-size: 14px;
+            transition: all 0.3s ease;
+        }
+
+        .theme-btn.active {
+            background: linear-gradient(135deg, #667eea, #764ba2);
+            color: white;
+            box-shadow: 0 5px 15px rgba(102, 126, 234, 0.4);
+        }
+
+        .theme-btn:hover:not(.active) {
+            color: var(--text-primary);
+            background: var(--input-bg);
+        }
+        
+        .grid { 
+            display: grid; 
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); 
+            gap: 30px; margin-top: 30px; 
+        }
+        
+        .profile-card {
+            background: var(--card-bg);
+            padding: 25px;
+            border-radius: 15px;
+            border: 1px solid var(--border-color);
+            backdrop-filter: blur(10px);
+            transition: all 0.3s ease;
+        }
+        
+        .btn {
+            background: linear-gradient(135deg, #667eea, #764ba2);
+            color: white; border: none; padding: 15px 30px;
+            border-radius: 25px; cursor: pointer; font-size: 16px;
+            transition: all 0.3s ease;
+            box-shadow: 0 10px 20px rgba(0, 0, 0, 0.3);
+        }
+        
+        .btn:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 15px 30px rgba(0, 0, 0, 0.4);
+        }
+        
+        .form-group { margin-bottom: 25px; }
+        .form-group label { 
+            display: block; margin-bottom: 10px; 
+            font-weight: 600; color: var(--text-primary); 
+        }
+        .form-group input, .form-group select { 
+            width: 100%; padding: 15px; border: 1px solid var(--border-color); 
+            border-radius: 10px; background: var(--input-bg); 
+            color: var(--text-primary); font-size: 16px;
+            backdrop-filter: blur(10px);
+        }
+        .form-group input:focus, .form-group select:focus { 
+            outline: none; border-color: #667eea; 
+            box-shadow: 0 0 20px rgba(102, 126, 234, 0.3); 
+        }
+        
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 20px;
+            margin-top: 20px;
+        }
+
+        .stat-card {
+            background: var(--card-bg);
+            padding: 25px;
+            border-radius: 15px;
+            border: 1px solid var(--border-color);
+            backdrop-filter: blur(10px);
+            transition: all 0.3s ease;
+        }
+
+        .stat-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 15px 30px var(--shadow);
+        }
+
+        .stat-card h3 {
+            margin: 0 0 15px 0;
+            font-size: 1.2rem;
+        }
+
+        .stat-value {
+            font-size: 2.5rem;
+            font-weight: bold;
+            margin: 10px 0;
+        }
+        
+        @keyframes pulse {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.6; }
+        }
+        </style>
+    </head>
+    <body>
+        <!-- Theme Toggle -->
+        <div class="theme-toggle">
+            <button class="theme-btn active" onclick="setTheme('auto')" id="auto-btn">🌓 Auto</button>
+            <button class="theme-btn" onclick="setTheme('light')" id="light-btn">☀️ Light</button>
+            <button class="theme-btn" onclick="setTheme('dark')" id="dark-btn">🌙 Dark</button>
+        </div>
+
+        <div class="container">
+            <div class="header">
+                <div class="verified-badge">
+                    <div class="three-am">3AM</div>
+                    <div class="verified-text">VERIFIED</div>
+                    <div class="verified-checkmark">✓</div>
+                </div>
+                <h1>Enhanced Music Bot</h1>
+                <p>Discord Music Bot with YouTube Integration & Suno Monitoring</p>
+            </div>
+
+            <!-- Live Music -->
+            <div class="section">
+                <h2>🎵 Live Music Stream</h2>
+                <div class="stats-grid">
+                    <div class="stat-card" style="background: linear-gradient(135deg, rgba(244, 63, 94, 0.2), rgba(139, 69, 19, 0.2)); border: 2px solid rgba(244, 63, 94, 0.4);">
+                        <h3 id="musicStatus" style="color: #f43f5e;">🎶 Now Playing</h3>
+                        <p><strong>Artist:</strong> <span id="currentArtist">Listening for music...</span></p>
+                        <p><strong>Song:</strong> <span id="currentSong">Waiting for track info...</span></p>
+                        <p><strong>Source:</strong> <span id="musicSource">Music Video Channel</span></p>
+                        <p><strong>Status:</strong> <span id="liveStatus">🔴 Live</span></p>
+                        
+                        <div style="margin-top: 20px; display: flex; justify-content: center; gap: 15px;">
+                            <button id="muteToggle" onclick="toggleMute()" class="btn" style="background: #f43f5e; padding: 12px 24px; font-size: 16px;">
+                                🔊 Mute Stream
+                            </button>
+                            <button onclick="refreshNowPlaying()" class="btn" style="background: #4ecdc4; padding: 12px 24px; font-size: 16px;">
+                                🔄 Refresh
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Premium Suno Monitoring Dashboard -->
+            <div class="section" style="background: linear-gradient(135deg, rgba(124, 58, 237, 0.3), rgba(79, 70, 229, 0.3)); border: 2px solid rgba(124, 58, 237, 0.5);">
+                <h2>🎵 Premium Suno Monitoring</h2>
+                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 20px; margin: 20px 0;">
+                    <div style="background: rgba(0,255,0,0.2); padding: 20px; border-radius: 15px; text-align: center; border: 1px solid rgba(0,255,0,0.3);">
+                        <h3 style="margin-top: 0; color: #4ade80;">🎵 Songs Posted</h3>
+                        <div style="font-size: 3rem; font-weight: bold; color: #4ade80; margin: 10px 0;">0</div>
+                        <p style="margin-bottom: 0; opacity: 0.8;">Auto-posted with reactions</p>
+                    </div>
+                    <div style="background: rgba(255,100,100,0.2); padding: 20px; border-radius: 15px; text-align: center; border: 1px solid rgba(255,100,100,0.3);">
+                        <h3 style="margin-top: 0; color: #f87171;">👥 Profiles Monitored</h3>
+                        <div style="font-size: 3rem; font-weight: bold; color: #f87171; margin: 10px 0;">1</div>
+                        <p style="margin-bottom: 0; opacity: 0.8;">3kloudz actively tracked</p>
+                    </div>
+                </div>
+                <div style="background: rgba(255,255,255,0.1); padding: 20px; border-radius: 15px; margin-top: 20px; border: 1px solid rgba(255,255,255,0.2);">
+                    <h3 style="margin-top: 0;">🔗 Active Monitoring Status</h3>
+                    <p><strong>Primary Profile:</strong> 3kloudz</p>
+                    <p><strong>Check Frequency:</strong> Every 3 minutes</p>
+                    <p><strong>Status:</strong> <span style="color: #4ade80; font-weight: bold;">🟢 ACTIVE</span></p>
+                    <p><strong>Last Check:</strong> <span id="lastCheck">Checking now...</span></p>
+                </div>
+            </div>
+
+            <!-- Suno Song Posting -->
+            <div class="section">
+                <h2>🎵 Auto-Post Suno Song</h2>
+                <form id="sunoForm">
+                    <div class="form-group">
+                        <label>Suno Song URL</label>
+                        <input type="text" id="sunoUrl" placeholder="https://suno.com/song/..." required>
+                    </div>
+                    <button type="submit" class="btn">🤖 Auto-Post with Smart Detection</button>
+                </form>
+                <div id="sunoStatus" style="margin-top: 15px;"></div>
+                <div style="background: rgba(255,255,255,0.1); padding: 15px; border-radius: 10px; margin-top: 15px; border: 1px solid rgba(255,255,255,0.2);">
+                    <h4 style="margin-top: 0; color: #4ade80;">🤖 Smart Auto-Detection</h4>
+                    <p style="margin-bottom: 0; opacity: 0.9;">Your bot automatically extracts the real song title and artwork from Suno URLs using advanced detection technology. No manual input needed!</p>
+                </div>
+            </div>
+
+            <!-- Suno Profile Monitoring -->
+            <div class="section">
+                <h2>👥 Suno Profile Monitoring</h2>
+                <div class="admin-controls" style="margin-bottom: 30px;">
+                    <button onclick="testMonitoring()" class="btn" style="background: linear-gradient(135deg, #667eea, #764ba2);">🔍 Test Monitoring</button>
+                    <button onclick="checkNow()" class="btn" style="background: linear-gradient(135deg, #4ecdc4, #44a08d);">⚡ Check Now</button>
+                </div>
+                <div class="grid">
             animation: none !important;
         }
 
