@@ -933,8 +933,9 @@ class EnhancedMusicBot {
             }
         });
 
-        this.app.listen(5000, () => {
-            console.log('🌟 Web server running on port 5000');
+        const port = process.env.PORT || 10000;
+        this.app.listen(port, '0.0.0.0', () => {
+            console.log(`🌟 Web server running on port ${port}`);
         });
     }
 
