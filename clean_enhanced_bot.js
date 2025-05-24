@@ -468,7 +468,7 @@ class EnhancedMusicBot {
             <button onclick="closeMiniPlayer()" style="background: none; border: none; color: white; cursor: pointer;">✕</button>
         </div>
         <div class="mini-player-info">
-            <span id="miniArtist">3Kloudz</span> - <span id="miniSong">Don't Want To Fight No More</span>
+            <span id="miniArtist">Not connected</span> - <span id="miniSong">Use Discord commands to start music</span>
         </div>
         <div class="mini-player-controls">
             <button onclick="muteStream()" style="background: #ff6b6b; border: none; color: white; padding: 5px 10px; border-radius: 5px; margin-right: 5px;">🔇 Mute</button>
@@ -525,10 +525,18 @@ class EnhancedMusicBot {
                     document.getElementById('artistName').textContent = data.artist;
                     document.getElementById('songName').textContent = data.song;
                     document.getElementById('sourceInfo').textContent = data.source || 'FlaviBot Player';
+                    
+                    // Update mini-player with real data
+                    document.getElementById('miniArtist').textContent = data.artist;
+                    document.getElementById('miniSong').textContent = data.song;
                 } else {
                     document.getElementById('artistName').textContent = data.artist || 'Not connected';
                     document.getElementById('songName').textContent = data.song || 'Use Discord commands to start music';
                     document.getElementById('sourceInfo').textContent = data.source || 'FlaviBot Player';
+                    
+                    // Update mini-player with status
+                    document.getElementById('miniArtist').textContent = data.artist || 'Not connected';
+                    document.getElementById('miniSong').textContent = data.song || 'Use Discord commands to start music';
                 }
             } catch (error) {
                 console.log('Live music update error:', error);
