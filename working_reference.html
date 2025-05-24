@@ -889,7 +889,7 @@
         // Music functions
         async function refreshNowPlaying() {
             try {
-                const response = await fetch('/api/now-playing');
+                const response = await fetch('/api/current-song');
                 const data = await response.json();
                 
                 if (data.success && data.currentSong) {
