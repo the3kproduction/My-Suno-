@@ -873,6 +873,26 @@
         </div>
 
         <div class="dashboard-grid">
+            <div class="card now-playing">
+                <div class="card-header" style="justify-content: center; text-align: center;">
+                    <div class="card-icon">🎵</div>
+                    <div class="card-title">NOW PLAYING</div>
+                </div>
+                <div class="song-info centered">
+                    <div class="song-artist" id="current-artist">Listening for music...</div>
+                    <div class="song-title" id="current-song">Waiting for track info...</div>
+                    <div class="song-status status-waiting" id="current-status">
+                        <span>🔴</span>
+                        <span id="status-text">Live</span>
+                    </div>
+                </div>
+                <div class="playback-controls">
+                    <button class="btn-control" onclick="refreshSong()">🔄 Refresh</button>
+                    <button class="btn-control" onclick="openSpotify()">🎵 Spotify</button>
+                    <button class="btn-control" onclick="openDiscord()">💬 Discord</button>
+                </div>
+            </div>
+
             <div class="card">
                 <div class="card-header">
                     <div class="card-icon">🎵</div>
@@ -894,26 +914,6 @@
                         <div style="font-weight: bold; color: #00ff88;">Smart Auto-Detection</div>
                     </div>
                     <p style="margin: 0; font-size: 14px; opacity: 0.9;">Your bot automatically extracts the real song title and artwork from Suno URLs using advanced detection technology. No manual input needed!</p>
-                </div>
-            </div>
-
-            <div class="card now-playing">
-                <div class="card-header" style="justify-content: center; text-align: center;">
-                    <div class="card-icon">🎵</div>
-                    <div class="card-title">NOW PLAYING</div>
-                </div>
-                <div class="song-info centered">
-                    <div class="song-artist" id="current-artist">Listening for music...</div>
-                    <div class="song-title" id="current-song">Waiting for track info...</div>
-                    <div class="song-status status-waiting" id="current-status">
-                        <span>🔴</span>
-                        <span id="status-text">Live</span>
-                    </div>
-                </div>
-                <div class="playback-controls">
-                    <button class="btn-control" onclick="refreshSong()">🔄 Refresh</button>
-                    <button class="btn-control" onclick="openSpotify()">🎵 Spotify</button>
-                    <button class="btn-control" onclick="openDiscord()">💬 Discord</button>
                 </div>
             </div>
 
