@@ -267,8 +267,31 @@ class Working3AMBot {
             }
         });
 
-        // Current song API endpoint with YouTube info
+        // Legacy endpoint redirect for frontend compatibility
         this.app.get('/api/current-song', (req, res) => {
+            if (this.currentSong && this.currentSong.artist && this.currentSong.song) {
+                res.json({
+                    success: true,
+                    artist: this.currentSong.artist,
+                    song: this.currentSong.song,
+                    source: 'FlaviBot Player',
+                    status: 'Live',
+                    spotifyUrl: this.currentSong.spotifyUrl || '',
+                    youtubeUrl: this.currentSong.youtubeUrl || ''
+                });
+            } else {
+                res.json({
+                    success: false,
+                    artist: "Connection error",
+                    song: "Unable to fetch song info",
+                    source: "FlaviBot Player",
+                    status: 'Waiting'
+                });
+            }
+        });
+
+        // Current song API endpoint with YouTube info (detailed format)
+        this.app.get('/api/current-song-detailed', (req, res) => {
             if (this.currentSong && this.currentSong.artist && this.currentSong.song) {
                 res.json({
                     success: true,
