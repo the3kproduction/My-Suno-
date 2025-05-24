@@ -208,32 +208,35 @@ class Enhanced3AMBot {
         .verified-badge {
             display: inline-flex;
             align-items: center;
-            background: linear-gradient(135deg, #8a2be2, #00ffff);
-            padding: 15px 30px;
-            border-radius: 50px;
-            margin-bottom: 20px;
+            justify-content: center;
+            width: 150px;
+            height: 150px;
+            border: 3px solid #8a2be2;
+            border-radius: 50%;
+            background: radial-gradient(circle at center, rgba(138, 43, 226, 0.3), rgba(0, 0, 0, 0.8));
             box-shadow: 
-                0 0 30px rgba(138, 43, 226, 0.6),
-                0 0 50px rgba(0, 255, 255, 0.4),
-                inset 0 0 20px rgba(255, 255, 255, 0.2);
+                0 0 20px #8a2be2,
+                inset 0 0 20px rgba(138, 43, 226, 0.5);
             animation: verifiedPulse 3s ease-in-out infinite;
-            border: 2px solid rgba(255, 255, 255, 0.3);
+            margin: 20px auto;
+            position: relative;
+            flex-direction: column;
         }
 
-        .three-am {
-            font-size: 1.8rem;
-            font-weight: 900;
+        .verified-badge .three-am {
             color: #00ffff;
-            margin-right: 10px;
-            animation: crazyTextGlow 2s ease-in-out infinite;
+            font-size: 2rem;
+            font-weight: bold;
+            text-shadow: 0 0 15px #00ffff;
+            margin-bottom: 5px;
         }
 
-        .verified-text {
-            font-size: 1.8rem;
-            font-weight: 900;
+        .verified-badge .verified-text {
             color: #8a2be2;
-            margin-right: 10px;
-            animation: crazyTextGlow 2s ease-in-out infinite reverse;
+            font-size: 1rem;
+            font-weight: bold;
+            text-shadow: 0 0 10px #8a2be2;
+            margin-bottom: 10px;
         }
 
         .verified-checkmark {
