@@ -1,0 +1,177 @@
+        <!-- Perfect 7-Panel Grid Layout -->
+        
+        <!-- Top Row: 3 panels -->
+        <div style="display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 20px; margin-bottom: 20px;">
+            <!-- Panel 1: NOW PLAYING -->
+            <div class="card">
+                <div class="card-header">
+                    <div class="card-icon">🎶</div>
+                    <div class="card-title">NOW PLAYING</div>
+                </div>
+                <div class="now-playing-content">
+                    <div class="song-info">
+                        <div class="song-title" id="current-song">3Kloudz - Obuwaba</div>
+                        <div class="song-artist" id="current-artist">Auto-detected from FlaviBot Player</div>
+                        <div class="song-source" id="music-source">Music Videos Voice Channel</div>
+                        <div class="live-status">🔴 LIVE</div>
+                    </div>
+                </div>
+                <div class="control-buttons">
+                    <button class="btn-control" onclick="launchDiscord()">🎧 Listen on Discord</button>
+                    <button class="btn-control" onclick="refreshSong()">🔄 Refresh</button>
+                    <button class="btn-control" onclick="openSpotify()">🎵 Spotify</button>
+                    <button class="btn-control" onclick="launchSuno()">🔥 Launch Suno</button>
+                </div>
+            </div>
+
+            <!-- Panel 2: Auto-Post Suno Song -->
+            <div class="card">
+                <div class="card-header">
+                    <div class="card-icon">🎵</div>
+                    <div class="card-title">Auto-Post Suno Song</div>
+                </div>
+                <div class="form-container">
+                    <div class="form-group">
+                        <label for="suno-url">Suno Song URL</label>
+                        <input type="url" id="suno-url" placeholder="https://suno.com/song/...">
+                    </div>
+                    <button class="btn btn-primary" onclick="postSunoSong()">
+                        <span>🚀</span>
+                        Auto-Post with Smart Detection
+                    </button>
+                </div>
+                <div class="feature-description" style="margin-top: 15px; padding-top: 15px; border-top: 1px solid rgba(255,255,255,0.1);">
+                    <div style="display: flex; align-items: center; gap: 8px; margin-bottom: 8px;">
+                        <span style="color: #4ade80;">✅</span>
+                        <span style="color: rgba(255,255,255,0.9); font-size: 13px;">Smart Auto-Detection</span>
+                    </div>
+                    <p style="margin: 0; font-size: 12px; color: rgba(255,255,255,0.7);">
+                        Your bot automatically extracts the real song title and artwork from Suno URLs using advanced detection technology. No manual input needed!
+                    </p>
+                </div>
+            </div>
+
+            <!-- Panel 3: Download Suno Songs -->
+            <div class="card">
+                <div class="card-header">
+                    <div class="card-icon">⬇️</div>
+                    <div class="card-title">Download Suno Songs</div>
+                </div>
+                <div class="download-container">
+                    <div style="display: flex; gap: 10px; margin-bottom: 15px;">
+                        <button class="btn btn-secondary" onclick="window.open('https://sunodownloader.io/', '_blank')" style="flex: 1; min-width: 140px; background: linear-gradient(135deg, #4ecdc4, #44a08d);">
+                            🎵 Audio Downloader
+                        </button>
+                        <button class="btn btn-secondary" onclick="window.open('https://sunodownloader.io/suno-video-downloader', '_blank')" style="flex: 1; min-width: 140px; background: linear-gradient(135deg, #667eea, #764ba2);">
+                            🎥 Video Downloader
+                        </button>
+                    </div>
+                    
+                    <div style="margin-top: 10px; font-size: 12px; color: #888; text-align: center;">
+                        Click a button to open the Suno downloader website, then paste your Suno URL there to download
+                    </div>
+                    
+                    <div id="download-status" style="margin-top: 15px; font-size: 14px;"></div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Middle Row: 3 panels -->
+        <div style="display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 20px; margin-bottom: 20px;">
+            <!-- Panel 4: Premium Suno Monitoring -->
+            <div class="card">
+                <div class="card-header">
+                    <div class="card-icon">🎵</div>
+                    <div class="card-title">Premium Suno Monitoring</div>
+                </div>
+                <div class="stats-grid">
+                    <div class="stat-item">
+                        <div class="stat-value" id="songs-posted">0</div>
+                        <div class="stat-label">Songs Posted</div>
+                        <div class="stat-sublabel">Auto-posted with reactions</div>
+                    </div>
+                    <div class="stat-item">
+                        <div class="stat-value" id="profiles-monitored">1</div>
+                        <div class="stat-label">Profiles Monitored</div>
+                        <div class="stat-sublabel">3kloudz actively tracked</div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Panel 5: Active Monitoring Status -->
+            <div class="card">
+                <div class="card-header">
+                    <div class="card-icon">🔗</div>
+                    <div class="card-title">Active Monitoring Status</div>
+                </div>
+                <div class="monitoring-details">
+                    <div class="detail-row">
+                        <strong>Primary Profile:</strong> 3kloudz
+                    </div>
+                    <div class="detail-row">
+                        <strong>Check Frequency:</strong> Every 3 minutes
+                    </div>
+                    <div class="detail-row">
+                        <strong>Status:</strong> <span class="status-active">🟢 ACTIVE</span>
+                    </div>
+                    <div class="detail-row">
+                        <strong>Last Check:</strong> <span id="monitoring-last-check">Checking now...</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Panel 6: Suno Profile Monitoring -->
+            <div class="card">
+                <div class="card-header">
+                    <div class="card-icon">👥</div>
+                    <div class="card-title">Suno Profile Monitoring</div>
+                </div>
+                <div class="profile-card">
+                    <div class="profile-info">
+                        <div class="profile-name">3Kloudz</div>
+                        <div class="profile-detail">
+                            <strong>Profile ID:</strong> 3kloudz
+                        </div>
+                        <div class="profile-detail">
+                            <strong>Last Checked:</strong> <span id="profile-last-check">Just now</span>
+                        </div>
+                        <div class="profile-detail">
+                            <strong>Status:</strong> <span class="status-active">🟢 Active</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Bottom Row: 1 wide panel -->
+        <div style="margin-bottom: 20px;">
+            <!-- Panel 7: Request Profile Monitoring -->
+            <div class="card">
+                <div class="card-header">
+                    <div class="card-icon">📝</div>
+                    <div class="card-title">Request Profile Monitoring</div>
+                </div>
+                <div class="form-container">
+                    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 15px; margin-bottom: 15px;">
+                        <div class="form-group">
+                            <label for="profile-username">Suno Username</label>
+                            <input type="text" id="profile-username" placeholder="Enter Suno username">
+                        </div>
+                        <div class="form-group">
+                            <label for="profile-url">Suno Profile URL</label>
+                            <input type="url" id="profile-url" placeholder="https://suno.com/@username">
+                        </div>
+                    </div>
+                    <button class="btn btn-primary" onclick="requestProfileMonitoring()" style="width: 100%;">
+                        <span>📨</span>
+                        Request Profile Monitoring
+                    </button>
+                    <div style="margin-top: 15px; padding: 15px; background: rgba(74, 222, 128, 0.1); border-radius: 8px; border: 1px solid rgba(74, 222, 128, 0.3);">
+                        <p style="margin: 0; font-size: 14px; color: rgba(255,255,255,0.9);">
+                            <strong>📧 How it works:</strong> Submit a Suno profile and we'll review it for monitoring. 
+                            Once approved, new songs from this profile will automatically be posted to your Discord channel!
+                        </p>
+                    </div>
+                </div>
+            </div>
+        </div>
