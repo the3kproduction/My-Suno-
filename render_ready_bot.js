@@ -876,7 +876,8 @@ class EnhancedMusicBot {
                                             spotifyUrl: match[2] || null,
                                             source: 'FlaviBot Player'
                                         };
-                                        console.log('🎵 Updated current track:', this.currentTrack);
+                                        console.log('🎵 Updated current track with Spotify URL:', this.currentTrack);
+                                        console.log('🎵 Spotify URL extracted:', match[2]);
                                         break;
                                     }
                                 }
