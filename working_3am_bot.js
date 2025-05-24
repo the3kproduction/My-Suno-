@@ -282,8 +282,11 @@ class Working3AMBot {
         try {
             const messages = await channel.messages.fetch({ limit: 50 });
             
-            // Look for FlaviBot messages with embeds
-            for (const message of messages.values()) {
+            // Convert to array and sort by timestamp (newest first)
+            const sortedMessages = Array.from(messages.values()).sort((a, b) => b.createdTimestamp - a.createdTimestamp);
+            
+            // Look for the most recent FlaviBot message with embeds
+            for (const message of sortedMessages) {
                 if (message.author.username && 
                     message.author.username.toLowerCase().includes('flavi') &&
                     message.embeds && message.embeds.length > 0) {
@@ -293,6 +296,8 @@ class Working3AMBot {
                     // Check if it's a music message (has song info)
                     if (embed.description && 
                         (embed.description.includes(' - ') || embed.title?.includes('Now playing'))) {
+                        
+                        console.log(`🎵 Found FlaviBot message from ${new Date(message.createdTimestamp).toLocaleTimeString()}: ${embed.description}`);
                         return message;
                     }
                 }
