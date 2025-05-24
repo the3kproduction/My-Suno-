@@ -310,8 +310,15 @@ class Working3AMBot {
         let artist = "Unknown Artist";
         
         if (embed.description) {
-            // Parse various formats: "Artist - Song - Duration" or "Artist - Song"
-            const description = embed.description.replace(/\*\*/g, ''); // Remove bold formatting
+            // Clean up the description - remove Discord emojis, formatting, and links
+            let description = embed.description
+                .replace(/\*\*/g, '') // Remove bold formatting
+                .replace(/<:[^:]+:\d+>/g, '') // Remove Discord emojis
+                .replace(/\[([^\]]+)\]\([^)]+\)/g, '$1') // Convert [text](link) to just text
+                .replace(/Added\s+/i, '') // Remove "Added" prefix
+                .trim();
+            
+            // Parse "Artist - Song" format
             const parts = description.split(' - ');
             
             if (parts.length >= 2) {
