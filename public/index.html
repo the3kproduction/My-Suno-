@@ -1418,9 +1418,15 @@
             
             statusDiv.innerHTML = '<span style="color: #4ade80;">🎵 Redirecting to audio downloader...</span>';
             
-            // Redirect to sunodownloader.io with the URL
-            const downloadUrl = `https://www.sunodownloader.io/?url=${encodeURIComponent(url)}`;
-            window.open(downloadUrl, '_blank');
+            // Copy URL to clipboard and redirect to sunodownloader.io
+            navigator.clipboard.writeText(url).then(() => {
+                statusDiv.innerHTML = '<span style="color: #4ade80;">🎵 URL copied! Redirecting to downloader...</span>';
+            }).catch(() => {
+                statusDiv.innerHTML = '<span style="color: #4ade80;">🎵 Redirecting to downloader...</span>';
+            });
+            
+            // Open the downloader site
+            window.open('https://www.sunodownloader.io/', '_blank');
             
             setTimeout(() => {
                 statusDiv.innerHTML = '<span style="color: #4ade80;">✅ Download page opened in new tab!</span>';
@@ -1443,9 +1449,15 @@
             
             statusDiv.innerHTML = '<span style="color: #667eea;">🎥 Redirecting to video downloader...</span>';
             
-            // Redirect to suno video downloader with the URL
-            const downloadUrl = `https://www.sunodownloader.io/suno-video-downloader?url=${encodeURIComponent(url)}`;
-            window.open(downloadUrl, '_blank');
+            // Copy URL to clipboard and redirect to sunodownloader.io
+            navigator.clipboard.writeText(url).then(() => {
+                statusDiv.innerHTML = '<span style="color: #667eea;">🎥 URL copied! Redirecting to downloader...</span>';
+            }).catch(() => {
+                statusDiv.innerHTML = '<span style="color: #667eea;">🎥 Redirecting to downloader...</span>';
+            });
+            
+            // Open the downloader site
+            window.open('https://www.sunodownloader.io/', '_blank');
             
             setTimeout(() => {
                 statusDiv.innerHTML = '<span style="color: #667eea;">✅ Video download page opened in new tab!</span>';
