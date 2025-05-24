@@ -847,8 +847,20 @@ class EnhancedMusicBot {
                             if (author.includes('Spotify') || title.includes('Spotify') || 
                                 author.includes('YouTube') || title.includes('YouTube') ||
                                 author.includes('FlaviBot') || title.includes('FlaviBot') ||
-                                description.includes('Now playing') || description.includes('♪') ||
-                                title.includes('Now playing')) {
+                                author.includes('Now playing') || description.includes('Now playing') || 
+                                description.includes('♪') || title.includes('Now playing')) {
+                                
+                                // Extract from FlaviBot format: **[Artist - Song Title](link)** - `duration`
+                                if (description && description.includes('**[') && description.includes('](')) {
+                                    const match = description.match(/\*\*\[([^\]]+)\]\([^)]+\)\*\*/);
+                                    if (match && match[1].includes(' - ')) {
+                                        const parts = match[1].split(' - ');
+                                        currentTrack.artist = parts[0].trim();
+                                        currentTrack.song = parts.slice(1).join(' - ').trim();
+                                        currentTrack.source = 'FlaviBot Player';
+                                        break;
+                                    }
+                                }
                                 
                                 // Extract from title field (most common for music players)
                                 if (title && title.includes(' - ')) {
