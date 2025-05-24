@@ -607,6 +607,7 @@
             animation: diagonalShift1 8s ease-in-out infinite;
             z-index: -1;
             clip-path: polygon(0 0, 100% 0, 0 100%);
+            display: var(--before-display, block);
         }
 
         /* Second half diagonal pattern */
@@ -622,6 +623,7 @@
             animation: diagonalShift2 10s ease-in-out infinite;
             z-index: -1;
             clip-path: polygon(100% 0, 100% 100%, 0 100%);
+            display: var(--after-display, block);
         }
 
         @keyframes autoGradientFlow {
@@ -1089,9 +1091,20 @@
             
             // Apply theme
             if (theme === 'light') {
-                document.body.style.filter = 'invert(1) hue-rotate(180deg)';
+                // Remove all gradient animations and set white background
+                document.body.style.background = '#ffffff';
+                document.body.style.animation = 'none';
+                document.body.style.color = '#000000';
+                // Hide pseudo-elements (diagonal gradients)
+                document.body.style.setProperty('--before-display', 'none');
+                document.body.style.setProperty('--after-display', 'none');
             } else {
-                document.body.style.filter = '';
+                // Restore normal theme
+                document.body.style.background = '';
+                document.body.style.animation = '';
+                document.body.style.color = '';
+                document.body.style.removeProperty('--before-display');
+                document.body.style.removeProperty('--after-display');
             }
         }
 
