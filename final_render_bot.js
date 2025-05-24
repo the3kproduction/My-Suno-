@@ -816,52 +816,84 @@ class EnhancedMusicBot {
         // Now Playing endpoint for live music info
         this.app.get('/now-playing', async (req, res) => {
             try {
-                // Try to get the latest message from Music Video channel that might contain song info
-                const musicChannel = await this.client.channels.fetch(this.musicVideoChannelId);
-                const messages = await musicChannel.messages.fetch({ limit: 5 });
+                // Check the new-songs channel for music player embeds
+                const newSongsChannel = await this.client.channels.fetch(this.sunoChannelId);
+                const messages = await newSongsChannel.messages.fetch({ limit: 10 });
                 
                 let currentTrack = {
                     artist: 'Listening for music...',
                     song: 'Waiting for track info...',
-                    source: 'Music Video Channel'
+                    source: 'New Songs Player'
                 };
                 
-                // Look for messages that might contain song info (from Flavibot or similar)
+                // Look for music player embeds or messages
                 for (const message of messages.values()) {
-                    // Check if message has embeds with music info
+                    // Check if message has embeds with music player info
                     if (message.embeds && message.embeds.length > 0) {
                         const embed = message.embeds[0];
-                        if (embed.title || embed.description) {
-                            // Try to extract artist and song from embed
-                            const title = embed.title || embed.description || '';
-                            const parts = title.split(' - ');
-                            if (parts.length >= 2) {
-                                currentTrack.artist = parts[0].trim();
-                                currentTrack.song = parts[1].trim();
-                                break;
-                            } else if (title.length > 0) {
-                                currentTrack.song = title.trim();
-                                currentTrack.artist = embed.author?.name || 'Unknown Artist';
-                                break;
+                        
+                        // Look for music player patterns in embed
+                        if (embed.author?.name || embed.title || embed.description) {
+                            const author = embed.author?.name || '';
+                            const title = embed.title || '';
+                            const description = embed.description || '';
+                            
+                            // Common music player patterns
+                            if (author.includes('Spotify') || title.includes('Spotify') || 
+                                author.includes('YouTube') || title.includes('YouTube') ||
+                                description.includes('Now playing') || description.includes('♪')) {
+                                
+                                // Extract from title field (most common for music players)
+                                if (title && title.includes(' - ')) {
+                                    const parts = title.split(' - ');
+                                    currentTrack.artist = parts[0].trim();
+                                    currentTrack.song = parts[1].trim();
+                                    currentTrack.source = author || 'Music Player';
+                                    break;
+                                }
+                                
+                                // Extract from description
+                                if (description && description.includes(' - ')) {
+                                    const parts = description.split(' - ');
+                                    currentTrack.artist = parts[0].trim();
+                                    currentTrack.song = parts[1].trim();
+                                    currentTrack.source = author || 'Music Player';
+                                    break;
+                                }
+                                
+                                // Single title without artist separation
+                                if (title && title.length > 0) {
+                                    currentTrack.song = title.trim();
+                                    currentTrack.artist = author || 'Unknown Artist';
+                                    currentTrack.source = 'Music Player';
+                                    break;
+                                }
                             }
                         }
-                    }
-                    
-                    // Check message content for song patterns
-                    const content = message.content;
-                    if (content.includes('Now playing:') || content.includes('♪') || content.includes('🎵')) {
-                        // Extract song info from text
-                        const songMatch = content.match(/(?:Now playing:|♪|🎵)\s*(.+)/i);
-                        if (songMatch) {
-                            const songInfo = songMatch[1].trim();
-                            const parts = songInfo.split(' - ');
-                            if (parts.length >= 2) {
-                                currentTrack.artist = parts[0].trim();
-                                currentTrack.song = parts[1].trim();
-                            } else {
-                                currentTrack.song = songInfo;
+                        
+                        // Check embed fields for track info
+                        if (embed.fields && embed.fields.length > 0) {
+                            let foundArtist = '';
+                            let foundSong = '';
+                            
+                            for (const field of embed.fields) {
+                                const fieldName = field.name.toLowerCase();
+                                const fieldValue = field.value;
+                                
+                                if (fieldName.includes('artist') || fieldName.includes('by')) {
+                                    foundArtist = fieldValue;
+                                }
+                                if (fieldName.includes('title') || fieldName.includes('song') || fieldName.includes('track')) {
+                                    foundSong = fieldValue;
+                                }
                             }
-                            break;
+                            
+                            if (foundArtist && foundSong) {
+                                currentTrack.artist = foundArtist;
+                                currentTrack.song = foundSong;
+                                currentTrack.source = embed.author?.name || 'Music Player';
+                                break;
+                            }
                         }
                     }
                 }
@@ -878,7 +910,7 @@ class EnhancedMusicBot {
                     success: false,
                     artist: 'Error fetching info',
                     song: 'Please check connection',
-                    source: 'Music Video Channel'
+                    source: 'New Songs Channel'
                 });
             }
         });
