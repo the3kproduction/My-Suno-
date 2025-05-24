@@ -576,16 +576,12 @@
                 const response = await fetch('/api/current-song');
                 const data = await response.json();
                 
-                if (data.success && data.song) {
-                    const parts = data.song.title.split(' - ');
-                    const artist = parts[0] || 'Unknown Artist';
-                    const song = parts.slice(1).join(' - ') || 'Unknown Song';
-                    
-                    document.getElementById('artist').textContent = artist;
-                    document.getElementById('song').textContent = song;
-                    document.getElementById('source').textContent = 'FlaviBot Player';
-                    currentSong = song;
-                    spotifyUrl = data.song.spotifyUrl || '';
+                if (data.success && data.currentSong) {
+                    document.getElementById('artist').textContent = data.currentSong.artist;
+                    document.getElementById('song').textContent = data.currentSong.song;
+                    document.getElementById('source').textContent = data.currentSong.source;
+                    currentSong = data.currentSong.song;
+                    spotifyUrl = data.currentSong.spotifyUrl || '';
                 } else {
                     document.getElementById('artist').textContent = 'Listening for music...';
                     document.getElementById('song').textContent = 'Waiting for track info...';
