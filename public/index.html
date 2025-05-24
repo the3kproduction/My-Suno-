@@ -115,7 +115,7 @@
             align-items: center;
             margin-bottom: 20px;
             position: absolute;
-            top: 15px;
+            top: 20px;
             left: 50%;
             transform: translateX(-50%);
             z-index: 9999;
@@ -134,8 +134,9 @@
         .logo-container::before {
             width: 220px;
             height: 220px;
-            top: -50px;
-            left: -50px;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
             border-top: 2px solid rgba(0, 255, 136, 0.8);
             border-right: 2px solid rgba(0, 255, 136, 0.4);
             animation: orbit-slow 8s linear infinite;
@@ -144,21 +145,22 @@
         .logo-container::after {
             width: 180px;
             height: 180px;
-            top: -30px;
-            left: -30px;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
             border-bottom: 2px solid rgba(255, 0, 128, 0.8);
             border-left: 2px solid rgba(255, 0, 128, 0.4);
             animation: orbit-fast 4s linear infinite reverse;
         }
 
         @keyframes orbit-slow {
-            0% { transform: rotate(0deg); }
-            100% { transform: rotate(360deg); }
+            0% { transform: translate(-50%, -50%) rotate(0deg); }
+            100% { transform: translate(-50%, -50%) rotate(360deg); }
         }
 
         @keyframes orbit-fast {
-            0% { transform: rotate(0deg); }
-            100% { transform: rotate(360deg); }
+            0% { transform: translate(-50%, -50%) rotate(0deg); }
+            100% { transform: translate(-50%, -50%) rotate(360deg); }
         }
 
         .logo-glow-outer {
