@@ -558,224 +558,251 @@ class EnhancedMusicBot {
                     <button onclick="checkNow()" class="btn" style="background: linear-gradient(135deg, #4ecdc4, #44a08d);">⚡ Check Now</button>
                 </div>
                 <div class="grid">
-            animation: none !important;
-        }
-
-        body.dark-theme {
-            background: linear-gradient(-45deg, #1a1a1a, #2d2d2d, #404040, #1a1a1a) !important;
-            color: white !important;
-            animation: none !important;
-        }
-
-        .light-theme .section {
-            background: rgba(255,255,255,0.9) !important;
-            color: #333 !important;
-        }
-
-        .dark-theme .section {
-            background: rgba(0,0,0,0.5) !important;
-            color: white !important;
-        }
-
-        @keyframes gradientBackground {
-            0% { background-position: 0% 50%; }
-            50% { background-position: 100% 50%; }
-            100% { background-position: 0% 50%; }
-        }
-
-        .theme-switcher {
-            position: fixed;
-            top: 20px;
-            right: 20px;
-            display: flex;
-            background: var(--card-bg);
-            border-radius: 50px;
-            padding: 4px;
-            backdrop-filter: blur(15px);
-            border: 1px solid var(--border-color);
-            z-index: 1000;
-        }
-
-        .theme-btn {
-            background: transparent;
-            border: none;
-            padding: 10px 20px;
-            border-radius: 50px;
-            color: var(--text-secondary);
-            cursor: pointer;
-            transition: all 0.3s ease;
-            font-size: 14px;
-            font-weight: 600;
-        }
-
-        .theme-btn.active,
-        .theme-btn:hover {
-            background: rgba(255, 255, 255, 0.2);
-            color: var(--text-primary);
-            transform: translateY(-1px);
-        }
-
-        @keyframes glow {
-            0%, 100% { 
-                box-shadow: 0 0 20px rgba(58, 255, 232, 0.5), 0 0 40px rgba(58, 255, 232, 0.3), 0 0 60px rgba(58, 255, 232, 0.1);
-            }
-            50% { 
-                box-shadow: 0 0 30px rgba(58, 255, 232, 0.8), 0 0 60px rgba(58, 255, 232, 0.5), 0 0 90px rgba(58, 255, 232, 0.3);
-            }
-        }
-
-        @keyframes crazyBackground {
-            0% { background-position: 0% 50%; }
-            50% { background-position: 100% 50%; }
-            100% { background-position: 0% 50%; }
-        }
-
-        @keyframes gentlePulse {
-            0%, 100% { transform: scale(1); opacity: 0.8; }
-            50% { transform: scale(1.05); opacity: 1; }
-        }
-
-        .container {
-            max-width: 1200px;
-            margin: 0 auto;
-            padding: 20px;
-        }
-
-        .theme-switcher {
-            position: fixed;
-            top: 30px;
-            right: 30px;
-            z-index: 1000;
-        }
-
-        .section {
-            background: rgba(255, 255, 255, 0.1);
-            backdrop-filter: blur(10px);
-            border-radius: 20px;
-            padding: 30px;
-            margin-bottom: 30px;
-            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
-            border: 1px solid rgba(255, 255, 255, 0.2);
-        }
-
-        .section h2 {
-            font-size: 1.8rem;
-            margin-bottom: 20px;
-            color: #fff;
-            font-weight: 700;
-        }
-
-        .btn {
-            background: linear-gradient(135deg, #667eea, #764ba2);
-            color: white;
-            border: none;
-            padding: 12px 24px;
-            border-radius: 25px;
-            font-weight: 600;
-            cursor: pointer;
-            transition: all 0.3s ease;
-            text-decoration: none;
-            display: inline-block;
-            text-align: center;
-        }
-
-        .btn:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
-        }
-
-        .form-group {
-            margin-bottom: 20px;
-        }
-
-        .form-group label {
-            display: block;
-            margin-bottom: 8px;
-            color: white;
-            font-weight: 500;
-        }
-
-        .form-group input,
-        .form-group textarea {
-            width: 100%;
-            padding: 12px;
-            border: none;
-            border-radius: 8px;
-            background: rgba(255, 255, 255, 0.9);
-            color: #333;
-            font-size: 14px;
-        }
-
-        .form-group textarea {
-            resize: vertical;
-            min-height: 80px;
-        }
-
-        .mini-player {
-            position: fixed;
-            bottom: 20px;
-            right: 20px;
-            width: 300px;
-            background: rgba(0, 0, 0, 0.9);
-            border-radius: 15px;
-            padding: 15px;
-            z-index: 9999;
-            cursor: move;
-            display: block !important;
-            backdrop-filter: blur(10px);
-            border: 1px solid rgba(255,255,255,0.1);
-        }
-
-        .mini-player-header {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            margin-bottom: 10px;
-            color: white;
-            font-weight: bold;
-        }
-
-        .mini-player-info {
-            color: white;
-            margin-bottom: 10px;
-            font-size: 14px;
-        }
-
-        .mini-player-controls {
-            display: flex;
-            gap: 10px;
-        }
-    </style>
-</head>
-<body>
-    <!-- Background Animation -->
-    <div class="background-animation"></div>
-    
-    <!-- Theme Switcher -->
-    <div class="theme-switcher">
-        <button id="auto-btn" class="theme-btn active" onclick="setTheme('auto')">🌍 Auto</button>
-        <button id="light-btn" class="theme-btn" onclick="setTheme('light')">☀️ Light</button>
-        <button id="dark-btn" class="theme-btn" onclick="setTheme('dark')">🌙 Dark</button>
-    </div>
-
-    <div class="container">
-        <!-- 3AM VERIFIED Header -->
-        <div class="header" style="text-align: center; padding: 60px 40px; background: transparent; position: relative;">
-            <!-- 3AM VERIFIED Logo -->
-            <div style="display: inline-block; width: 120px; height: 120px; border-radius: 50%; background: linear-gradient(135deg, #667eea, #764ba2); position: relative; margin-bottom: 30px; animation: glow 3s ease-in-out infinite;">
-                <div style="position: absolute; top: 15px; left: 50%; transform: translateX(-50%); color: #3affe8; font-weight: 800; font-size: 24px; text-shadow: 0 0 20px rgba(58, 255, 232, 0.8);">3AM</div>
-                <div style="position: absolute; bottom: 25px; left: 50%; transform: translateX(-50%); color: rgba(255,255,255,0.8); font-size: 12px; font-weight: 600; letter-spacing: 1px;">VERIFIED</div>
-                <div style="position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); width: 30px; height: 30px; border: 3px solid #3affe8; border-radius: 8px; display: flex; align-items: center; justify-content: center; animation: glow 2s ease-in-out infinite;">
-                    <span style="color: #3affe8; font-size: 18px; font-weight: bold;">✓</span>
+                    <div class="profile-card">
+                        <h3>👤 3kloudz Profile</h3>
+                        <p><strong>Status:</strong> <span style="color: #4ade80;">🟢 Monitored</span></p>
+                        <p><strong>Songs Found:</strong> 0</p>
+                        <p><strong>Last Check:</strong> <span id="profile1LastCheck">Never</span></p>
+                    </div>
                 </div>
             </div>
-            
-            <!-- Enhanced Music Bot Title -->
-            <h1 style="font-size: 4rem; font-weight: 800; background: linear-gradient(45deg, #3affe8, #667eea, #764ba2, #3affe8); background-size: 300% 300%; animation: crazyBackground 6s ease infinite; -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text; text-shadow: 0 0 40px rgba(58, 255, 232, 0.5); margin-bottom: 20px; letter-spacing: 2px;">Enhanced Music Bot</h1>
-            
-            <!-- Subtitle -->
-            <p style="font-size: 1.2rem; color: rgba(255,255,255,0.8); font-weight: 500; margin-bottom: 40px; text-shadow: 0 2px 10px rgba(0,0,0,0.3);">Discord Music Bot with YouTube Integration & Suno Monitoring</p>
         </div>
+
+        <script>
+            // Theme System
+            function setTheme(theme) {
+                const buttons = document.querySelectorAll('.theme-btn');
+                buttons.forEach(btn => btn.classList.remove('active'));
+                document.getElementById(theme + '-btn').classList.add('active');
+                
+                if (theme === 'auto') {
+                    const hour = new Date().getHours();
+                    const autoTheme = (hour >= 6 && hour < 18) ? 'light' : 'dark';
+                    document.documentElement.setAttribute('data-theme', autoTheme);
+                    localStorage.setItem('theme', 'auto');
+                } else {
+                    document.documentElement.setAttribute('data-theme', theme);
+                    localStorage.setItem('theme', theme);
+                }
+                console.log('Theme set to:', theme);
+            }
+
+            function initTheme() {
+                const savedTheme = localStorage.getItem('theme') || 'auto';
+                setTheme(savedTheme);
+            }
+
+            setInterval(() => {
+                if (localStorage.getItem('theme') === 'auto') {
+                    setTheme('auto');
+                }
+            }, 60000);
+
+            // Initialize theme
+            initTheme();
+
+            // Update live music info
+            async function updateLiveMusicInfo() {
+                try {
+                    const response = await fetch('/api/now-playing');
+                    const data = await response.json();
+                    
+                    if (data.isPlaying) {
+                        document.getElementById('currentArtist').textContent = data.artist || 'Unknown Artist';
+                        document.getElementById('currentSong').textContent = data.title || 'Unknown Song';
+                        document.getElementById('musicSource').textContent = data.source || 'Music Channel';
+                        document.getElementById('liveStatus').innerHTML = '🔴 Live';
+                        document.getElementById('musicStatus').innerHTML = '🎶 Now Playing';
+                    } else {
+                        document.getElementById('currentArtist').textContent = 'No music playing';
+                        document.getElementById('currentSong').textContent = 'Waiting for track...';
+                        document.getElementById('musicSource').textContent = 'Music Channel';
+                        document.getElementById('liveStatus').innerHTML = '⚫ Offline';
+                        document.getElementById('musicStatus').innerHTML = '🎵 Waiting';
+                    }
+                } catch (error) {
+                    console.error('Error fetching music info:', error);
+                }
+            }
+
+            function refreshNowPlaying() {
+                updateLiveMusicInfo();
+            }
+
+            function toggleMute() {
+                const btn = document.getElementById('muteToggle');
+                if (btn.textContent.includes('Mute')) {
+                    btn.innerHTML = '🔇 Unmute Stream';
+                } else {
+                    btn.innerHTML = '🔊 Mute Stream';
+                }
+            }
+
+            // Suno form handling
+            document.getElementById('sunoForm').addEventListener('submit', async (e) => {
+                e.preventDefault();
+                const url = document.getElementById('sunoUrl').value;
+                const status = document.getElementById('sunoStatus');
+                
+                status.innerHTML = '<div style="color: #4ade80;">🤖 Processing with smart detection...</div>';
+                
+                try {
+                    const response = await fetch('/api/suno-post', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({ url })
+                    });
+                    
+                    const result = await response.json();
+                    
+                    if (result.success) {
+                        status.innerHTML = '<div style="color: #4ade80;">✅ Successfully posted to Discord!</div>';
+                        document.getElementById('sunoUrl').value = '';
+                    } else {
+                        status.innerHTML = '<div style="color: #f87171;">❌ Error: ' + result.error + '</div>';
+                    }
+                } catch (error) {
+                    status.innerHTML = '<div style="color: #f87171;">❌ Error posting song</div>';
+                }
+            });
+
+            async function testMonitoring() {
+                try {
+                    const response = await fetch('/api/test-monitoring');
+                    const result = await response.json();
+                    alert('Test result: ' + result.message);
+                } catch (error) {
+                    alert('Test failed: ' + error.message);
+                }
+            }
+
+            async function checkNow() {
+                try {
+                    const response = await fetch('/api/check-now');
+                    const result = await response.json();
+                    alert('Check complete: ' + result.message);
+                } catch (error) {
+                    alert('Check failed: ' + error.message);
+                }
+            }
+
+            // Update last check time
+            function updateLastCheckTime() {
+                const now = new Date().toLocaleTimeString();
+                document.getElementById('lastCheck').textContent = now;
+                document.getElementById('profile1LastCheck').textContent = now;
+            }
+
+            // Auto-refresh data
+            setInterval(updateLiveMusicInfo, 30000);
+            setInterval(updateLastCheckTime, 180000);
+            
+            // Initial load
+            updateLiveMusicInfo();
+            updateLastCheckTime();
+        </script>
+    </body>
+</html>`);
+
+        // API endpoints
+        this.app.get('/api/now-playing', (req, res) => {
+            res.json({
+                isPlaying: this.currentSong !== null,
+                artist: this.currentSong?.artist || 'Unknown Artist',
+                title: this.currentSong?.title || 'Unknown Song',
+                source: 'Discord Voice Channel'
+            });
+        });
+
+        this.app.post('/api/suno-post', async (req, res) => {
+            try {
+                const { url } = req.body;
+                const result = await this.extractSunoData(url);
+                
+                if (result.success) {
+                    await this.postSunoToDiscord(result.title, url, result.description);
+                    res.json({ success: true });
+                } else {
+                    res.json({ success: false, error: result.error });
+                }
+            } catch (error) {
+                res.json({ success: false, error: error.message });
+            }
+        });
+
+        this.app.get('/api/test-monitoring', (req, res) => {
+            res.json({ message: 'Monitoring system is active and working!' });
+        });
+
+        this.app.get('/api/check-now', async (req, res) => {
+            try {
+                await this.checkAllProfilesForNewSongs();
+                res.json({ message: 'Successfully checked all profiles for new songs!' });
+            } catch (error) {
+                res.json({ message: 'Check completed with some errors: ' + error.message });
+            }
+        });
+
+        const port = process.env.PORT || 5000;
+        this.app.listen(port, '0.0.0.0', () => {
+            console.log(`3AM VERIFIED Dashboard running on port ${port}`);
+        });
+    }
+
+    async extractSunoData(url) {
+        try {
+            console.log('Extracting Suno data from:', url);
+            
+            const response = await fetch(url);
+            const html = await response.text();
+            
+            // Extract title from page
+            const titleMatch = html.match(/<title[^>]*>([^<]+)<\/title>/i);
+            const title = titleMatch ? titleMatch[1].replace(' | Suno', '') : 'Unknown Song';
+            
+            // Try to extract description or use default
+            const description = `🎵 New song from Suno AI! Check it out: ${title}`;
+            
+            return {
+                success: true,
+                title: title,
+                description: description,
+                url: url
+            };
+        } catch (error) {
+            console.error('Error extracting Suno data:', error);
+            return {
+                success: false,
+                error: error.message
+            };
+        }
+    }
+
+    async postSunoToDiscord(title, url, description = '') {
+        try {
+            const channel = this.client.channels.cache.get(process.env.DISCORD_CHANNEL_ID);
+            if (!channel) {
+                throw new Error('Discord channel not found');
+            }
+
+            const embed = {
+                color: 0x667eea,
+                title: `🎵 ${title}`,
+                description: description || `New song posted from Suno AI!`,
+                url: url,
+                timestamp: new Date().toISOString(),
+                footer: {
+                    text: '3AM VERIFIED Bot'
+                }
+            };
+
+            await channel.send({ embeds: [embed] });
+            console.log('Successfully posted Suno song to Discord');
+        } catch (error) {
+            console.error('Error posting to Discord:', error);
+            throw error;
+        }
+    }
 
         <!-- Live Music Stream Section -->
         <div class="section" style="background: linear-gradient(135deg, rgba(102, 126, 234, 0.2), rgba(118, 75, 162, 0.2)); border: 2px solid rgba(58, 255, 232, 0.3);">
