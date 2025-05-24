@@ -831,6 +831,11 @@ class EnhancedMusicBot {
                     // Check if message has embeds with music player info
                     if (message.embeds && message.embeds.length > 0) {
                         const embed = message.embeds[0];
+                        console.log('🎵 Found embed:', {
+                            author: embed.author?.name,
+                            title: embed.title,
+                            description: embed.description?.substring(0, 100)
+                        });
                         
                         // Look for music player patterns in embed
                         if (embed.author?.name || embed.title || embed.description) {
@@ -838,10 +843,12 @@ class EnhancedMusicBot {
                             const title = embed.title || '';
                             const description = embed.description || '';
                             
-                            // Common music player patterns
+                            // Common music player patterns (including FlaviBot)
                             if (author.includes('Spotify') || title.includes('Spotify') || 
                                 author.includes('YouTube') || title.includes('YouTube') ||
-                                description.includes('Now playing') || description.includes('♪')) {
+                                author.includes('FlaviBot') || title.includes('FlaviBot') ||
+                                description.includes('Now playing') || description.includes('♪') ||
+                                title.includes('Now playing')) {
                                 
                                 // Extract from title field (most common for music players)
                                 if (title && title.includes(' - ')) {
