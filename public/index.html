@@ -563,6 +563,75 @@
             transform: translateY(-1px);
         }
 
+        .song-info.centered {
+            text-align: center;
+        }
+
+        .song-info.centered .song-artist,
+        .song-info.centered .song-title,
+        .song-info.centered .song-status {
+            text-align: center;
+            justify-content: center;
+        }
+
+        /* Dynamic scroll background effects */
+        body.scroll-effect-1 {
+            background: linear-gradient(135deg, #ff0080, #7928ca, #ff0080);
+            background-size: 400% 400%;
+            animation: gradientShift 3s ease infinite;
+        }
+
+        body.scroll-effect-2 {
+            background: linear-gradient(135deg, #00ff88, #0070f3, #00ff88);
+            background-size: 400% 400%;
+            animation: gradientShift 3s ease infinite;
+        }
+
+        body.scroll-effect-3 {
+            background: linear-gradient(135deg, #ff4081, #9c27b0, #ff4081);
+            background-size: 400% 400%;
+            animation: gradientShift 3s ease infinite;
+        }
+
+        @keyframes gradientShift {
+            0%, 100% { background-position: 0% 50%; }
+            50% { background-position: 100% 50%; }
+        }
+
+        /* Theme toggle */
+        .theme-toggle {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            z-index: 1000;
+            display: flex;
+            gap: 5px;
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 25px;
+            padding: 5px;
+            backdrop-filter: blur(10px);
+        }
+
+        .theme-btn {
+            padding: 8px 12px;
+            border: none;
+            border-radius: 20px;
+            background: transparent;
+            color: white;
+            cursor: pointer;
+            font-size: 12px;
+            transition: all 0.3s ease;
+        }
+
+        .theme-btn.active {
+            background: rgba(138, 43, 226, 0.8);
+            color: white;
+        }
+
+        .theme-btn:hover {
+            background: rgba(255, 255, 255, 0.2);
+        }
+
         @media (max-width: 768px) {
             .container {
                 padding: 15px;
@@ -592,6 +661,13 @@
 <body>
     <div class="floating-particles"></div>
     
+    <!-- Theme Toggle -->
+    <div class="theme-toggle">
+        <button class="theme-btn active" onclick="setTheme('auto')">AUTO</button>
+        <button class="theme-btn" onclick="setTheme('dark')">DARK</button>
+        <button class="theme-btn" onclick="setTheme('light')">LIGHT</button>
+    </div>
+    
     <div class="container">
         <div class="header">
             <div class="logo-container">
@@ -614,7 +690,7 @@
                     <div class="card-icon">🎵</div>
                     <div class="card-title">NOW PLAYING</div>
                 </div>
-                <div class="song-info">
+                <div class="song-info centered">
                     <div class="song-artist" id="current-artist">Listening for music...</div>
                     <div class="song-title" id="current-song">Waiting for track info...</div>
                     <div class="song-status status-waiting" id="current-status">
@@ -624,7 +700,8 @@
                 </div>
                 <div class="playback-controls">
                     <button class="btn-control" onclick="refreshSong()">🔄 Refresh</button>
-                    <button class="btn-control" onclick="openSpotify()">🎵 Open on Spotify</button>
+                    <button class="btn-control" onclick="openSpotify()">🎵 Spotify</button>
+                    <button class="btn-control" onclick="openDiscord()">💬 Discord</button>
                 </div>
             </div>
 
@@ -896,6 +973,65 @@
             document.getElementById('your-name').value = '';
             document.getElementById('request-reason').value = '';
         }
+
+        // Open Discord function
+        function openDiscord() {
+            // Open Discord in a new tab
+            window.open('https://discord.gg/your-server', '_blank');
+        }
+
+        // Theme management
+        let currentTheme = 'auto';
+        function setTheme(theme) {
+            currentTheme = theme;
+            
+            // Update active button
+            document.querySelectorAll('.theme-btn').forEach(btn => btn.classList.remove('active'));
+            event.target.classList.add('active');
+            
+            // Apply theme
+            if (theme === 'light') {
+                document.body.style.filter = 'invert(1) hue-rotate(180deg)';
+            } else {
+                document.body.style.filter = '';
+            }
+        }
+
+        // Dramatic scroll effects
+        let lastScrollY = 0;
+        let scrollEffectTimeout;
+        
+        function handleScroll() {
+            const scrollY = window.scrollY;
+            const scrollDelta = Math.abs(scrollY - lastScrollY);
+            
+            // Clear previous timeout
+            clearTimeout(scrollEffectTimeout);
+            
+            // Apply dramatic color changes based on scroll direction and speed
+            if (scrollDelta > 50) {
+                if (scrollY > lastScrollY) {
+                    // Scrolling down - dramatic pink/purple
+                    document.body.className = 'scroll-effect-1';
+                } else {
+                    // Scrolling up - dramatic green/blue
+                    document.body.className = 'scroll-effect-2';
+                }
+            } else if (scrollDelta > 20) {
+                // Medium scroll - dramatic purple/magenta
+                document.body.className = 'scroll-effect-3';
+            }
+            
+            // Reset to original after scrolling stops
+            scrollEffectTimeout = setTimeout(() => {
+                document.body.className = '';
+            }, 1000);
+            
+            lastScrollY = scrollY;
+        }
+
+        // Add scroll listener
+        window.addEventListener('scroll', handleScroll);
 
         // Initialize
         createParticles();
