@@ -46,7 +46,7 @@ args = "Music Video Bot"
 
 [[workflows.workflow.tasks]]
 task = "workflow.run"
-args = "3AM VERIFIED Dashboard"
+args = "Working 3AM Bot"
 
 [[workflows.workflow]]
 name = "discord-bot-test"
@@ -120,12 +120,12 @@ args = "node final_render_bot.js"
 waitForPort = 5000
 
 [[workflows.workflow]]
-name = "3AM VERIFIED Dashboard"
+name = "Working 3AM Bot"
 author = "agent"
 
 [[workflows.workflow.tasks]]
 task = "shell.exec"
-args = "node perfect_3am_bot.js"
+args = "node working_3am_bot.js"
 waitForPort = 5000
 
 [deployment]
