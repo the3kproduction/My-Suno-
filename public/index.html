@@ -815,7 +815,7 @@
 
         <div class="dashboard-grid">
             <div class="card now-playing">
-                <div class="card-header">
+                <div class="card-header" style="justify-content: center; text-align: center;">
                     <div class="card-icon">🎵</div>
                     <div class="card-title">NOW PLAYING</div>
                 </div>
@@ -1141,6 +1141,20 @@
                 // Hide pseudo-elements (diagonal gradients)
                 document.body.style.setProperty('--before-display', 'none');
                 document.body.style.setProperty('--after-display', 'none');
+                
+                // Force all text elements to be dark and readable
+                const allTextElements = document.querySelectorAll('*');
+                allTextElements.forEach(el => {
+                    if (el.style) {
+                        el.style.color = '#000000';
+                    }
+                });
+                
+                // Specifically target card elements and ensure they're readable
+                document.querySelectorAll('.card, .card-title, .card-header, .song-artist, .song-title, .song-status, .stat-value, .stat-label').forEach(el => {
+                    el.style.color = '#000000';
+                    el.style.backgroundColor = 'rgba(0,0,0,0.05)';
+                });
             } else {
                 // Restore normal theme
                 document.body.style.background = '';
