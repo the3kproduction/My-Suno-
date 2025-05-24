@@ -466,13 +466,89 @@ class Enhanced3AMBot {
             res.send(htmlContent);
         });
 
-        this.app.get('/api/now-playing', (req, res) => {
-            res.json({
-                isPlaying: this.currentSong !== null,
-                artist: this.currentSong?.artist || 'Unknown Artist',
-                title: this.currentSong?.title || 'Unknown Song',
-                source: 'Discord Voice Channel'
-            });
+        this.app.get('/api/now-playing', async (req, res) => {
+            try {
+                // Get the new song channel where FlaviBot is playing
+                const newSongChannel = this.client.channels.cache.get(process.env.DISCORD_CHANNEL_ID);
+                if (!newSongChannel) {
+                    return res.json({
+                        isPlaying: false,
+                        artist: 'Channel not found',
+                        title: 'Unable to connect',
+                        source: 'Discord Channel'
+                    });
+                }
+
+                // Look for FlaviBot in the server
+                const guild = newSongChannel.guild;
+                const flaviBot = guild.members.cache.find(member => 
+                    member.user.username.toLowerCase().includes('flavi') || 
+                    member.user.displayName.toLowerCase().includes('flavi')
+                );
+
+                if (!flaviBot) {
+                    return res.json({
+                        isPlaying: false,
+                        artist: 'FlaviBot not found',
+                        title: 'Bot not in server',
+                        source: 'Discord Channel'
+                    });
+                }
+
+                // Check FlaviBot's activities for music info
+                const activities = flaviBot.presence?.activities || [];
+                const musicActivity = activities.find(activity => 
+                    activity.type === 2 || // LISTENING activity type
+                    activity.name?.toLowerCase().includes('music') ||
+                    activity.name?.toLowerCase().includes('spotify') ||
+                    activity.name?.toLowerCase().includes('youtube') ||
+                    activity.details || activity.state
+                );
+
+                if (musicActivity) {
+                    // Extract song info from activity
+                    const artist = musicActivity.state || musicActivity.details || 'Unknown Artist';
+                    const title = musicActivity.details || musicActivity.name || 'Unknown Song';
+                    const source = musicActivity.name || 'Music Player';
+
+                    return res.json({
+                        isPlaying: true,
+                        artist: artist,
+                        title: title,
+                        source: source,
+                        activity: musicActivity
+                    });
+                }
+
+                // Check if FlaviBot is in a voice channel (playing music)
+                const voiceState = flaviBot.voice;
+                if (voiceState?.channel) {
+                    return res.json({
+                        isPlaying: true,
+                        artist: 'FlaviBot',
+                        title: 'Playing in voice channel',
+                        source: voiceState.channel.name,
+                        channel: voiceState.channel.name
+                    });
+                }
+
+                // No music activity detected
+                return res.json({
+                    isPlaying: false,
+                    artist: 'No music playing',
+                    title: 'Waiting for track...',
+                    source: 'Music Channel'
+                });
+
+            } catch (error) {
+                console.error('Error getting FlaviBot music info:', error);
+                res.json({
+                    isPlaying: false,
+                    artist: 'Error loading data',
+                    title: 'Connection issue',
+                    source: 'Discord Channel'
+                });
+            }
         });
 
         this.app.post('/api/suno-post', async (req, res) => {
