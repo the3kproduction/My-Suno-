@@ -267,7 +267,7 @@ class Working3AMBot {
             }
         });
 
-        // Legacy endpoint redirect for frontend compatibility
+        // Main API endpoint for frontend compatibility
         this.app.get('/api/current-song', (req, res) => {
             if (this.currentSong && this.currentSong.artist && this.currentSong.song) {
                 res.json({
