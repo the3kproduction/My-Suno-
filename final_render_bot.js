@@ -860,10 +860,76 @@ class EnhancedMusicBot {
                                         break;
                                     }
                                 }
-                                
-                                // Extract from title field (most common for music players)
-                                if (title && title.includes(' - ')) {
-                                    const parts = title.split(' - ');
+                            }
+                        }
+                    }
+                }
+                
+                res.json({
+                    success: true,
+                    artist: currentTrack.artist,
+                    song: currentTrack.song,
+                    spotifyUrl: currentTrack.spotifyUrl,
+                    source: currentTrack.source
+                });
+            } catch (error) {
+                console.error('❌ Now playing error:', error);
+                res.json({
+                    success: false,
+                    artist: 'Connection error',
+                    song: 'Please refresh',
+                    source: 'Music Video Channel'
+                });
+            }
+        });
+
+        // Web server setup
+        this.app.post('/auto-post-suno', async (req, res) => {
+            try {
+                const { sunoUrl } = req.body;
+                
+                if (!sunoUrl) {
+                    return res.json({ success: false, error: 'URL is required' });
+                }
+                
+                console.log('📝 Auto-posting Suno URL to helper channel:', sunoUrl);
+                
+                // Post to helper channel for smart processing
+                const helperChannel = await this.client.channels.fetch(this.botHelperChannelId);
+                await helperChannel.send(sunoUrl);
+                
+                res.json({ 
+                    success: true, 
+                    message: 'Song posted to Discord successfully!' 
+                });
+            } catch (error) {
+                console.error('❌ Auto-post error:', error);
+                res.json({ 
+                    success: false, 
+                    error: 'Failed to post song' 
+                });
+            }
+        });
+
+        const port = process.env.PORT || 5000;
+        this.app.listen(port, '0.0.0.0', () => {
+            console.log(`🌟 Web server running on port ${port}`);
+        });
+    }
+
+    // Music detection monitoring (this was the broken section)
+    async setupMusicDetection() {
+        // This will be handled by the existing message monitoring
+    }
+
+    renderDashboard() {
+        return `<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <title>Enhanced Music Bot - 3AM VERIFIED</title>
+        <style>
                                     currentTrack.artist = parts[0].trim();
                                     currentTrack.song = parts[1].trim();
                                     currentTrack.source = author || 'Music Player';

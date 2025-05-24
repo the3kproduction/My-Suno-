@@ -721,6 +721,223 @@ class EnhancedMusicBot {
         
         .no-video h3 { font-size: 3rem; margin-bottom: 10px; opacity: 0.7; }
         
+        /* Compact Mini-Player Overlay */
+        .mini-player {
+            position: fixed;
+            bottom: 20px;
+            right: 20px;
+            width: 350px;
+            height: 120px;
+            background: linear-gradient(135deg, rgba(102, 126, 234, 0.95), rgba(118, 75, 162, 0.95));
+            backdrop-filter: blur(20px);
+            border-radius: 16px;
+            box-shadow: 0 10px 40px rgba(0,0,0,0.3);
+            border: 1px solid rgba(255,255,255,0.2);
+            padding: 15px;
+            z-index: 1000;
+            transform: translateY(200px);
+            opacity: 0;
+            transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+            cursor: grab;
+            user-select: none;
+        }
+        
+        .mini-player.visible {
+            transform: translateY(0);
+            opacity: 1;
+        }
+        
+        .mini-player.dragging {
+            cursor: grabbing;
+            transition: none;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.4);
+        }
+        
+        .mini-player:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 15px 50px rgba(0,0,0,0.4);
+        }
+        
+        .mini-player-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 10px;
+        }
+        
+        .mini-player-title {
+            font-size: 12px;
+            font-weight: 600;
+            color: rgba(255,255,255,0.8);
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+        
+        .mini-player-controls {
+            display: flex;
+            gap: 8px;
+        }
+        
+        .mini-control-btn {
+            width: 24px;
+            height: 24px;
+            border: none;
+            border-radius: 50%;
+            background: rgba(255,255,255,0.2);
+            color: white;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 12px;
+        }
+        
+        .mini-control-btn:hover {
+            background: rgba(255,255,255,0.3);
+            transform: scale(1.1);
+        }
+        
+        .mini-player-content {
+            display: flex;
+            gap: 12px;
+            align-items: center;
+        }
+        
+        .mini-album-art {
+            width: 50px;
+            height: 50px;
+            border-radius: 8px;
+            background: linear-gradient(135deg, #ff6b6b, #4ecdc4);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 20px;
+            animation: gentlePulse 3s ease-in-out infinite;
+        }
+        
+        .mini-track-info {
+            flex: 1;
+            overflow: hidden;
+        }
+        
+        .mini-track-name {
+            font-weight: 600;
+            font-size: 14px;
+            color: white;
+            margin-bottom: 2px;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+        
+        .mini-artist-name {
+            font-size: 12px;
+            color: rgba(255,255,255,0.7);
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+        
+        .mini-progress {
+            width: 100%;
+            height: 3px;
+            background: rgba(255,255,255,0.2);
+            border-radius: 2px;
+            margin-top: 8px;
+            overflow: hidden;
+        }
+        
+        .mini-progress-bar {
+            height: 100%;
+            background: linear-gradient(90deg, #ff6b6b, #4ecdc4);
+            border-radius: 2px;
+            width: 45%;
+            animation: subtleShimmer 2s ease-in-out infinite;
+        }
+        
+        .mini-play-controls {
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+        }
+        
+        .mini-play-btn {
+            width: 40px;
+            height: 40px;
+            border: none;
+            border-radius: 50%;
+            background: linear-gradient(135deg, #ff6b6b, #4ecdc4);
+            color: white;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 16px;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.2);
+        }
+        
+        .mini-play-btn:hover {
+            transform: scale(1.1);
+            box-shadow: 0 6px 20px rgba(0,0,0,0.3);
+        }
+        
+        .mini-volume-control {
+            display: flex;
+            align-items: center;
+            gap: 5px;
+        }
+        
+        .mini-volume-slider {
+            width: 60px;
+            height: 3px;
+            background: rgba(255,255,255,0.2);
+            border-radius: 2px;
+            position: relative;
+            cursor: pointer;
+        }
+        
+        .mini-volume-level {
+            height: 100%;
+            background: linear-gradient(90deg, #ff6b6b, #4ecdc4);
+            border-radius: 2px;
+            width: 70%;
+        }
+        
+        .mini-player-expanded {
+            height: auto;
+            max-height: 200px;
+        }
+        
+        .mini-player-toggle {
+            position: absolute;
+            bottom: -15px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 30px;
+            height: 30px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, #ff6b6b, #4ecdc4);
+            border: none;
+            color: white;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 12px;
+            transition: all 0.3s ease;
+            opacity: 0;
+        }
+        
+        .mini-player:hover .mini-player-toggle {
+            opacity: 1;
+        }
+        
+        .mini-player-toggle:hover {
+            transform: translateX(-50%) scale(1.1);
+        }
+        
         .form-group { margin-bottom: 25px; }
         
         .form-group label { 
@@ -1215,6 +1432,201 @@ class EnhancedMusicBot {
 
         // Auto refresh every 30 seconds
         setInterval(() => location.reload(), 30000);
+
+        // Mini-Player Functionality
+        let isDragging = false;
+        let dragOffset = { x: 0, y: 0 };
+        let currentTrack = null;
+        let isPlaying = false;
+        
+        // Create and show mini-player
+        function createMiniPlayer() {
+            const miniPlayer = document.createElement('div');
+            miniPlayer.className = 'mini-player';
+            miniPlayer.id = 'miniPlayer';
+            
+            miniPlayer.innerHTML = \`
+                <div class="mini-player-header">
+                    <div class="mini-player-title">NOW PLAYING</div>
+                    <div class="mini-player-controls">
+                        <button class="mini-control-btn" onclick="toggleMiniPlayer()" title="Minimize">−</button>
+                        <button class="mini-control-btn" onclick="closeMiniPlayer()" title="Close">×</button>
+                    </div>
+                </div>
+                
+                <div class="mini-player-content">
+                    <div class="mini-album-art">🎵</div>
+                    
+                    <div class="mini-track-info">
+                        <div class="mini-track-name" id="miniTrackName">Loading...</div>
+                        <div class="mini-artist-name" id="miniArtistName">Fetching track info...</div>
+                        <div class="mini-progress">
+                            <div class="mini-progress-bar"></div>
+                        </div>
+                    </div>
+                    
+                    <div class="mini-play-controls">
+                        <button class="mini-play-btn" onclick="togglePlayback()" id="miniPlayBtn">▶</button>
+                        <div class="mini-volume-control">
+                            <div class="mini-volume-slider" onclick="adjustVolume(event)">
+                                <div class="mini-volume-level"></div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <button class="mini-player-toggle" onclick="expandMiniPlayer()" title="Expand">↑</button>
+            \`;
+            
+            document.body.appendChild(miniPlayer);
+            
+            // Add drag functionality
+            miniPlayer.addEventListener('mousedown', startDrag);
+            document.addEventListener('mousemove', handleDrag);
+            document.addEventListener('mouseup', endDrag);
+            
+            // Show mini-player after a short delay
+            setTimeout(() => {
+                miniPlayer.classList.add('visible');
+            }, 1000);
+            
+            // Update track info
+            updateMiniPlayerTrack();
+            
+            return miniPlayer;
+        }
+        
+        // Drag functionality
+        function startDrag(e) {
+            if (e.target.closest('.mini-control-btn') || e.target.closest('.mini-play-btn')) return;
+            
+            isDragging = true;
+            const miniPlayer = document.getElementById('miniPlayer');
+            miniPlayer.classList.add('dragging');
+            
+            const rect = miniPlayer.getBoundingClientRect();
+            dragOffset.x = e.clientX - rect.left;
+            dragOffset.y = e.clientY - rect.top;
+        }
+        
+        function handleDrag(e) {
+            if (!isDragging) return;
+            
+            const miniPlayer = document.getElementById('miniPlayer');
+            const x = e.clientX - dragOffset.x;
+            const y = e.clientY - dragOffset.y;
+            
+            // Keep within viewport bounds
+            const maxX = window.innerWidth - miniPlayer.offsetWidth;
+            const maxY = window.innerHeight - miniPlayer.offsetHeight;
+            
+            const clampedX = Math.max(0, Math.min(x, maxX));
+            const clampedY = Math.max(0, Math.min(y, maxY));
+            
+            miniPlayer.style.left = clampedX + 'px';
+            miniPlayer.style.top = clampedY + 'px';
+            miniPlayer.style.right = 'auto';
+            miniPlayer.style.bottom = 'auto';
+        }
+        
+        function endDrag() {
+            if (!isDragging) return;
+            
+            isDragging = false;
+            const miniPlayer = document.getElementById('miniPlayer');
+            miniPlayer.classList.remove('dragging');
+        }
+        
+        // Mini-player controls
+        function togglePlayback() {
+            isPlaying = !isPlaying;
+            const playBtn = document.getElementById('miniPlayBtn');
+            playBtn.innerHTML = isPlaying ? '⏸' : '▶';
+            
+            // Add visual feedback
+            playBtn.style.transform = 'scale(0.9)';
+            setTimeout(() => {
+                playBtn.style.transform = '';
+            }, 150);
+        }
+        
+        function adjustVolume(e) {
+            const slider = e.currentTarget;
+            const rect = slider.getBoundingClientRect();
+            const percent = (e.clientX - rect.left) / rect.width;
+            const volumeLevel = slider.querySelector('.mini-volume-level');
+            volumeLevel.style.width = Math.max(0, Math.min(100, percent * 100)) + '%';
+        }
+        
+        function toggleMiniPlayer() {
+            const miniPlayer = document.getElementById('miniPlayer');
+            miniPlayer.style.height = miniPlayer.style.height === '60px' ? '120px' : '60px';
+        }
+        
+        function expandMiniPlayer() {
+            const miniPlayer = document.getElementById('miniPlayer');
+            miniPlayer.classList.toggle('mini-player-expanded');
+        }
+        
+        function closeMiniPlayer() {
+            const miniPlayer = document.getElementById('miniPlayer');
+            miniPlayer.classList.remove('visible');
+            setTimeout(() => {
+                miniPlayer.remove();
+            }, 400);
+        }
+        
+        // Update track information
+        async function updateMiniPlayerTrack() {
+            try {
+                const response = await fetch('/now-playing');
+                const data = await response.json();
+                
+                if (data.success && data.artist && data.song) {
+                    document.getElementById('miniTrackName').textContent = data.song;
+                    document.getElementById('miniArtistName').textContent = data.artist;
+                    
+                    // Update album art with first letter of song
+                    const albumArt = document.querySelector('.mini-album-art');
+                    albumArt.textContent = data.song.charAt(0).toUpperCase();
+                    
+                    currentTrack = data;
+                } else {
+                    document.getElementById('miniTrackName').textContent = 'No track playing';
+                    document.getElementById('miniArtistName').textContent = 'Start playing music to see controls';
+                }
+            } catch (error) {
+                console.log('Mini-player update error:', error);
+                document.getElementById('miniTrackName').textContent = 'Connection error';
+                document.getElementById('miniArtistName').textContent = 'Please refresh the page';
+            }
+        }
+        
+        // Show mini-player when scrolling or after delay
+        function showMiniPlayerOnScroll() {
+            let scrollTimeout;
+            window.addEventListener('scroll', () => {
+                clearTimeout(scrollTimeout);
+                scrollTimeout = setTimeout(() => {
+                    if (!document.getElementById('miniPlayer') && window.scrollY > 100) {
+                        createMiniPlayer();
+                    }
+                }, 500);
+            });
+        }
+        
+        // Initialize mini-player functionality
+        showMiniPlayerOnScroll();
+        
+        // Auto-create mini-player after 3 seconds if music is playing
+        setTimeout(() => {
+            if (!document.getElementById('miniPlayer')) {
+                createMiniPlayer();
+            }
+        }, 3000);
+        
+        // Update track info every 15 seconds
+        setInterval(updateMiniPlayerTrack, 15000);
     </script>
 </body>
 </html>

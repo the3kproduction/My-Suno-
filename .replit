@@ -52,10 +52,6 @@ args = "Music Video Bot"
 task = "workflow.run"
 args = "Suno Focused Bot"
 
-[[workflows.workflow.tasks]]
-task = "workflow.run"
-args = "Premium Suno Bot"
-
 [[workflows.workflow]]
 name = "discord-bot-test"
 author = "agent"
@@ -138,15 +134,6 @@ waitForPort = 5000
 
 [[workflows.workflow]]
 name = "Suno Focused Bot"
-author = "agent"
-
-[[workflows.workflow.tasks]]
-task = "shell.exec"
-args = "node suno_focused_bot.js"
-waitForPort = 5000
-
-[[workflows.workflow]]
-name = "Premium Suno Bot"
 author = "agent"
 
 [[workflows.workflow.tasks]]
