@@ -239,26 +239,32 @@ class Working3AMBot {
 
         // Current song API endpoint with YouTube info
         this.app.get('/api/current-song', (req, res) => {
-            if (this.currentSong && this.currentSong.title) {
+            if (this.currentSong && this.currentSong.artist && this.currentSong.song) {
                 res.json({
                     success: true,
-                    song: {
-                        title: this.currentSong.title,
-                        artist: this.currentSong.artist || 'Unknown Artist',
+                    currentSong: {
+                        artist: this.currentSong.artist,
+                        song: this.currentSong.song,
                         source: 'FlaviBot Player',
                         spotifyUrl: this.currentSong.spotifyUrl || '',
-                        lastUpdated: this.currentSong.lastUpdated || Date.now()
+                        lastUpdated: this.currentSong.lastUpdated || Date.now(),
+                        searchQuery: this.currentSong.searchQuery || `${this.currentSong.artist} ${this.currentSong.song}`,
+                        youtubeUrl: this.currentSong.youtubeUrl || '',
+                        videoId: this.currentSong.videoId || ''
                     }
                 });
             } else {
                 res.json({
                     success: false,
-                    song: {
-                        title: "Listening for music...",
-                        artist: "Waiting for track info...",
+                    currentSong: {
+                        artist: "Listening for music...",
+                        song: "Waiting for track info...",
                         source: "FlaviBot Player",
                         spotifyUrl: '',
-                        lastUpdated: Date.now()
+                        lastUpdated: Date.now(),
+                        searchQuery: '',
+                        youtubeUrl: '',
+                        videoId: ''
                     }
                 });
             }
