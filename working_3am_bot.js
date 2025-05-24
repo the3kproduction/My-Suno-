@@ -254,6 +254,20 @@ class Working3AMBot {
             
             if (newSongsChannel) {
                 console.log('✅ Found new-songs channel, checking for active player...');
+                
+                // Debug: Check all recent messages in new-songs
+                try {
+                    const debugMessages = await newSongsChannel.messages.fetch({ limit: 10 });
+                    console.log(`🔍 Found ${debugMessages.size} messages in new-songs channel:`);
+                    for (const msg of debugMessages.values()) {
+                        if (msg.author.username && msg.author.username.toLowerCase().includes('flavi')) {
+                            console.log(`  📝 FlaviBot message: ${msg.embeds[0]?.description || msg.content || 'No content'}`);
+                        }
+                    }
+                } catch (e) {
+                    console.log('Debug check failed:', e.message);
+                }
+                
                 const lastMessage = await this.getLastMusicMessage(newSongsChannel);
                 if (lastMessage) {
                     this.updateCurrentSong(lastMessage);
@@ -293,7 +307,7 @@ class Working3AMBot {
                 console.log('Specific message not found in this channel, checking recent messages...');
             }
             
-            const messages = await channel.messages.fetch({ limit: 50 });
+            const messages = await channel.messages.fetch({ limit: 100 });
             
             // Convert to array and sort by timestamp (newest first)
             const sortedMessages = Array.from(messages.values()).sort((a, b) => b.createdTimestamp - a.createdTimestamp);
