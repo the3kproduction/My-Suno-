@@ -82,10 +82,10 @@ class Working3AMBot {
     }
 
     setupWebServer() {
-        // Serve the exact working dashboard with logo
+        // Serve the beautiful 3AM VERIFIED dashboard with neon logo
         this.app.get('/', (req, res) => {
             const fs = require('fs');
-            let htmlContent = fs.readFileSync('working_reference.html', 'utf8');
+            let htmlContent = fs.readFileSync('public/index.html', 'utf8');
             
             // Make sure the logo is properly included
             if (!htmlContent.includes('verified-badge')) {
