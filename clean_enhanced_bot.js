@@ -340,10 +340,10 @@ class EnhancedMusicBot {
                     <div style="flex: 1;">
                         <div style="color: #ff6b6b; font-size: 12px; font-weight: 600; text-transform: uppercase; letter-spacing: 1px; margin-bottom: 5px;">🔴 Now Playing</div>
                         <div style="font-size: 16px; font-weight: 600; color: white; margin-bottom: 3px;">
-                            <span>Artist: </span><span id="artistName">3Kloudz</span>
+                            <span>Artist: </span><span id="artistName">Not connected</span>
                         </div>
                         <div style="font-size: 14px; color: rgba(255,255,255,0.7);">
-                            <span>Song: </span><span id="songName">Don't Want To Fight No More</span>
+                            <span>Song: </span><span id="songName">Use Discord commands to start music</span>
                         </div>
                         <div style="font-size: 12px; color: rgba(255,255,255,0.5); margin-top: 5px;">
                             <span>Source: </span><span id="sourceInfo">FlaviBot Player</span> • 
