@@ -18,7 +18,14 @@ class Working3AMBot {
         
         this.app = express();
         this.app.use(express.json());
-        this.currentSong = null;
+        this.currentSong = {
+            artist: "Listening for music...",
+            song: "Waiting for track info...",
+            source: "FlaviBot Player",
+            lastUpdated: Date.now(),
+            searchQuery: "",
+            spotifyUrl: ""
+        };
     }
 
     async start() {
@@ -491,22 +498,21 @@ class Working3AMBot {
             }
         }
         
-        // Only update if it's different from current
-        if (this.currentSong.artist !== artist || this.currentSong.song !== song) {
-            this.currentSong = {
-                artist: artist,
-                song: song,
-                source: "FlaviBot Player",
-                lastUpdated: Date.now(),
-                searchQuery: `${artist} ${song}`,
-                spotifyUrl: this.currentSpotifyUrl || ''
-            };
-            
-            console.log(`🎵 Auto-detected now playing: ${artist} - ${song}`);
-            
-            // Get YouTube link for this song
-            this.getYouTubeLink(artist, song);
-        }
+        // Always update the current song (force update)
+        this.currentSong = {
+            artist: artist,
+            song: song,
+            source: "FlaviBot Player",
+            lastUpdated: Date.now(),
+            searchQuery: `${artist} ${song}`,
+            spotifyUrl: this.currentSpotifyUrl || ''
+        };
+        
+        console.log(`🎵 Auto-detected now playing: ${artist} - ${song}`);
+        console.log(`📡 Current song object updated:`, this.currentSong);
+        
+        // Get YouTube link for this song
+        this.getYouTubeLink(artist, song);
     }
 
     async getYouTubeLink(artist, song) {
