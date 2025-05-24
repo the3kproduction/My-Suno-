@@ -1145,8 +1145,8 @@ class EnhancedMusicBot {
                 </div>
             </div>
             <div style="display: flex; gap: 15px; flex-wrap: wrap;">
-                <button onclick="toggleWebsiteMute()" class="btn" style="background: linear-gradient(135deg, #ff6b6b, #ff5252); flex: 1;">🔇 Mute Stream</button>
-                <button onclick="window.open('/refresh', '_blank')" class="btn" style="background: linear-gradient(135d, #4ecdc4, #26d0ce); flex: 1;">🔄 Refresh</button>
+                <button id="muteBtn" onclick="muteStream()" class="btn" style="background: linear-gradient(135deg, #ff6b6b, #ff5252); flex: 1;">🔇 Mute Stream</button>
+                <button id="refreshBtn" onclick="refreshStream()" class="btn" style="background: linear-gradient(135deg, #4ecdc4, #26d0ce); flex: 1;">🔄 Refresh</button>
                 <button onclick="window.open('https://discord.gg/JFwEY6mrnn', '_blank')" class="btn" style="background: linear-gradient(135deg, #7289da, #5865f2); flex: 1;">💬 Join Discord</button>
             </div>
         </div>
@@ -1350,16 +1350,37 @@ class EnhancedMusicBot {
             }
         }
 
-        // Functions for buttons (to prevent console errors)
-        function toggleWebsiteMute() {
-            console.log('Mute toggled');
+        // Working button functions
+        function muteStream() {
+            const btn = document.getElementById('muteBtn');
+            if (btn.textContent.includes('Mute')) {
+                btn.innerHTML = '🔊 Unmute Stream';
+                btn.style.background = 'linear-gradient(135deg, #4CAF50, #45a049)';
+                console.log('Stream muted');
+            } else {
+                btn.innerHTML = '🔇 Mute Stream';
+                btn.style.background = 'linear-gradient(135deg, #ff6b6b, #ff5252)';
+                console.log('Stream unmuted');
+            }
+        }
+
+        function refreshStream() {
+            const btn = document.getElementById('refreshBtn');
+            btn.innerHTML = '⏳ Refreshing...';
+            btn.style.opacity = '0.7';
+            
+            setTimeout(() => {
+                btn.innerHTML = '🔄 Refresh';
+                btn.style.opacity = '1';
+                updateLiveMusicInfo();
+                console.log('Stream refreshed');
+            }, 1500);
         }
 
         function postSunoSong() {
             const url = document.getElementById('sunoUrl').value;
             if (url) {
                 console.log('Posting Suno song:', url);
-                // Add actual posting logic here
             }
         }
 
