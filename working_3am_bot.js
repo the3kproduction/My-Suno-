@@ -306,10 +306,11 @@ class Working3AMBot {
                     const embed = message.embeds[0];
                     
                     // Check if it's a music message (has song info)
-                    if (embed.description && 
-                        (embed.description.includes(' - ') || embed.title?.includes('Now playing'))) {
+                    if ((embed.description && embed.description.includes(' - ')) || 
+                        (embed.title && embed.title.includes('Now playing')) ||
+                        (embed.fields && embed.fields.some(field => field.name === 'Now playing'))) {
                         
-                        console.log(`🎵 Found FlaviBot message from ${new Date(message.createdTimestamp).toLocaleTimeString()}: ${embed.description}`);
+                        console.log(`🎵 Found FlaviBot message from ${new Date(message.createdTimestamp).toLocaleTimeString()}: ${embed.description || embed.title || 'Interactive player'}`);
                         return message;
                     }
                 }
