@@ -434,7 +434,20 @@
                         <p><strong>Source:</strong> <span id="musicSource">Music Video Channel</span></p>
                         <p><strong>Status:</strong> <span id="liveStatus">🔴 Live</span></p>
                         
-                        <div style="margin-top: 20px; display: flex; justify-content: center; gap: 15px;">
+                        <!-- YouTube Audio Player -->
+                        <div id="audioPlayerContainer" style="margin: 20px 0; border-radius: 15px; overflow: hidden; background: rgba(0,0,0,0.3); border: 2px solid rgba(244, 63, 94, 0.3);">
+                            <div id="audioPlayer" style="width: 100%; height: 200px; display: flex; align-items: center; justify-content: center; color: rgba(255,255,255,0.7);">
+                                <div style="text-align: center;">
+                                    <div style="font-size: 3rem; margin-bottom: 10px;">🎵</div>
+                                    <div>Click "Play Song" to hear the current track</div>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div style="margin-top: 20px; display: flex; justify-content: center; gap: 15px; flex-wrap: wrap;">
+                            <button id="playSongBtn" onclick="playCurrentSong()" class="btn" style="background: #22c55e; padding: 12px 24px; font-size: 16px;">
+                                ▶️ Play Song
+                            </button>
                             <button id="muteToggle" onclick="toggleMute()" class="btn" style="background: #f43f5e; padding: 12px 24px; font-size: 16px;">
                                 🔊 Mute Stream
                             </button>
@@ -653,16 +666,84 @@
             
             async function refreshNowPlaying() {
                 try {
-                    const response = await fetch('/now-playing');
+                    const response = await fetch('/api/current-song');
                     const data = await response.json();
                     
-                    if (data.success) {
-                        document.getElementById('currentArtist').textContent = data.artist || 'Unknown Artist';
-                        document.getElementById('currentSong').textContent = data.song || 'Unknown Song';
-                        document.getElementById('musicSource').textContent = data.source || 'Music Video Channel';
+                    if (data.success && data.currentSong) {
+                        document.getElementById('currentArtist').textContent = data.currentSong.artist || 'Unknown Artist';
+                        document.getElementById('currentSong').textContent = data.currentSong.song || 'Unknown Song';
+                        document.getElementById('musicSource').textContent = data.currentSong.source || 'FlaviBot Music Channel';
+                        
+                        // Store current song data for playing
+                        window.currentTrack = {
+                            artist: data.currentSong.artist,
+                            song: data.currentSong.song
+                        };
                     }
                 } catch (error) {
                     console.log('Could not fetch now playing info');
+                }
+            }
+
+            async function playCurrentSong() {
+                const playBtn = document.getElementById('playSongBtn');
+                const audioPlayer = document.getElementById('audioPlayer');
+                
+                if (!window.currentTrack || !window.currentTrack.artist || !window.currentTrack.song) {
+                    alert('🎵 No song detected! Please wait for FlaviBot to start playing music.');
+                    return;
+                }
+                
+                playBtn.innerHTML = '⏳ Searching...';
+                playBtn.disabled = true;
+                
+                try {
+                    const response = await fetch('/api/youtube-search', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({
+                            artist: window.currentTrack.artist,
+                            song: window.currentTrack.song
+                        })
+                    });
+                    
+                    const data = await response.json();
+                    
+                    if (data.success && data.videoId) {
+                        // Create YouTube embed
+                        audioPlayer.innerHTML = `
+                            <iframe 
+                                width="100%" 
+                                height="200" 
+                                src="https://www.youtube.com/embed/${data.videoId}?autoplay=1&enablejsapi=1" 
+                                frameborder="0" 
+                                allow="autoplay; encrypted-media" 
+                                allowfullscreen>
+                            </iframe>
+                        `;
+                        playBtn.innerHTML = '🔄 Search New Song';
+                        playBtn.disabled = false;
+                    } else {
+                        audioPlayer.innerHTML = `
+                            <div style="text-align: center; padding: 50px; color: rgba(255,255,255,0.7);">
+                                <div style="font-size: 2rem; margin-bottom: 10px;">❌</div>
+                                <div>Could not find "${window.currentTrack.artist} - ${window.currentTrack.song}" on YouTube</div>
+                                <div style="font-size: 0.9rem; margin-top: 10px; opacity: 0.7;">Try clicking "Refresh" to get the latest song info</div>
+                            </div>
+                        `;
+                        playBtn.innerHTML = '▶️ Try Again';
+                        playBtn.disabled = false;
+                    }
+                } catch (error) {
+                    audioPlayer.innerHTML = `
+                        <div style="text-align: center; padding: 50px; color: rgba(255,255,255,0.7);">
+                            <div style="font-size: 2rem; margin-bottom: 10px;">⚠️</div>
+                            <div>Error searching for song</div>
+                            <div style="font-size: 0.9rem; margin-top: 10px; opacity: 0.7;">Check your connection and try again</div>
+                        </div>
+                    `;
+                    playBtn.innerHTML = '▶️ Play Song';
+                    playBtn.disabled = false;
                 }
             }
             
