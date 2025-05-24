@@ -827,9 +827,17 @@
             .logo-container {
                 top: 10px !important;
                 right: 10px !important;
-                transform: scale(0.5) !important;
+                transform: scale(0.6) !important;
                 z-index: 1000 !important;
                 left: auto !important;
+            }
+            
+            /* MOBILE ONLY - Improve logo text readability */
+            .logo-container .logo-text {
+                font-size: 16px !important;
+                font-weight: 900 !important;
+                text-shadow: 2px 2px 4px rgba(0,0,0,0.8), 0 0 10px rgba(255,255,255,0.3) !important;
+                color: #ffffff !important;
             }
             
             /* MOBILE ONLY - Add margin to prevent content overlap */
@@ -1287,12 +1295,21 @@
         setInterval(updateTimestamps, 60000);
 
         // Suno song posting function
+        // Store posted URLs to prevent duplicates
+        let postedUrls = new Set();
+
         async function postSunoSong() {
             const urlInput = document.getElementById('suno-url');
             const url = urlInput.value.trim();
             
             if (!url) {
                 alert('Please enter a Suno URL');
+                return;
+            }
+
+            // Check for duplicate URL
+            if (postedUrls.has(url)) {
+                alert('⚠️ This song URL has already been posted! Please try a different song.');
                 return;
             }
 
@@ -1313,6 +1330,8 @@
                 const result = await response.json();
                 
                 if (result.success) {
+                    // Add URL to posted set to prevent future duplicates
+                    postedUrls.add(url);
                     button.innerHTML = '<span>✅</span> Posted Successfully!';
                     urlInput.value = '';
                     setTimeout(() => {
