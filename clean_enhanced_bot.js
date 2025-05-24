@@ -106,6 +106,29 @@ class EnhancedMusicBot {
             color: white;
             min-height: 100vh;
             overflow-x: hidden;
+            transition: all 0.5s ease;
+        }
+
+        body.light-theme {
+            background: linear-gradient(-45deg, #f8f9fa, #e9ecef, #dee2e6, #ced4da) !important;
+            color: #333 !important;
+            animation: none !important;
+        }
+
+        body.dark-theme {
+            background: linear-gradient(-45deg, #1a1a1a, #2d2d2d, #404040, #1a1a1a) !important;
+            color: white !important;
+            animation: none !important;
+        }
+
+        .light-theme .section {
+            background: rgba(255,255,255,0.9) !important;
+            color: #333 !important;
+        }
+
+        .dark-theme .section {
+            background: rgba(0,0,0,0.5) !important;
+            color: white !important;
         }
 
         @keyframes gradientBackground {
@@ -218,9 +241,11 @@ class EnhancedMusicBot {
             background: rgba(0, 0, 0, 0.9);
             border-radius: 15px;
             padding: 15px;
-            z-index: 1000;
+            z-index: 9999;
             cursor: move;
-            display: none;
+            display: block !important;
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255,255,255,0.1);
         }
 
         .mini-player-header {
@@ -432,29 +457,16 @@ class EnhancedMusicBot {
                 activeBtn.style.background = 'linear-gradient(45deg, #667eea, #764ba2)';
             }
             
-            // Apply theme changes
+            // Remove all theme classes
+            document.body.classList.remove('light-theme', 'dark-theme', 'auto-theme');
+            
+            // Apply theme class
             if (theme === 'light') {
-                document.body.style.background = 'linear-gradient(-45deg, #f8f9fa, #e9ecef, #dee2e6, #ced4da)';
-                document.body.style.color = '#333';
-                document.querySelectorAll('.section').forEach(section => {
-                    section.style.background = 'rgba(255,255,255,0.9)';
-                    section.style.color = '#333';
-                });
+                document.body.classList.add('light-theme');
             } else if (theme === 'dark') {
-                document.body.style.background = 'linear-gradient(-45deg, #1a1a1a, #2d2d2d, #404040, #1a1a1a)';
-                document.body.style.color = 'white';
-                document.querySelectorAll('.section').forEach(section => {
-                    section.style.background = 'rgba(0,0,0,0.3)';
-                    section.style.color = 'white';
-                });
+                document.body.classList.add('dark-theme');
             } else {
-                // Auto theme - original colorful background
-                document.body.style.background = 'linear-gradient(-45deg, #667eea, #764ba2, #f093fb, #f5576c, #4facfe, #00f2fe)';
-                document.body.style.color = 'white';
-                document.querySelectorAll('.section').forEach(section => {
-                    section.style.background = 'rgba(255,255,255,0.1)';
-                    section.style.color = 'white';
-                });
+                document.body.classList.add('auto-theme');
             }
             
             localStorage.setItem('theme', theme);
