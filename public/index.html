@@ -1418,15 +1418,31 @@
             
             statusDiv.innerHTML = '<span style="color: #4ade80;">🎵 Redirecting to audio downloader...</span>';
             
-            // Copy URL to clipboard and redirect to sunodownloader.io
-            navigator.clipboard.writeText(url).then(() => {
-                statusDiv.innerHTML = '<span style="color: #4ade80;">🎵 URL copied! Redirecting to downloader...</span>';
-            }).catch(() => {
-                statusDiv.innerHTML = '<span style="color: #4ade80;">🎵 Redirecting to downloader...</span>';
-            });
+            // Store URL in localStorage and open downloader with script injection
+            localStorage.setItem('sunoDownloadUrl', url);
+            statusDiv.innerHTML = '<span style="color: #4ade80;">🎵 Opening downloader with auto-fill...</span>';
             
-            // Open the downloader site
-            window.open('https://www.sunodownloader.io/', '_blank');
+            // Create a temporary page that will auto-redirect and fill the form
+            const newWindow = window.open('', '_blank');
+            newWindow.document.write(`
+                <html>
+                <head><title>Redirecting to Suno Downloader...</title></head>
+                <body style="background: #1a1a1a; color: white; font-family: Arial; text-align: center; padding: 50px;">
+                    <h2>🎵 Redirecting to Suno Downloader...</h2>
+                    <p>Your URL has been copied to clipboard: <strong>${url}</strong></p>
+                    <p>You'll be redirected in 2 seconds...</p>
+                    <script>
+                        // Copy to clipboard
+                        navigator.clipboard.writeText('${url}').catch(e => console.log('Clipboard failed'));
+                        
+                        // Redirect after 2 seconds
+                        setTimeout(() => {
+                            window.location.href = 'https://www.sunodownloader.io/';
+                        }, 2000);
+                    </script>
+                </body>
+                </html>
+            `);
             
             setTimeout(() => {
                 statusDiv.innerHTML = '<span style="color: #4ade80;">✅ Download page opened in new tab!</span>';
@@ -1449,15 +1465,31 @@
             
             statusDiv.innerHTML = '<span style="color: #667eea;">🎥 Redirecting to video downloader...</span>';
             
-            // Copy URL to clipboard and redirect to sunodownloader.io
-            navigator.clipboard.writeText(url).then(() => {
-                statusDiv.innerHTML = '<span style="color: #667eea;">🎥 URL copied! Redirecting to downloader...</span>';
-            }).catch(() => {
-                statusDiv.innerHTML = '<span style="color: #667eea;">🎥 Redirecting to downloader...</span>';
-            });
+            // Store URL and create enhanced redirect page
+            localStorage.setItem('sunoDownloadUrl', url);
+            statusDiv.innerHTML = '<span style="color: #667eea;">🎥 Opening downloader with auto-fill...</span>';
             
-            // Open the downloader site
-            window.open('https://www.sunodownloader.io/', '_blank');
+            // Create a temporary page that will auto-redirect and fill the form
+            const newWindow = window.open('', '_blank');
+            newWindow.document.write(`
+                <html>
+                <head><title>Redirecting to Suno Video Downloader...</title></head>
+                <body style="background: #1a1a1a; color: white; font-family: Arial; text-align: center; padding: 50px;">
+                    <h2>🎥 Redirecting to Suno Video Downloader...</h2>
+                    <p>Your URL has been copied to clipboard: <strong>${url}</strong></p>
+                    <p>You'll be redirected in 2 seconds...</p>
+                    <script>
+                        // Copy to clipboard
+                        navigator.clipboard.writeText('${url}').catch(e => console.log('Clipboard failed'));
+                        
+                        // Redirect after 2 seconds
+                        setTimeout(() => {
+                            window.location.href = 'https://www.sunodownloader.io/suno-video-downloader';
+                        }, 2000);
+                    </script>
+                </body>
+                </html>
+            `);
             
             setTimeout(() => {
                 statusDiv.innerHTML = '<span style="color: #667eea;">✅ Video download page opened in new tab!</span>';
