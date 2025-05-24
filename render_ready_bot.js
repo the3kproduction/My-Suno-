@@ -1402,6 +1402,39 @@ class EnhancedMusicBot {
             transition: all 0.3s ease;
         }
 
+        .discord-button {
+            position: fixed;
+            top: 20px;
+            left: 20px;
+            z-index: 1000;
+            background: linear-gradient(135deg, #5865f2, #7289da);
+            color: white;
+            border: none;
+            padding: 15px 25px;
+            border-radius: 50px;
+            font-weight: bold;
+            font-size: 16px;
+            cursor: pointer;
+            text-decoration: none;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            box-shadow: 0 8px 25px rgba(88, 101, 242, 0.4);
+            backdrop-filter: blur(10px);
+            transition: all 0.3s ease;
+            animation: discordPulse 3s ease-in-out infinite;
+        }
+
+        .discord-button:hover {
+            transform: translateY(-3px) scale(1.05);
+            box-shadow: 0 12px 35px rgba(88, 101, 242, 0.6);
+        }
+
+        @keyframes discordPulse {
+            0%, 100% { box-shadow: 0 8px 25px rgba(88, 101, 242, 0.4); }
+            50% { box-shadow: 0 8px 35px rgba(88, 101, 242, 0.8); }
+        }
+
         .theme-toggle {
             position: fixed;
             top: 20px;
