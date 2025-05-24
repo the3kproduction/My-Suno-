@@ -289,8 +289,14 @@ class EnhancedMusicBot {
                         </div>
                         <div style="font-size: 12px; color: rgba(255,255,255,0.5); margin-top: 5px;">
                             <span>Source: </span><span id="sourceInfo">FlaviBot Player</span> • 
-                            <span>Status: </span><span style="color: #4ecdc4;">🔴 Live</span>
+                            <span>Status: </span><span id="statusInfo" style="color: #4ecdc4;">🔴 Live</span>
                         </div>
+                        <!-- Hidden Audio Player -->
+                        <audio id="liveAudioPlayer" controls style="width: 100%; margin-top: 15px; border-radius: 8px;">
+                            <source src="https://radio.garden/api/ara/content/listen/E8Oa6zd2/channel.mp3" type="audio/mpeg">
+                            <source src="https://stream.zeno.fm/8wv4d8g4k5zuv" type="audio/mpeg">
+                            Your browser does not support the audio element.
+                        </audio>
                     </div>
                 </div>
             </div>
@@ -649,17 +655,66 @@ class EnhancedMusicBot {
             }
         }
 
-        // Override mute function to sync both players
+        // Override mute function to sync both players and control audio
         function muteStream() {
             const btn = document.getElementById('muteBtn');
+            const audio = document.getElementById('liveAudioPlayer');
+            
             if (btn.textContent.includes('Mute')) {
                 btn.innerHTML = '🔊 Unmute Stream';
                 btn.style.background = 'linear-gradient(135deg, #4CAF50, #45a049)';
+                audio.muted = true;
             } else {
                 btn.innerHTML = '🔇 Mute Stream';
                 btn.style.background = 'linear-gradient(135deg, #ff6b6b, #ff5252)';
+                audio.muted = false;
+                audio.play().catch(e => console.log('Audio play failed:', e));
             }
             syncMiniPlayer();
+        }
+
+        function refreshStream() {
+            const btn = document.getElementById('refreshBtn');
+            const audio = document.getElementById('liveAudioPlayer');
+            
+            btn.innerHTML = '⏳ Refreshing...';
+            btn.style.opacity = '0.7';
+            
+            // Reload audio source
+            audio.load();
+            
+            setTimeout(() => {
+                btn.innerHTML = '🔄 Refresh';
+                btn.style.opacity = '1';
+                updateLiveMusicInfo();
+                
+                // Try to get fresh song data
+                fetchCurrentSong();
+                console.log('Stream refreshed');
+            }, 1500);
+        }
+
+        // Fetch real current song from music services
+        async function fetchCurrentSong() {
+            try {
+                // This will get real song data instead of placeholder
+                const response = await fetch('/now-playing');
+                const data = await response.json();
+                
+                if (data.success) {
+                    document.getElementById('artistName').textContent = data.artist;
+                    document.getElementById('songName').textContent = data.song;
+                    document.getElementById('sourceInfo').textContent = data.source;
+                    document.getElementById('statusInfo').textContent = data.status === 'Live' ? '🔴 Live' : '⏸️ ' + data.status;
+                    document.getElementById('statusInfo').style.color = data.status === 'Live' ? '#4ecdc4' : '#ff6b6b';
+                    
+                    // Update mini player too
+                    document.getElementById('miniArtist').textContent = data.artist;
+                    document.getElementById('miniSong').textContent = data.song;
+                }
+            } catch (error) {
+                console.log('Failed to fetch current song:', error);
+            }
         }
 
         // Audio element for actual music playback
