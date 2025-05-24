@@ -231,6 +231,54 @@ class Working3AMBot {
                 res.json({ success: false, error: error.message });
             }
         });
+
+        // Current song API endpoint with YouTube info
+        this.app.get('/api/current-song', (req, res) => {
+            res.json({
+                success: true,
+                currentSong: this.currentSong || {
+                    artist: "No song playing",
+                    song: "Please start music on FlaviBot",
+                    source: "None",
+                    lastUpdated: Date.now()
+                }
+            });
+        });
+
+        // YouTube search endpoint for audio playback
+        this.app.post('/api/youtube-search', async (req, res) => {
+            try {
+                const { artist, song } = req.body;
+                
+                if (!artist || !song) {
+                    return res.json({ success: false, error: 'Artist and song required' });
+                }
+
+                const query = `${artist} ${song}`;
+                const searchUrl = `https://www.googleapis.com/youtube/v3/search?part=snippet&q=${encodeURIComponent(query)}&type=video&key=${process.env.YOUTUBE_API_KEY}`;
+                
+                const response = await fetch(searchUrl);
+                const data = await response.json();
+                
+                if (data.items && data.items.length > 0) {
+                    const videoId = data.items[0].id.videoId;
+                    const videoTitle = data.items[0].snippet.title;
+                    
+                    res.json({
+                        success: true,
+                        videoId: videoId,
+                        title: videoTitle,
+                        embedUrl: `https://www.youtube.com/embed/${videoId}?autoplay=1&enablejsapi=1`
+                    });
+                } else {
+                    res.json({ success: false, error: 'No YouTube video found' });
+                }
+                
+            } catch (error) {
+                console.error('YouTube search error:', error);
+                res.json({ success: false, error: 'YouTube search failed' });
+            }
+        });
     }
 
     startMusicMonitoring() {
@@ -377,10 +425,39 @@ class Working3AMBot {
                 artist: artist,
                 song: song,
                 source: "FlaviBot Player",
-                lastUpdated: Date.now()
+                lastUpdated: Date.now(),
+                searchQuery: `${artist} ${song}`
             };
             
             console.log(`🎵 Auto-detected now playing: ${artist} - ${song}`);
+            
+            // Get YouTube link for this song
+            this.getYouTubeLink(artist, song);
+        }
+    }
+
+    async getYouTubeLink(artist, song) {
+        try {
+            const query = `${artist} ${song}`;
+            const searchUrl = `https://www.googleapis.com/youtube/v3/search?part=snippet&q=${encodeURIComponent(query)}&type=video&key=${process.env.YOUTUBE_API_KEY}`;
+            
+            const response = await fetch(searchUrl);
+            const data = await response.json();
+            
+            if (data.items && data.items.length > 0) {
+                const videoId = data.items[0].id.videoId;
+                const youtubeUrl = `https://www.youtube.com/watch?v=${videoId}`;
+                
+                console.log(`🎬 Found YouTube link: ${youtubeUrl}`);
+                
+                // Update current song with YouTube info
+                if (this.currentSong) {
+                    this.currentSong.youtubeUrl = youtubeUrl;
+                    this.currentSong.videoId = videoId;
+                }
+            }
+        } catch (error) {
+            console.log('YouTube search failed, but song tracking continues:', error.message);
         }
     }
 
