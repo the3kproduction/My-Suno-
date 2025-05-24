@@ -1258,6 +1258,56 @@
         // Auto-refresh current song every 15 seconds
         setInterval(fetchCurrentSong, 15000);
         setInterval(updateTimestamps, 60000);
+
+        // Suno song posting function
+        async function postSunoSong() {
+            const urlInput = document.getElementById('suno-url');
+            const url = urlInput.value.trim();
+            
+            if (!url) {
+                alert('Please enter a Suno URL');
+                return;
+            }
+
+            const button = document.querySelector('.btn-primary');
+            const originalText = button.innerHTML;
+            
+            try {
+                // Show loading state
+                button.innerHTML = '<span>🔄</span> Posting...';
+                button.disabled = true;
+
+                const response = await fetch('/api/suno-post', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ url })
+                });
+                
+                const result = await response.json();
+                
+                if (result.success) {
+                    button.innerHTML = '<span>✅</span> Posted Successfully!';
+                    urlInput.value = '';
+                    setTimeout(() => {
+                        button.innerHTML = originalText;
+                        button.disabled = false;
+                    }, 2000);
+                } else {
+                    button.innerHTML = '<span>❌</span> Error: ' + result.error;
+                    setTimeout(() => {
+                        button.innerHTML = originalText;
+                        button.disabled = false;
+                    }, 3000);
+                }
+            } catch (error) {
+                console.error('Network error:', error);
+                button.innerHTML = '<span>❌</span> Network Error';
+                setTimeout(() => {
+                    button.innerHTML = originalText;
+                    button.disabled = false;
+                }, 3000);
+            }
+        }
     </script>
 </body>
 </html>
