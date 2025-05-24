@@ -414,10 +414,15 @@
 
         <div class="container">
             <div class="header">
-                <div class="verified-badge">
-                    <div class="three-am">3AM</div>
-                    <div class="verified-text">VERIFIED</div>
-                    <div class="verified-checkmark">✓</div>
+                <div style="display: flex; align-items: center; justify-content: center; gap: 20px; flex-wrap: wrap;">
+                    <button onclick="joinDiscord()" class="discord-btn" style="background: linear-gradient(135deg, #5865f2, #7289da); padding: 12px 24px; font-size: 16px; font-weight: 600; box-shadow: 0 4px 15px rgba(88, 101, 242, 0.4); border: none; border-radius: 12px; color: white; cursor: pointer; transition: all 0.3s ease; transform: translateY(0);">
+                        💬 Join Discord
+                    </button>
+                    <div class="verified-badge">
+                        <div class="three-am">3AM</div>
+                        <div class="verified-text">VERIFIED</div>
+                        <div class="verified-checkmark">✓</div>
+                    </div>
                 </div>
                 <h1>Enhanced Music Bot</h1>
                 <p>Discord Music Bot with YouTube Integration & Suno Monitoring</p>
@@ -992,6 +997,12 @@
                     // If no current song, show a nice message
                     alert('No song currently playing! The Spotify button will work when music is detected.');
                 }
+            }
+            
+            function joinDiscord() {
+                // Replace this with your actual Discord invite link
+                const discordInviteUrl = 'https://discord.gg/your-server-invite';
+                window.open(discordInviteUrl, '_blank');
             }
         </script>
     </body>
