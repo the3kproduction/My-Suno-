@@ -34,10 +34,6 @@ args = "Enhanced AI Suno Bot"
 
 [[workflows.workflow.tasks]]
 task = "workflow.run"
-args = "Clean Enhanced Bot"
-
-[[workflows.workflow.tasks]]
-task = "workflow.run"
 args = "Enhanced Music Bot"
 
 [[workflows.workflow.tasks]]
@@ -50,7 +46,7 @@ args = "Music Video Bot"
 
 [[workflows.workflow.tasks]]
 task = "workflow.run"
-args = "Suno Focused Bot"
+args = "3AM VERIFIED Dashboard"
 
 [[workflows.workflow]]
 name = "discord-bot-test"
@@ -97,15 +93,6 @@ args = "node final_render_bot.js"
 waitForPort = 5000
 
 [[workflows.workflow]]
-name = "Clean Enhanced Bot"
-author = "agent"
-
-[[workflows.workflow.tasks]]
-task = "shell.exec"
-args = "node clean_enhanced_bot.js"
-waitForPort = 5000
-
-[[workflows.workflow]]
 name = "Enhanced Music Bot"
 author = "agent"
 
@@ -133,12 +120,12 @@ args = "node final_render_bot.js"
 waitForPort = 5000
 
 [[workflows.workflow]]
-name = "Suno Focused Bot"
+name = "3AM VERIFIED Dashboard"
 author = "agent"
 
 [[workflows.workflow.tasks]]
 task = "shell.exec"
-args = "node suno_focused_bot.js"
+args = "node clean_enhanced_bot.js"
 waitForPort = 5000
 
 [deployment]
