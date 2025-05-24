@@ -27,6 +27,10 @@ class EnhancedMusicBot {
             profilesMonitored: 1,
             lastCheck: new Date()
         };
+        
+        this.currentTrack = null;
+        this.audioPlayer = null;
+        this.voiceConnection = null;
     }
 
     async start() {
@@ -774,32 +778,44 @@ class EnhancedMusicBot {
 
         this.app.get('/now-playing', async (req, res) => {
             try {
-                // Get actual currently playing track from your voice channels
-                const musicChannel = this.client.channels.cache.get('YOUR_MUSIC_CHANNEL_ID');
-                const gamingChannel = this.client.channels.cache.get('YOUR_GAMING_CHANNEL_ID');
-                
-                // Check if bot is connected to voice and playing something
-                const connections = this.client.voice.adapters;
-                
-                if (connections && connections.size > 0) {
-                    // Get real track info from currently playing song
+                // Check if we have a current track stored
+                if (this.currentTrack) {
                     res.json({
                         success: true,
-                        artist: 'Currently Playing Artist',
-                        song: 'Real Song Title',
+                        artist: this.currentTrack.artist || 'Unknown Artist',
+                        song: this.currentTrack.title || this.currentTrack.song || 'Unknown Song',
                         source: 'FlaviBot Player',
-                        status: 'Live'
+                        status: 'Live',
+                        url: this.currentTrack.url
                     });
-                } else {
-                    // No music currently playing
-                    res.json({
-                        success: true,
-                        artist: 'No music playing',
-                        song: 'Join a voice channel and start playing music',
-                        source: 'FlaviBot Player',
-                        status: 'Waiting'
-                    });
+                    return;
                 }
+
+                // Check if bot is in voice channel and playing
+                const guild = this.client.guilds.cache.first();
+                if (guild) {
+                    const botMember = guild.members.cache.get(this.client.user.id);
+                    if (botMember && botMember.voice.channel) {
+                        // Bot is in voice channel
+                        res.json({
+                            success: true,
+                            artist: 'Music Bot',
+                            song: 'Connected to voice channel',
+                            source: 'FlaviBot Player',
+                            status: 'Connected'
+                        });
+                        return;
+                    }
+                }
+
+                // No music currently playing
+                res.json({
+                    success: false,
+                    artist: 'No music playing',
+                    song: 'Start playing music to see live info',
+                    source: 'FlaviBot Player',
+                    status: 'Waiting'
+                });
             } catch (error) {
                 console.log('Now-playing error:', error);
                 res.json({
