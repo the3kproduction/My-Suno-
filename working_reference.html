@@ -427,12 +427,54 @@
             <div class="section">
                 <h2>🎵 Live Music Stream</h2>
                 <div class="stats-grid">
-                    <div class="stat-card" style="background: linear-gradient(135deg, rgba(244, 63, 94, 0.2), rgba(139, 69, 19, 0.2)); border: 2px solid rgba(244, 63, 94, 0.4);">
-                        <h3 id="musicStatus" style="color: #f43f5e;">🎶 Now Playing</h3>
-                        <p><strong>Artist:</strong> <span id="currentArtist">Listening for music...</span></p>
-                        <p><strong>Song:</strong> <span id="currentSong">Waiting for track info...</span></p>
-                        <p><strong>Source:</strong> <span id="musicSource">Music Video Channel</span></p>
-                        <p><strong>Status:</strong> <span id="liveStatus">🔴 Live</span></p>
+                    <div class="stat-card" style="background: linear-gradient(135deg, rgba(244, 63, 94, 0.15), rgba(139, 92, 246, 0.15)); border: 2px solid rgba(244, 63, 94, 0.3); backdrop-filter: blur(15px); position: relative; overflow: hidden;">
+                        
+                        <!-- Animated background effect -->
+                        <div style="position: absolute; top: 0; left: 0; right: 0; bottom: 0; background: linear-gradient(45deg, transparent, rgba(244, 63, 94, 0.1), transparent); animation: shimmer 3s infinite; pointer-events: none;"></div>
+                        
+                        <!-- Header with glow effect -->
+                        <div style="text-align: center; margin-bottom: 25px; position: relative; z-index: 2;">
+                            <h3 style="color: #f43f5e; margin: 0; font-size: 1.8rem; text-shadow: 0 0 20px rgba(244, 63, 94, 0.8), 0 0 40px rgba(244, 63, 94, 0.4);">
+                                🎶 Live Music Stream
+                            </h3>
+                            <div style="height: 2px; background: linear-gradient(90deg, transparent, #f43f5e, #8b5cf6, #f43f5e, transparent); margin: 10px auto; width: 250px; border-radius: 2px; box-shadow: 0 0 10px rgba(244, 63, 94, 0.5);"></div>
+                        </div>
+                        
+                        <div style="position: relative; z-index: 2;">
+                            <!-- Artist Display -->
+                            <div style="display: flex; align-items: center; margin-bottom: 18px; padding: 15px; background: rgba(0,0,0,0.3); border-radius: 12px; border-left: 4px solid #f43f5e; backdrop-filter: blur(10px); box-shadow: 0 4px 15px rgba(0,0,0,0.2);">
+                                <div style="width: 40px; height: 40px; background: linear-gradient(135deg, #f43f5e, #ec4899); border-radius: 50%; display: flex; align-items: center; justify-content: center; margin-right: 15px; box-shadow: 0 0 15px rgba(244, 63, 94, 0.4);">
+                                    <span style="font-size: 1.3rem;">🎤</span>
+                                </div>
+                                <div style="flex: 1;">
+                                    <div style="color: rgba(255,255,255,0.6); font-size: 0.8rem; margin-bottom: 3px; text-transform: uppercase; letter-spacing: 1px; font-weight: 500;">ARTIST</div>
+                                    <div id="currentArtist" style="color: #fff; font-weight: 700; font-size: 1.2rem; text-shadow: 0 2px 4px rgba(0,0,0,0.3);">Listening for music...</div>
+                                </div>
+                            </div>
+                            
+                            <!-- Song Display -->
+                            <div style="display: flex; align-items: center; margin-bottom: 18px; padding: 15px; background: rgba(0,0,0,0.3); border-radius: 12px; border-left: 4px solid #8b5cf6; backdrop-filter: blur(10px); box-shadow: 0 4px 15px rgba(0,0,0,0.2);">
+                                <div style="width: 40px; height: 40px; background: linear-gradient(135deg, #8b5cf6, #a855f7); border-radius: 50%; display: flex; align-items: center; justify-content: center; margin-right: 15px; box-shadow: 0 0 15px rgba(139, 92, 246, 0.4);">
+                                    <span style="font-size: 1.3rem;">🎵</span>
+                                </div>
+                                <div style="flex: 1;">
+                                    <div style="color: rgba(255,255,255,0.6); font-size: 0.8rem; margin-bottom: 3px; text-transform: uppercase; letter-spacing: 1px; font-weight: 500;">TRACK</div>
+                                    <div id="currentSong" style="color: #fff; font-weight: 700; font-size: 1.2rem; text-shadow: 0 2px 4px rgba(0,0,0,0.3);">Waiting for track info...</div>
+                                </div>
+                            </div>
+                            
+                            <!-- Source & Status in a beautiful grid -->
+                            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 15px; margin-bottom: 5px;">
+                                <div style="padding: 12px; background: rgba(0,0,0,0.3); border-radius: 10px; border-left: 4px solid #4ecdc4; backdrop-filter: blur(10px); box-shadow: 0 4px 15px rgba(0,0,0,0.2);">
+                                    <div style="color: rgba(255,255,255,0.6); font-size: 0.75rem; margin-bottom: 3px; text-transform: uppercase; letter-spacing: 1px; font-weight: 500;">SOURCE</div>
+                                    <div id="musicSource" style="color: #4ecdc4; font-weight: 600; font-size: 0.9rem; text-shadow: 0 0 10px rgba(78, 205, 196, 0.3);">Music Video Channel</div>
+                                </div>
+                                <div style="padding: 12px; background: rgba(0,0,0,0.3); border-radius: 10px; border-left: 4px solid #22c55e; backdrop-filter: blur(10px); box-shadow: 0 4px 15px rgba(0,0,0,0.2);">
+                                    <div style="color: rgba(255,255,255,0.6); font-size: 0.75rem; margin-bottom: 3px; text-transform: uppercase; letter-spacing: 1px; font-weight: 500;">STATUS</div>
+                                    <div id="liveStatus" style="color: #22c55e; font-weight: 600; font-size: 0.9rem; text-shadow: 0 0 10px rgba(34, 197, 94, 0.3);">🔴 Live</div>
+                                </div>
+                            </div>
+                        </div>
                         
                         <div style="margin-top: 20px; display: flex; justify-content: center; gap: 15px; flex-wrap: wrap;">
                             <button id="muteToggle" onclick="toggleMute()" class="btn" style="background: #f43f5e; padding: 12px 24px; font-size: 16px;">
