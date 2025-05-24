@@ -148,11 +148,52 @@ class Working3AMBot {
         // Working now-playing endpoint that matches reference site
         this.app.get('/now-playing', async (req, res) => {
             try {
+                // Debug: Log what servers our bot can see
+                console.log('Bot is in servers:', this.client.guilds.cache.map(g => `${g.name} (${g.id})`));
+                
                 // Try to get music info from Discord
                 const musicVideoChannelId = '1375615201990283303';
                 const musicVideoChannel = this.client.channels.cache.get(musicVideoChannelId);
                 
+                console.log('Looking for channel:', musicVideoChannelId);
+                console.log('Channel found:', musicVideoChannel ? `Yes: ${musicVideoChannel.name}` : 'No');
+                
                 if (!musicVideoChannel) {
+                    // Try to find any guild and look for FlaviBot there
+                    for (const guild of this.client.guilds.cache.values()) {
+                        console.log(`Checking guild: ${guild.name}`);
+                        console.log('Members in guild:', guild.members.cache.map(m => m.user.username));
+                        
+                        const flaviBot = guild.members.cache.find(member => 
+                            member.user.username.toLowerCase().includes('flavi') || 
+                            member.user.displayName.toLowerCase().includes('flavi')
+                        );
+                        
+                        if (flaviBot) {
+                            console.log('Found FlaviBot:', flaviBot.user.username);
+                            console.log('FlaviBot presence:', flaviBot.presence);
+                            
+                            if (flaviBot.presence && flaviBot.presence.activities.length > 0) {
+                                console.log('FlaviBot activities:', flaviBot.presence.activities);
+                                
+                                const activity = flaviBot.presence.activities.find(act => 
+                                    act.type === 2 || // LISTENING
+                                    act.name.toLowerCase().includes('music') ||
+                                    act.name.toLowerCase().includes('spotify')
+                                );
+
+                                if (activity) {
+                                    return res.json({
+                                        success: true,
+                                        artist: activity.state || "Unknown Artist",
+                                        song: activity.details || "Unknown Song",
+                                        source: "FlaviBot Player"
+                                    });
+                                }
+                            }
+                        }
+                    }
+                    
                     return res.json({
                         success: false,
                         artist: "Error fetching info",
@@ -161,14 +202,20 @@ class Working3AMBot {
                     });
                 }
 
-                // Look for FlaviBot presence
+                // Look for FlaviBot presence in the specific channel's guild
                 const guild = musicVideoChannel.guild;
+                console.log('Guild members:', guild.members.cache.map(m => m.user.username));
+                
                 const flaviBot = guild.members.cache.find(member => 
                     member.user.username.toLowerCase().includes('flavi') || 
                     member.user.displayName.toLowerCase().includes('flavi')
                 );
 
+                console.log('FlaviBot found:', flaviBot ? flaviBot.user.username : 'No');
+
                 if (flaviBot && flaviBot.presence && flaviBot.presence.activities.length > 0) {
+                    console.log('FlaviBot activities:', flaviBot.presence.activities);
+                    
                     const activity = flaviBot.presence.activities.find(act => 
                         act.type === 2 || // LISTENING
                         act.name.toLowerCase().includes('music') ||
