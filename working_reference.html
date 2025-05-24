@@ -483,8 +483,8 @@
                         </audio>
                         
                         <div style="margin-top: 20px; display: flex; justify-content: center; gap: 15px; flex-wrap: wrap;">
-                            <button id="muteToggle" onclick="toggleAudioStream()" class="btn" style="background: #f43f5e; padding: 12px 24px; font-size: 16px;">
-                                🔊 Mute Website Audio
+                            <button id="muteToggle" onclick="toggleAudioStream()" class="btn" style="background: #6b7280; padding: 12px 24px; font-size: 16px;">
+                                🔇 Unmute Website Audio
                             </button>
                             <button onclick="refreshNowPlaying()" class="btn" style="background: #4ecdc4; padding: 12px 24px; font-size: 16px;">
                                 🔄 Refresh
@@ -835,17 +835,32 @@
             updateBackgroundOnScroll();
 
             // Audio stream control
-            let isAudioMuted = false;
-            let audioStream = null;
+            let isAudioMuted = true; // Start muted
+            let audioInitialized = false;
 
-            function toggleAudioStream() {
+            async function toggleAudioStream() {
                 const audio = document.getElementById('discordAudioStream');
                 const button = document.getElementById('muteToggle');
+                
+                // Initialize audio stream on first click
+                if (!audioInitialized) {
+                    await initializeAudioStream();
+                    audioInitialized = true;
+                }
                 
                 if (isAudioMuted) {
                     // Unmute - start streaming
                     audio.volume = 0.7;
-                    audio.play().catch(e => console.log('Audio play prevented:', e));
+                    const playPromise = audio.play();
+                    if (playPromise !== undefined) {
+                        playPromise.then(() => {
+                            console.log('Audio started successfully');
+                        }).catch(e => {
+                            console.log('Audio play failed:', e);
+                            button.innerHTML = '❌ Audio Not Available';
+                            return;
+                        });
+                    }
                     button.innerHTML = '🔊 Mute Website Audio';
                     button.style.background = '#f43f5e';
                     isAudioMuted = false;
