@@ -525,26 +525,80 @@ class Enhanced3AMBot {
 
     async postSunoToDiscord(title, url, description = '') {
         try {
-            const channel = this.client.channels.cache.get(process.env.DISCORD_CHANNEL_ID);
-            if (!channel) {
-                throw new Error('Discord channel not found');
+            // Step 1: Post to hidden bot-helper channel to get rich preview
+            const botHelperChannel = this.client.channels.cache.find(channel => 
+                channel.name === 'bot-helper' || channel.name === 'bot_helper'
+            );
+            
+            if (!botHelperChannel) {
+                throw new Error('Bot helper channel not found. Please create a #bot-helper channel.');
             }
 
-            const embed = {
-                color: 0x667eea,
-                title: '🎵 ' + title,
-                description: description || 'New song posted from Suno AI!',
-                url: url,
-                timestamp: new Date().toISOString(),
-                footer: {
-                    text: '3AM VERIFIED Bot'
-                }
-            };
+            // Post the raw Suno URL to bot-helper channel - Discord will generate rich preview
+            const helperMessage = await botHelperChannel.send(url);
+            console.log('Posted Suno URL to bot-helper channel for rich preview');
 
-            await channel.send({ embeds: [embed] });
-            console.log('Successfully posted Suno song to Discord');
+            // Step 2: Wait a moment for Discord to generate the rich preview
+            setTimeout(async () => {
+                try {
+                    // Fetch the message again to get the rich embed data
+                    const messageWithEmbed = await botHelperChannel.messages.fetch(helperMessage.id);
+                    
+                    // Step 3: Post to main channel with the rich content
+                    const mainChannel = this.client.channels.cache.get(process.env.DISCORD_CHANNEL_ID);
+                    if (!mainChannel) {
+                        throw new Error('Main Discord channel not found');
+                    }
+
+                    // If Discord generated a rich embed, use that data
+                    if (messageWithEmbed.embeds && messageWithEmbed.embeds.length > 0) {
+                        const originalEmbed = messageWithEmbed.embeds[0];
+                        
+                        const enhancedEmbed = {
+                            color: 0x667eea,
+                            title: originalEmbed.title || '🎵 ' + title,
+                            description: originalEmbed.description || description || 'New song from Suno AI!',
+                            url: url,
+                            image: originalEmbed.image ? { url: originalEmbed.image.url } : null,
+                            thumbnail: originalEmbed.thumbnail ? { url: originalEmbed.thumbnail.url } : null,
+                            timestamp: new Date().toISOString(),
+                            footer: {
+                                text: '3AM VERIFIED Bot • Auto-posted from Suno AI',
+                                icon_url: originalEmbed.thumbnail?.url
+                            },
+                            fields: originalEmbed.fields || []
+                        };
+
+                        await mainChannel.send({ 
+                            content: '🎵 **New Song Alert!** 🎵',
+                            embeds: [enhancedEmbed] 
+                        });
+                        
+                        console.log('Successfully reposted with rich content to main channel');
+                    } else {
+                        // Fallback if no rich embed was generated
+                        await mainChannel.send({
+                            content: '🎵 **New Song Alert!** 🎵\n' + url,
+                            embeds: [{
+                                color: 0x667eea,
+                                title: '🎵 ' + title,
+                                description: description || 'New song from Suno AI!',
+                                url: url,
+                                timestamp: new Date().toISOString(),
+                                footer: {
+                                    text: '3AM VERIFIED Bot'
+                                }
+                            }]
+                        });
+                        console.log('Posted with fallback embed to main channel');
+                    }
+                } catch (error) {
+                    console.error('Error reposting to main channel:', error);
+                }
+            }, 3000); // Wait 3 seconds for Discord to generate rich preview
+
         } catch (error) {
-            console.error('Error posting to Discord:', error);
+            console.error('Error in smart posting system:', error);
             throw error;
         }
     }
