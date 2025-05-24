@@ -1,10 +1,18 @@
-const { Client, GatewayIntentBits, SlashCommandBuilder, EmbedBuilder, ChannelType, Routes } = require('discord.js');
-const { REST } = require('@discordjs/rest');
-const { joinVoiceChannel, createAudioPlayer, createAudioResource, AudioPlayerStatus, VoiceConnectionStatus } = require('@discordjs/voice');
-const youtubeDl = require('youtube-dl-exec');
-const express = require('express');
-const axios = require('axios');
-require('dotenv').config();
+const { Client, GatewayIntentBits, SlashCommandBuilder, EmbedBuilder, ChannelType, require('dotenv').config();
+       const { REST } = require('@discordjs/rest');
+       const { Routes } = require('discord.js');
+
+       const rest = new REST({ version: '10' }).setToken(process.env.TOKEN);
+
+       // Example: Fetch a channel by ID
+       async function fetchChannel(channelId) {
+           try {
+               const channel = await rest.get(Routes.channel(channelId));
+               console.log('Fetched channel:', channel);
+           } catch (error) {
+               console.error('Error fetching channel:', error);
+           }
+       }
 
 class EnhancedMusicBot {
     constructor() {
