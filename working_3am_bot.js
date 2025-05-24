@@ -18,6 +18,7 @@ class Working3AMBot {
         
         this.app = express();
         this.app.use(express.json());
+        this.app.use(express.static('public'));
         this.currentSong = {
             artist: "Listening for music...",
             song: "Waiting for track info...",
