@@ -52,16 +52,55 @@
         100% { transform: translateX(100%); }
     }
     
+    @keyframes scrollGradient {
+        0% { background-position: 0% 50%; }
+        50% { background-position: 100% 50%; }
+        100% { background-position: 0% 50%; }
+    }
+    
+    @keyframes floatParticles {
+        0% { transform: translateY(0px) rotate(0deg); opacity: 0; }
+        10% { opacity: 1; }
+        90% { opacity: 1; }
+        100% { transform: translateY(-100vh) rotate(360deg); opacity: 0; }
+    }
+    
     body {
         font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
         line-height: 1.6;
         color: var(--text-primary);
         background: var(--bg-primary);
         background-size: 400% 400%;
-        animation: gentleGradient 15s ease infinite;
+        animation: scrollGradient 15s ease infinite;
         min-height: 100vh;
         position: relative;
         overflow-x: hidden;
+    }
+    
+    body::before {
+        content: '';
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background: 
+            radial-gradient(circle at 20% 80%, rgba(120, 119, 198, 0.3) 0%, transparent 50%),
+            radial-gradient(circle at 80% 20%, rgba(255, 119, 198, 0.3) 0%, transparent 50%),
+            radial-gradient(circle at 40% 40%, rgba(120, 219, 255, 0.3) 0%, transparent 50%);
+        pointer-events: none;
+        z-index: -1;
+    }
+    
+    .floating-particle {
+        position: fixed;
+        width: 4px;
+        height: 4px;
+        background: rgba(255, 255, 255, 0.6);
+        border-radius: 50%;
+        pointer-events: none;
+        z-index: 0;
+        animation: floatParticles linear infinite;
     }
     
     .container {
@@ -95,9 +134,17 @@
         font-size: 14px;
         box-shadow: 0 4px 15px rgba(102, 126, 234, 0.4);
         margin-bottom: 20px;
+        position: absolute;
+        left: 20px;
+        top: 20px;
+    }
+    
+    .header-top {
+        display: flex;
+        justify-content: flex-start;
+        align-items: center;
+        margin-bottom: 20px;
         position: relative;
-        left: calc(50% - 275px);
-        transform: translateX(-50%);
     }
     
     .three-am {
@@ -247,15 +294,15 @@
 
     <div class="container">
         <div class="header">
-            <div style="display: flex; align-items: center; justify-content: center; gap: 20px; flex-wrap: wrap;">
+            <div class="header-top">
                 <button onclick="joinDiscord()" class="discord-btn" style="background: linear-gradient(135deg, #5865f2, #7289da); padding: 12px 24px; font-size: 16px; font-weight: 600; box-shadow: 0 4px 15px rgba(88, 101, 242, 0.4); border: none; border-radius: 12px; color: white; cursor: pointer; transition: all 0.3s ease; transform: translateY(0);">
                     💬 Join Discord
                 </button>
-                <div class="verified-badge">
-                    <div class="three-am">3AM</div>
-                    <div class="verified-text">VERIFIED</div>
-                    <div class="verified-checkmark">✓</div>
-                </div>
+            </div>
+            <div class="verified-badge">
+                <div class="three-am">3AM</div>
+                <div class="verified-text">VERIFIED</div>
+                <div class="verified-checkmark">✓</div>
             </div>
             <h1>Enhanced Music Bot</h1>
             <p>Discord Music Bot with YouTube Integration & Suno Monitoring</p>
@@ -572,10 +619,33 @@
             }
         }
 
+        // Create floating particles
+        function createFloatingParticles() {
+            for (let i = 0; i < 50; i++) {
+                setTimeout(() => {
+                    const particle = document.createElement('div');
+                    particle.className = 'floating-particle';
+                    particle.style.left = Math.random() * 100 + '%';
+                    particle.style.animationDuration = (Math.random() * 15 + 10) + 's';
+                    particle.style.animationDelay = Math.random() * 2 + 's';
+                    document.body.appendChild(particle);
+                    
+                    // Remove particle after animation
+                    setTimeout(() => {
+                        if (document.body.contains(particle)) {
+                            document.body.removeChild(particle);
+                        }
+                    }, 25000);
+                }, Math.random() * 5000);
+            }
+        }
+
         // Initialize
         initTheme();
         refreshNowPlaying();
         setInterval(refreshNowPlaying, 15000);
+        createFloatingParticles();
+        setInterval(createFloatingParticles, 15000);
     </script>
 </body>
 </html>
