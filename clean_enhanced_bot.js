@@ -247,10 +247,10 @@ class EnhancedMusicBot {
 <body>
     <!-- Theme Switcher -->
     <div class="theme-switcher">
-        <div style="display: flex; gap: 10px; background: rgba(255,255,255,0.1); backdrop-filter: blur(10px); border-radius: 25px; padding: 10px;">
-            <button onclick="setTheme('auto')" style="background: linear-gradient(45deg, #667eea, #764ba2); border: none; border-radius: 50%; width: 40px; height: 40px; color: white; cursor: pointer; display: flex; align-items: center; justify-content: center;">🔄</button>
-            <button onclick="setTheme('light')" style="background: linear-gradient(45deg, #fff, #f0f0f0); border: none; border-radius: 50%; width: 40px; height: 40px; color: #333; cursor: pointer; display: flex; align-items: center; justify-content: center;">☀️</button>
-            <button onclick="setTheme('dark')" style="background: linear-gradient(45deg, #2c3e50, #34495e); border: none; border-radius: 50%; width: 40px; height: 40px; color: white; cursor: pointer; display: flex; align-items: center; justify-content: center;">🌙</button>
+        <div style="display: flex; gap: 5px; background: rgba(0,0,0,0.4); backdrop-filter: blur(10px); border-radius: 15px; padding: 8px;">
+            <button id="autoThemeBtn" onclick="setTheme('auto')" style="background: linear-gradient(45deg, #667eea, #764ba2); border: none; border-radius: 10px; padding: 8px 12px; color: white; cursor: pointer; font-size: 11px; font-weight: bold; transition: all 0.3s ease;">AUTO</button>
+            <button id="lightThemeBtn" onclick="setTheme('light')" style="background: rgba(255,255,255,0.2); border: none; border-radius: 10px; padding: 8px 12px; color: white; cursor: pointer; font-size: 11px; font-weight: bold; transition: all 0.3s ease;">LIGHT</button>
+            <button id="darkThemeBtn" onclick="setTheme('dark')" style="background: rgba(255,255,255,0.2); border: none; border-radius: 10px; padding: 8px 12px; color: white; cursor: pointer; font-size: 11px; font-weight: bold; transition: all 0.3s ease;">DARK</button>
         </div>
     </div>
 
@@ -415,7 +415,42 @@ class EnhancedMusicBot {
     <script>
         // Theme switching functionality
         function setTheme(theme) {
-            document.documentElement.setAttribute('data-theme', theme);
+            // Clear all button highlights
+            document.getElementById('autoThemeBtn').style.background = 'rgba(255,255,255,0.2)';
+            document.getElementById('lightThemeBtn').style.background = 'rgba(255,255,255,0.2)';
+            document.getElementById('darkThemeBtn').style.background = 'rgba(255,255,255,0.2)';
+            
+            // Highlight active button
+            const activeBtn = document.getElementById(theme + 'ThemeBtn');
+            if (activeBtn) {
+                activeBtn.style.background = 'linear-gradient(45deg, #667eea, #764ba2)';
+            }
+            
+            // Apply theme changes
+            if (theme === 'light') {
+                document.body.style.background = 'linear-gradient(-45deg, #f8f9fa, #e9ecef, #dee2e6, #ced4da)';
+                document.body.style.color = '#333';
+                document.querySelectorAll('.section').forEach(section => {
+                    section.style.background = 'rgba(255,255,255,0.9)';
+                    section.style.color = '#333';
+                });
+            } else if (theme === 'dark') {
+                document.body.style.background = 'linear-gradient(-45deg, #1a1a1a, #2d2d2d, #404040, #1a1a1a)';
+                document.body.style.color = 'white';
+                document.querySelectorAll('.section').forEach(section => {
+                    section.style.background = 'rgba(0,0,0,0.3)';
+                    section.style.color = 'white';
+                });
+            } else {
+                // Auto theme - original colorful background
+                document.body.style.background = 'linear-gradient(-45deg, #667eea, #764ba2, #f093fb, #f5576c, #4facfe, #00f2fe)';
+                document.body.style.color = 'white';
+                document.querySelectorAll('.section').forEach(section => {
+                    section.style.background = 'rgba(255,255,255,0.1)';
+                    section.style.color = 'white';
+                });
+            }
+            
             localStorage.setItem('theme', theme);
             console.log('Theme set to:', theme);
         }
