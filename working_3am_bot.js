@@ -87,72 +87,7 @@ class Working3AMBot {
             const fs = require('fs');
             let htmlContent = fs.readFileSync('public/index.html', 'utf8');
             
-            // Make sure the logo is properly included
-            if (!htmlContent.includes('verified-badge')) {
-                // Add logo CSS and HTML if missing
-                const logoCSS = `
-        .header {
-            text-align: center;
-        }
-        
-        .verified-badge {
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            width: 150px;
-            height: 150px;
-            border: 3px solid #8a2be2;
-            border-radius: 50%;
-            background: radial-gradient(circle at center, rgba(138, 43, 226, 0.3), rgba(0, 0, 0, 0.8));
-            box-shadow: 
-                0 0 20px #8a2be2,
-                inset 0 0 20px rgba(138, 43, 226, 0.5);
-            animation: verifiedPulse 3s ease-in-out infinite;
-            margin: 20px auto;
-            position: relative;
-            flex-direction: column;
-        }
-
-        .verified-badge .three-am {
-            color: #00ffff;
-            font-size: 2rem;
-            font-weight: bold;
-            text-shadow: 0 0 15px #00ffff;
-            margin-bottom: 5px;
-        }
-
-        .verified-badge .verified-text {
-            color: #8a2be2;
-            font-size: 1rem;
-            font-weight: bold;
-            text-shadow: 0 0 10px #8a2be2;
-            margin-bottom: 10px;
-        }
-
-        .verified-checkmark {
-            width: 35px;
-            height: 35px;
-            border: 2px solid #00ffff;
-            border-radius: 8px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            color: #00ffff;
-            font-size: 1.5rem;
-            box-shadow: 0 0 15px #00ffff;
-        }`;
-                
-                htmlContent = htmlContent.replace('</style>', logoCSS + '\n</style>');
-                
-                const logoHTML = `
-                <div class="verified-badge">
-                    <div class="three-am">3AM</div>
-                    <div class="verified-text">VERIFIED</div>
-                    <div class="verified-checkmark">✓</div>
-                </div>`;
-                
-                htmlContent = htmlContent.replace('<div class="header">', '<div class="header">' + logoHTML);
-            }
+            // Logo is already properly included in the HTML file, no need to inject it
             
             res.send(htmlContent);
         });
