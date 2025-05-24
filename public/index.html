@@ -565,6 +565,10 @@
 
         .song-info.centered {
             text-align: center;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            width: 100%;
         }
 
         .song-info.centered .song-artist,
@@ -572,44 +576,63 @@
         .song-info.centered .song-status {
             text-align: center;
             justify-content: center;
+            width: 100%;
+            display: block;
         }
 
-        /* Dynamic scroll background effects */
+        .song-status {
+            text-align: center !important;
+            width: 100% !important;
+            display: block !important;
+        }
+
+        /* Smooth dynamic scroll background effects */
+        body {
+            transition: all 0.6s ease-in-out;
+        }
+
         body.scroll-effect-1 {
             background: linear-gradient(135deg, #ff0080, #7928ca, #ff0080);
             background-size: 400% 400%;
-            animation: gradientShift 3s ease infinite;
+            animation: gradientShift 4s ease-in-out infinite;
+            transition: all 0.8s cubic-bezier(0.4, 0.0, 0.2, 1);
         }
 
         body.scroll-effect-2 {
             background: linear-gradient(135deg, #00ff88, #0070f3, #00ff88);
             background-size: 400% 400%;
-            animation: gradientShift 3s ease infinite;
+            animation: gradientShift 4s ease-in-out infinite;
+            transition: all 0.8s cubic-bezier(0.4, 0.0, 0.2, 1);
         }
 
         body.scroll-effect-3 {
             background: linear-gradient(135deg, #ff4081, #9c27b0, #ff4081);
             background-size: 400% 400%;
-            animation: gradientShift 3s ease infinite;
+            animation: gradientShift 4s ease-in-out infinite;
+            transition: all 0.8s cubic-bezier(0.4, 0.0, 0.2, 1);
         }
 
         @keyframes gradientShift {
             0%, 100% { background-position: 0% 50%; }
-            50% { background-position: 100% 50%; }
+            25% { background-position: 100% 0%; }
+            50% { background-position: 100% 100%; }
+            75% { background-position: 0% 100%; }
         }
 
-        /* Theme toggle */
+        /* Theme toggle - Fixed positioning */
         .theme-toggle {
-            position: fixed;
-            top: 20px;
-            right: 20px;
-            z-index: 1000;
-            display: flex;
+            position: fixed !important;
+            top: 20px !important;
+            right: 20px !important;
+            z-index: 9999 !important;
+            display: flex !important;
             gap: 5px;
-            background: rgba(255, 255, 255, 0.1);
+            background: rgba(255, 255, 255, 0.1) !important;
             border-radius: 25px;
             padding: 5px;
             backdrop-filter: blur(10px);
+            transform: none !important;
+            filter: none !important;
         }
 
         .theme-btn {
@@ -617,19 +640,26 @@
             border: none;
             border-radius: 20px;
             background: transparent;
-            color: white;
+            color: white !important;
             cursor: pointer;
             font-size: 12px;
             transition: all 0.3s ease;
+            transform: none !important;
+            filter: none !important;
         }
 
         .theme-btn.active {
-            background: rgba(138, 43, 226, 0.8);
-            color: white;
+            background: rgba(138, 43, 226, 0.8) !important;
+            color: white !important;
         }
 
         .theme-btn:hover {
-            background: rgba(255, 255, 255, 0.2);
+            background: rgba(255, 255, 255, 0.2) !important;
+        }
+
+        /* Ensure theme toggle is not affected by light mode invert */
+        body[style*="invert"] .theme-toggle {
+            filter: invert(1) hue-rotate(180deg) !important;
         }
 
         @media (max-width: 768px) {
@@ -997,7 +1027,7 @@
             }
         }
 
-        // Dramatic scroll effects
+        // Improved dramatic scroll effects
         let lastScrollY = 0;
         let scrollEffectTimeout;
         
@@ -1008,8 +1038,8 @@
             // Clear previous timeout
             clearTimeout(scrollEffectTimeout);
             
-            // Apply dramatic color changes based on scroll direction and speed
-            if (scrollDelta > 50) {
+            // More sensitive scroll detection with smoother color changes
+            if (scrollDelta > 10) {
                 if (scrollY > lastScrollY) {
                     // Scrolling down - dramatic pink/purple
                     document.body.className = 'scroll-effect-1';
@@ -1017,15 +1047,15 @@
                     // Scrolling up - dramatic green/blue
                     document.body.className = 'scroll-effect-2';
                 }
-            } else if (scrollDelta > 20) {
-                // Medium scroll - dramatic purple/magenta
+            } else if (scrollDelta > 5) {
+                // Light scroll - dramatic purple/magenta
                 document.body.className = 'scroll-effect-3';
             }
             
-            // Reset to original after scrolling stops
+            // Reset to original after scrolling stops (longer delay for smoothness)
             scrollEffectTimeout = setTimeout(() => {
                 document.body.className = '';
-            }, 1000);
+            }, 1500);
             
             lastScrollY = scrollY;
         }
