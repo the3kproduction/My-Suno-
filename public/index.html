@@ -823,6 +823,26 @@
                 background: rgba(255, 255, 255, 0.8) !important;
                 color: #000000 !important;
             }
+            
+            /* MOBILE ONLY - Fix logo collision with content */
+            .logo-container {
+                top: 10px !important;
+                right: 10px !important;
+                transform: scale(0.7) !important;
+                z-index: 1000 !important;
+            }
+            
+            /* MOBILE ONLY - Add margin to prevent content overlap */
+            .container {
+                margin-top: 80px !important;
+            }
+            
+            /* MOBILE ONLY - Ensure cards don't get covered */
+            .card {
+                margin-top: 20px !important;
+                position: relative !important;
+                z-index: 10 !important;
+            }
         }
     </style>
 </head>
