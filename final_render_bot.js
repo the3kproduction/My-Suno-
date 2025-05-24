@@ -1853,8 +1853,8 @@ class EnhancedMusicBot {
                 }
             }
             
-            // Auto-refresh now playing every 30 seconds
-            setInterval(refreshNowPlaying, 30000);
+            // Auto-refresh now playing every 15 seconds for faster updates
+            setInterval(refreshNowPlaying, 15000);
 
             // Initialize theme when page loads
             document.addEventListener('DOMContentLoaded', initTheme);
