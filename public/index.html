@@ -1,317 +1,631 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="en" data-theme="dark">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>🎵 Suno Discord Bot</title>
+    <title>3AM VERIFIED - Enhanced Music Bot</title>
     <style>
         * {
             margin: 0;
             padding: 0;
             box-sizing: border-box;
         }
-        
-        body {
-            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            min-height: 100vh;
-            color: #333;
+
+        :root {
+            --bg-primary: linear-gradient(-45deg, #667eea, #764ba2, #f093fb, #f5576c, #4facfe, #00f2fe);
+            --card-bg: rgba(255, 255, 255, 0.1);
+            --text-primary: #ffffff;
+            --text-secondary: rgba(255, 255, 255, 0.8);
+            --border-color: rgba(255, 255, 255, 0.2);
         }
-        
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: var(--bg-primary);
+            background-size: 400% 400%;
+            animation: gradientShift 15s ease infinite;
+            color: var(--text-primary);
+            min-height: 100vh;
+            position: relative;
+            overflow-x: hidden;
+            transition: background 0.5s ease;
+        }
+
+        @keyframes gradientShift {
+            0% { background-position: 0% 50%; }
+            50% { background-position: 100% 50%; }
+            100% { background-position: 0% 50%; }
+        }
+
+        @keyframes floatUp {
+            0% {
+                transform: translateY(100vh) rotate(0deg);
+                opacity: 0;
+            }
+            10% {
+                opacity: 1;
+            }
+            90% {
+                opacity: 1;
+            }
+            100% {
+                transform: translateY(-100vh) rotate(360deg);
+                opacity: 0;
+            }
+        }
+
+        @keyframes pulse {
+            0%, 100% {
+                box-shadow: 0 0 0 0 rgba(138, 43, 226, 0.7);
+            }
+            50% {
+                box-shadow: 0 0 0 20px rgba(138, 43, 226, 0);
+            }
+        }
+
+        .floating-particles {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+            z-index: 1;
+        }
+
+        .particle {
+            position: absolute;
+            width: 4px;
+            height: 4px;
+            background: rgba(255, 255, 255, 0.6);
+            border-radius: 50%;
+            animation: floatUp 20s linear infinite;
+        }
+
+        .particle:nth-child(2n) {
+            width: 6px;
+            height: 6px;
+            animation-duration: 25s;
+        }
+
+        .particle:nth-child(3n) {
+            width: 3px;
+            height: 3px;
+            animation-duration: 15s;
+            background: rgba(138, 43, 226, 0.8);
+        }
+
         .container {
-            max-width: 800px;
+            max-width: 1400px;
             margin: 0 auto;
             padding: 20px;
+            position: relative;
+            z-index: 2;
         }
-        
+
         .header {
             text-align: center;
+            margin-bottom: 40px;
+            position: relative;
+        }
+
+        .logo-container {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            margin-bottom: 20px;
+            position: relative;
+            z-index: 10;
+        }
+
+        .logo-glow-outer {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            width: 300px;
+            height: 300px;
+            border-radius: 50%;
+            background: radial-gradient(circle, rgba(138, 43, 226, 0.6) 0%, rgba(138, 43, 226, 0.3) 30%, rgba(138, 43, 226, 0.1) 60%, transparent 100%);
+            animation: logoGlowPulse 3s ease-in-out infinite;
+            z-index: 1;
+        }
+
+        .logo-glow-middle {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            width: 200px;
+            height: 200px;
+            border-radius: 50%;
+            background: radial-gradient(circle, rgba(138, 43, 226, 0.8) 0%, rgba(138, 43, 226, 0.4) 50%, transparent 100%);
+            animation: logoGlowPulse 3s ease-in-out infinite 0.5s;
+            z-index: 2;
+        }
+
+        .logo-glow-inner {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            width: 120px;
+            height: 120px;
+            border-radius: 50%;
+            background: radial-gradient(circle, rgba(138, 43, 226, 1) 0%, rgba(138, 43, 226, 0.6) 70%, transparent 100%);
+            animation: logoGlowPulse 3s ease-in-out infinite 1s;
+            z-index: 3;
+        }
+
+        @keyframes logoGlowPulse {
+            0%, 100% {
+                transform: translate(-50%, -50%) scale(1);
+                opacity: 0.8;
+            }
+            50% {
+                transform: translate(-50%, -50%) scale(1.2);
+                opacity: 1;
+            }
+        }
+
+        .logo-circle {
+            width: 100px;
+            height: 100px;
+            border-radius: 50%;
+            border: 3px solid #8a2be2;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            background: rgba(0, 0, 0, 0.3);
+            backdrop-filter: blur(10px);
+            position: relative;
+            z-index: 4;
+            animation: logoInnerPulse 2s ease-in-out infinite;
+        }
+
+        @keyframes logoInnerPulse {
+            0%, 100% {
+                transform: scale(1);
+                border-color: #8a2be2;
+                box-shadow: 0 0 20px rgba(138, 43, 226, 0.5);
+            }
+            50% {
+                transform: scale(1.05);
+                border-color: #00ffff;
+                box-shadow: 0 0 30px rgba(138, 43, 226, 0.8);
+            }
+        }
+
+        .logo-text {
+            font-size: 14px;
+            font-weight: bold;
+            text-align: center;
+            line-height: 1.1;
+        }
+
+        .logo-3am {
+            color: #00ffff;
+            text-shadow: 0 0 10px #00ffff;
+        }
+
+        .logo-verified {
+            color: #8a2be2;
+            font-size: 10px;
+            text-shadow: 0 0 8px #8a2be2;
+        }
+
+        .logo-checkmark {
+            width: 20px;
+            height: 20px;
+            background: #00ffff;
+            border-radius: 3px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-top: 5px;
+            box-shadow: 0 0 10px rgba(0, 255, 255, 0.5);
+        }
+
+        .logo-checkmark::after {
+            content: '✓';
+            color: #000;
+            font-weight: bold;
+            font-size: 12px;
+        }
+
+        .dashboard-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
+            gap: 25px;
             margin-bottom: 30px;
-            color: white;
         }
-        
-        .header h1 {
-            font-size: 2.5rem;
-            margin-bottom: 10px;
-            text-shadow: 2px 2px 4px rgba(0,0,0,0.3);
+
+        .card {
+            background: var(--card-bg);
+            border-radius: 20px;
+            padding: 25px;
+            backdrop-filter: blur(15px);
+            border: 1px solid var(--border-color);
+            transition: all 0.3s ease;
+            position: relative;
+            overflow: hidden;
         }
-        
-        .status {
+
+        .card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.1), transparent);
+            transition: left 0.5s;
+        }
+
+        .card:hover::before {
+            left: 100%;
+        }
+
+        .card:hover {
+            transform: translateY(-5px);
+            border-color: rgba(138, 43, 226, 0.5);
+            box-shadow: 0 10px 30px rgba(138, 43, 226, 0.2);
+        }
+
+        .card-header {
+            display: flex;
+            align-items: center;
+            margin-bottom: 20px;
+            gap: 10px;
+        }
+
+        .card-icon {
+            font-size: 24px;
+            padding: 8px;
+            border-radius: 10px;
+            background: rgba(138, 43, 226, 0.2);
+        }
+
+        .card-title {
+            font-size: 18px;
+            font-weight: 600;
+            color: var(--text-primary);
+        }
+
+        .now-playing {
+            background: linear-gradient(135deg, rgba(138, 43, 226, 0.2), rgba(0, 255, 255, 0.1));
+            border: 2px solid rgba(138, 43, 226, 0.3);
+        }
+
+        .song-info {
+            margin-bottom: 15px;
+        }
+
+        .song-title {
+            font-size: 20px;
+            font-weight: bold;
+            margin-bottom: 8px;
+            color: #00ffff;
+            text-shadow: 0 0 10px rgba(0, 255, 255, 0.5);
+        }
+
+        .song-artist {
+            font-size: 16px;
+            color: var(--text-secondary);
+            margin-bottom: 8px;
+        }
+
+        .song-status {
             display: inline-flex;
             align-items: center;
             gap: 8px;
-            background: rgba(34, 197, 94, 0.9);
-            padding: 8px 16px;
-            border-radius: 20px;
+            padding: 6px 12px;
+            border-radius: 15px;
+            font-size: 14px;
             font-weight: 600;
-            color: white;
         }
-        
-        .card {
-            background: white;
-            border-radius: 16px;
-            padding: 24px;
-            margin-bottom: 20px;
-            box-shadow: 0 8px 32px rgba(0,0,0,0.1);
+
+        .status-live {
+            background: rgba(34, 197, 94, 0.2);
+            color: #22c55e;
+            border: 1px solid rgba(34, 197, 94, 0.3);
         }
-        
+
+        .status-waiting {
+            background: rgba(251, 191, 36, 0.2);
+            color: #fbbf24;
+            border: 1px solid rgba(251, 191, 36, 0.3);
+        }
+
+        .form-container {
+            background: rgba(255, 255, 255, 0.05);
+            border-radius: 15px;
+            padding: 20px;
+            margin-top: 20px;
+        }
+
         .form-group {
             margin-bottom: 20px;
         }
-        
-        label {
+
+        .form-group label {
             display: block;
             margin-bottom: 8px;
             font-weight: 600;
-            color: #374151;
+            color: var(--text-primary);
         }
-        
-        input, textarea {
+
+        .form-group input {
             width: 100%;
-            padding: 12px;
-            border: 2px solid #e5e7eb;
-            border-radius: 8px;
+            padding: 12px 16px;
+            border: 2px solid var(--border-color);
+            border-radius: 10px;
+            background: rgba(255, 255, 255, 0.1);
+            color: var(--text-primary);
             font-size: 16px;
-            transition: border-color 0.3s;
+            transition: all 0.3s ease;
         }
-        
-        input:focus, textarea:focus {
+
+        .form-group input:focus {
             outline: none;
-            border-color: #667eea;
-            box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+            border-color: rgba(138, 43, 226, 0.6);
+            box-shadow: 0 0 0 3px rgba(138, 43, 226, 0.2);
         }
-        
-        .button-group {
-            display: flex;
-            gap: 12px;
-            flex-wrap: wrap;
+
+        .form-group input::placeholder {
+            color: rgba(255, 255, 255, 0.5);
         }
-        
-        button {
-            flex: 1;
+
+        .btn {
             padding: 12px 24px;
             border: none;
-            border-radius: 8px;
+            border-radius: 10px;
             font-weight: 600;
             font-size: 16px;
             cursor: pointer;
-            transition: all 0.3s;
-            min-width: 140px;
+            transition: all 0.3s ease;
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
         }
-        
+
         .btn-primary {
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            background: linear-gradient(135deg, #8a2be2, #4facfe);
             color: white;
         }
-        
-        .btn-secondary {
-            background: #f3f4f6;
-            color: #374151;
-        }
-        
-        .btn-extract {
-            background: linear-gradient(135deg, #10b981 0%, #059669 100%);
-            color: white;
-        }
-        
-        button:hover {
+
+        .btn-primary:hover {
             transform: translateY(-2px);
-            box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+            box-shadow: 0 8px 25px rgba(138, 43, 226, 0.4);
         }
-        
-        .loading {
-            display: none;
+
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 15px;
+            margin-top: 20px;
+        }
+
+        .stat-item {
+            background: rgba(255, 255, 255, 0.05);
+            padding: 15px;
+            border-radius: 10px;
             text-align: center;
-            padding: 20px;
-            color: #6b7280;
         }
-        
-        .message {
-            padding: 12px;
-            border-radius: 8px;
-            margin-bottom: 20px;
-            display: none;
+
+        .stat-value {
+            font-size: 24px;
+            font-weight: bold;
+            color: #00ffff;
+            text-shadow: 0 0 10px rgba(0, 255, 255, 0.5);
         }
-        
-        .message.success {
-            background: #d1fae5;
-            color: #065f46;
-            border: 1px solid #a7f3d0;
+
+        .stat-label {
+            font-size: 14px;
+            color: var(--text-secondary);
+            margin-top: 5px;
         }
-        
-        .message.error {
-            background: #fee2e2;
-            color: #991b1b;
-            border: 1px solid #fca5a5;
-        }
-        
+
         @media (max-width: 768px) {
             .container {
                 padding: 15px;
             }
-            
-            .header h1 {
-                font-size: 2rem;
+            .dashboard-grid {
+                grid-template-columns: 1fr;
+                gap: 20px;
             }
-            
-            .button-group {
-                flex-direction: column;
+            .logo-glow-outer {
+                width: 200px;
+                height: 200px;
             }
-            
-            button {
-                min-width: auto;
+            .logo-glow-middle {
+                width: 140px;
+                height: 140px;
+            }
+            .logo-circle {
+                width: 80px;
+                height: 80px;
+            }
+            .logo-text {
+                font-size: 12px;
             }
         }
     </style>
 </head>
 <body>
+    <div class="floating-particles"></div>
+    
     <div class="container">
         <div class="header">
-            <h1>🎵 Suno Discord Bot</h1>
-            <div class="status">
-                <span>●</span>
-                Ready
+            <div class="logo-container">
+                <div class="logo-glow-outer"></div>
+                <div class="logo-glow-middle"></div>
+                <div class="logo-glow-inner"></div>
+                <div class="logo-circle">
+                    <div class="logo-text">
+                        <div class="logo-3am">3AM</div>
+                        <div class="logo-verified">VERIFIED</div>
+                    </div>
+                    <div class="logo-checkmark"></div>
+                </div>
             </div>
         </div>
-        
-        <div class="message" id="message"></div>
-        
-        <div class="card">
-            <h2 style="margin-bottom: 20px; color: #374151;">Post New Song</h2>
-            
-            <form id="songForm">
-                <div class="form-group">
-                    <label for="url">Suno Song URL *</label>
-                    <input type="url" id="url" name="url" placeholder="https://suno.com/song/..." required>
+
+        <div class="dashboard-grid">
+            <div class="card now-playing">
+                <div class="card-header">
+                    <div class="card-icon">🎵</div>
+                    <div class="card-title">NOW PLAYING</div>
                 </div>
-                
-                <div class="form-group">
-                    <label for="title">Song Title *</label>
-                    <input type="text" id="title" name="title" placeholder="Enter song title or auto-extract" required>
+                <div class="song-info">
+                    <div class="song-artist" id="current-artist">Listening for music...</div>
+                    <div class="song-title" id="current-song">Waiting for track info...</div>
+                    <div class="song-status status-waiting" id="current-status">
+                        <span>🔴</span>
+                        <span id="status-text">Live</span>
+                    </div>
                 </div>
-                
-                <div class="form-group">
-                    <label for="description">Description (Optional)</label>
-                    <textarea id="description" name="description" rows="3" placeholder="Add a custom description or let AI generate one"></textarea>
+            </div>
+
+            <div class="card">
+                <div class="card-header">
+                    <div class="card-icon">📊</div>
+                    <div class="card-title">Live Music Stream</div>
                 </div>
-                
-                <div class="button-group">
-                    <button type="button" class="btn-extract" onclick="extractSong()">🎯 Auto-Extract</button>
-                    <button type="submit" class="btn-primary">🚀 Post Song</button>
-                    <button type="submit" class="btn-secondary" onclick="submitWithAI(event)">✨ Post with AI</button>
+                <div class="stats-grid">
+                    <div class="stat-item">
+                        <div class="stat-value" id="songs-today">0</div>
+                        <div class="stat-label">Songs Today</div>
+                    </div>
+                    <div class="stat-item">
+                        <div class="stat-value" id="total-posts">0</div>
+                        <div class="stat-label">Total Posts</div>
+                    </div>
                 </div>
-            </form>
-        </div>
-        
-        <div class="loading" id="loading">
-            <div>⏳ Processing your request...</div>
+            </div>
+
+            <div class="card">
+                <div class="card-header">
+                    <div class="card-icon">🎯</div>
+                    <div class="card-title">Premium Suno Monitoring</div>
+                </div>
+                <div class="form-container">
+                    <div class="form-group">
+                        <label for="suno-url">Suno Song URL</label>
+                        <input type="url" id="suno-url" placeholder="https://suno.com/song/...">
+                    </div>
+                    <button class="btn btn-primary" onclick="postSunoSong()">
+                        <span>🚀</span>
+                        Post to Discord
+                    </button>
+                </div>
+            </div>
+
+            <div class="card">
+                <div class="card-header">
+                    <div class="card-icon">⚡</div>
+                    <div class="card-title">Active Monitoring Status</div>
+                </div>
+                <div class="stats-grid">
+                    <div class="stat-item">
+                        <div class="stat-value" id="bot-status">Online</div>
+                        <div class="stat-label">Bot Status</div>
+                    </div>
+                    <div class="stat-item">
+                        <div class="stat-value" id="last-check">Just now</div>
+                        <div class="stat-label">Last Check</div>
+                    </div>
+                </div>
+            </div>
         </div>
     </div>
-    
+
     <script>
-        function showMessage(text, type) {
-            const message = document.getElementById('message');
-            message.textContent = text;
-            message.className = 'message ' + type;
-            message.style.display = 'block';
-            setTimeout(() => {
-                message.style.display = 'none';
-            }, 5000);
-        }
-        
-        function showLoading(show) {
-            document.getElementById('loading').style.display = show ? 'block' : 'none';
-        }
-        
-        async function extractSong() {
-            const url = document.getElementById('url').value;
-            if (!url) {
-                showMessage('Please enter a Suno URL first', 'error');
-                return;
-            }
+        // Create floating particles
+        function createParticles() {
+            const container = document.querySelector('.floating-particles');
+            const particleCount = 50;
             
-            showLoading(true);
+            for (let i = 0; i < particleCount; i++) {
+                const particle = document.createElement('div');
+                particle.className = 'particle';
+                particle.style.left = Math.random() * 100 + '%';
+                particle.style.animationDelay = Math.random() * 20 + 's';
+                particle.style.animationDuration = (15 + Math.random() * 10) + 's';
+                container.appendChild(particle);
+            }
+        }
+
+        // Fetch current song data
+        async function fetchCurrentSong() {
             try {
-                const response = await fetch('/extract-song', {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ url })
-                });
-                
+                const response = await fetch('/api/current-song');
                 const data = await response.json();
-                if (data.title) {
-                    document.getElementById('title').value = data.title;
-                    showMessage('Song title extracted successfully!', 'success');
+                
+                if (data.success) {
+                    document.getElementById('current-artist').textContent = `Artist: ${data.artist}`;
+                    document.getElementById('current-song').textContent = `Song: ${data.song}`;
+                    document.getElementById('current-status').className = 'song-status status-live';
+                    document.getElementById('status-text').textContent = data.status || 'Live';
                 } else {
-                    showMessage('Could not extract title automatically', 'error');
+                    document.getElementById('current-artist').textContent = 'Artist: Connection error';
+                    document.getElementById('current-song').textContent = 'Song: Unable to fetch song info';
+                    document.getElementById('current-status').className = 'song-status status-waiting';
+                    document.getElementById('status-text').textContent = 'Waiting';
                 }
             } catch (error) {
-                showMessage('Failed to extract song data', 'error');
+                console.error('Error fetching current song:', error);
+                document.getElementById('current-artist').textContent = 'Artist: Connection error';
+                document.getElementById('current-song').textContent = 'Song: Unable to fetch song info';
+                document.getElementById('current-status').className = 'song-status status-waiting';
+                document.getElementById('status-text').textContent = 'Offline';
             }
-            showLoading(false);
         }
-        
-        function submitWithAI(event) {
-            event.preventDefault();
-            document.getElementById('songForm').dispatchEvent(new Event('submit'));
-            document.querySelector('input[name="useAI"]')?.remove();
-            const input = document.createElement('input');
-            input.type = 'hidden';
-            input.name = 'useAI';
-            input.value = 'true';
-            document.getElementById('songForm').appendChild(input);
-        }
-        
-        document.getElementById('songForm').addEventListener('submit', async (e) => {
-            e.preventDefault();
-            
-            const formData = new FormData(e.target);
-            const data = Object.fromEntries(formData);
-            
-            if (!data.url || !data.title) {
-                showMessage('URL and title are required', 'error');
+
+        // Post Suno song
+        async function postSunoSong() {
+            const url = document.getElementById('suno-url').value;
+            if (!url) {
+                alert('Please enter a Suno URL');
                 return;
             }
-            
-            showLoading(true);
+
             try {
-                const response = await fetch('/post-song', {
+                const response = await fetch('/post-suno', {
                     method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify(data)
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({ url }),
                 });
-                
-                const result = await response.json();
-                if (result.success) {
-                    showMessage(result.message, 'success');
-                    setTimeout(() => location.reload(), 2000);
+
+                const data = await response.json();
+                if (data.success) {
+                    alert('Song posted successfully!');
+                    document.getElementById('suno-url').value = '';
                 } else {
-                    showMessage(result.error || 'Failed to post song', 'error');
+                    alert('Failed to post song: ' + (data.error || 'Unknown error'));
                 }
             } catch (error) {
-                showMessage('Network error occurred', 'error');
+                alert('Network error occurred');
             }
-            showLoading(false);
-        });
-        
-        async function shareAgain(songId) {
-            showLoading(true);
-            try {
-                const response = await fetch(`/share-again/${songId}`, {
-                    method: 'POST'
-                });
-                
-                const result = await response.json();
-                if (result.success) {
-                    showMessage(result.message, 'success');
-                } else {
-                    showMessage(result.error || 'Failed to share song', 'error');
-                }
-            } catch (error) {
-                showMessage('Network error occurred', 'error');
-            }
-            showLoading(false);
         }
+
+        // Update timestamps
+        function updateTimestamps() {
+            const now = new Date();
+            document.getElementById('last-check').textContent = now.toLocaleTimeString();
+        }
+
+        // Initialize
+        createParticles();
+        fetchCurrentSong();
+        updateTimestamps();
+
+        // Auto-refresh current song every 15 seconds
+        setInterval(fetchCurrentSong, 15000);
+        setInterval(updateTimestamps, 60000);
     </script>
 </body>
 </html>
