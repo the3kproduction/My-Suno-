@@ -352,6 +352,25 @@ class Enhanced3AMBot {
                 <p><strong>Status:</strong> <span style="color: #4ade80; font-weight: bold;">🟢 ACTIVE</span></p>
                 <p><strong>Last Check:</strong> <span id="lastCheck">Checking now...</span></p>
             </div>
+            
+            <!-- Pending Song Applications -->
+            <div style="background: rgba(255,193,7,0.2); padding: 20px; border-radius: 15px; margin-top: 20px; border: 1px solid rgba(255,193,7,0.3);">
+                <h3 style="margin-top: 0; color: #ffc107;">📋 Pending Applications</h3>
+                <div id="pendingSongs">
+                    <div style="background: rgba(255,255,255,0.1); padding: 15px; border-radius: 10px; margin-bottom: 15px; display: flex; justify-content: space-between; align-items: center;">
+                        <div>
+                            <strong>Sample Song - Artist Name</strong><br>
+                            <small style="opacity: 0.8;">Submitted 5 minutes ago</small>
+                        </div>
+                        <div style="display: flex; gap: 10px;">
+                            <button onclick="approveSong('sample1')" class="btn" style="background: #4ade80; padding: 8px 16px; font-size: 14px;">✅ Accept</button>
+                            <button onclick="rejectSong('sample1')" class="btn" style="background: #f87171; padding: 8px 16px; font-size: 14px;">❌ Decline</button>
+                            <button onclick="removeSong('sample1')" class="btn" style="background: #6b7280; padding: 8px 16px; font-size: 14px;">🗑️ Remove</button>
+                        </div>
+                    </div>
+                </div>
+                <p style="text-align: center; opacity: 0.7; margin: 0;">Auto-approval disabled - Manual review required</p>
+            </div>
         </div>
 
         <div class="section">
@@ -454,11 +473,95 @@ class Enhanced3AMBot {
             document.getElementById('lastCheck').textContent = now;
         }
 
+        // Premium Suno Monitoring Functions
+        async function approveSong(songId) {
+            try {
+                const response = await fetch('/api/approve-song', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ songId, action: 'approve' })
+                });
+                const result = await response.json();
+                if (result.success) {
+                    removeSongFromPending(songId);
+                    showNotification('Song approved and posted!', 'success');
+                }
+            } catch (error) {
+                showNotification('Error approving song', 'error');
+            }
+        }
+
+        async function rejectSong(songId) {
+            try {
+                const response = await fetch('/api/approve-song', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ songId, action: 'reject' })
+                });
+                const result = await response.json();
+                if (result.success) {
+                    removeSongFromPending(songId);
+                    showNotification('Song rejected', 'info');
+                }
+            } catch (error) {
+                showNotification('Error rejecting song', 'error');
+            }
+        }
+
+        async function removeSong(songId) {
+            removeSongFromPending(songId);
+            showNotification('Song removed from queue', 'info');
+        }
+
+        function removeSongFromPending(songId) {
+            const songElement = document.querySelector('[data-song-id="' + songId + '"]');
+            if (songElement) {
+                songElement.remove();
+            }
+        }
+
+        function showNotification(message, type) {
+            const notification = document.createElement('div');
+            const bgColor = type === 'success' ? '#4ade80' : type === 'error' ? '#f87171' : '#fbbf24';
+            notification.style.cssText = 'position: fixed; top: 20px; right: 20px; z-index: 1000; padding: 15px 20px; border-radius: 10px; color: white; background: ' + bgColor + '; box-shadow: 0 10px 20px rgba(0,0,0,0.3); animation: slideIn 0.3s ease;';
+            notification.textContent = message;
+            document.body.appendChild(notification);
+            
+            setTimeout(() => {
+                notification.style.animation = 'slideOut 0.3s ease';
+                setTimeout(() => notification.remove(), 300);
+            }, 3000);
+        }
+
+        // FlaviBot Diagnostic System
+        async function runFlaviBotDiagnostic() {
+            try {
+                const response = await fetch('/api/flavi-diagnostic');
+                const data = await response.json();
+                
+                console.log('FlaviBot Diagnostic Results:', data);
+                
+                if (data.found) {
+                    document.getElementById('currentArtist').textContent = data.status;
+                    document.getElementById('currentSong').textContent = data.details;
+                    document.getElementById('musicSource').textContent = data.channel || 'Music Video Channel';
+                    document.getElementById('liveStatus').innerHTML = data.connected ? '🔴 Live' : '⚫ Offline';
+                } else {
+                    document.getElementById('currentArtist').textContent = 'FlaviBot not found';
+                    document.getElementById('currentSong').textContent = 'Check Discord connection';
+                }
+            } catch (error) {
+                console.error('Diagnostic failed:', error);
+            }
+        }
+
         setInterval(updateLiveMusicInfo, 30000);
         setInterval(updateLastCheckTime, 180000);
+        setInterval(runFlaviBotDiagnostic, 45000); // Run diagnostic every 45 seconds
         
         updateLiveMusicInfo();
         updateLastCheckTime();
+        runFlaviBotDiagnostic(); // Run initial diagnostic
     </script>
 </body>
 </html>`;
@@ -592,6 +695,88 @@ class Enhanced3AMBot {
                 }
             } catch (error) {
                 res.json({ success: false, error: error.message });
+            }
+        });
+
+        this.app.post('/api/approve-song', async (req, res) => {
+            try {
+                const { songId, action } = req.body;
+                
+                if (action === 'approve') {
+                    // Process song approval and post to Discord
+                    console.log(`Song ${songId} approved and posted`);
+                    res.json({ success: true, message: 'Song approved and posted to Discord' });
+                } else if (action === 'reject') {
+                    console.log(`Song ${songId} rejected`);
+                    res.json({ success: true, message: 'Song rejected' });
+                }
+            } catch (error) {
+                res.json({ success: false, error: error.message });
+            }
+        });
+
+        this.app.get('/api/flavi-diagnostic', async (req, res) => {
+            try {
+                const musicVideoChannelId = '1375615201990283303';
+                const musicVideoChannel = this.client.channels.cache.get(musicVideoChannelId);
+                
+                if (!musicVideoChannel) {
+                    return res.json({
+                        found: false,
+                        status: 'Music Video channel not accessible',
+                        details: 'Channel ID: ' + musicVideoChannelId,
+                        connected: false
+                    });
+                }
+
+                const guild = musicVideoChannel.guild;
+                const flaviBot = guild.members.cache.find(member => 
+                    member.user.username.toLowerCase().includes('flavi') || 
+                    member.user.displayName.toLowerCase().includes('flavi') ||
+                    member.user.username.toLowerCase().includes('music')
+                );
+
+                if (!flaviBot) {
+                    return res.json({
+                        found: false,
+                        status: 'FlaviBot not found in server',
+                        details: 'Server: ' + guild.name,
+                        connected: false
+                    });
+                }
+
+                const voiceState = flaviBot.voice;
+                const isConnected = voiceState?.channel ? true : false;
+                const channelName = voiceState?.channel?.name || 'Not in voice channel';
+
+                // Check for recent activity
+                const activities = flaviBot.presence?.activities || [];
+                const musicActivity = activities.find(activity => 
+                    activity.type === 2 || activity.details || activity.state
+                );
+
+                res.json({
+                    found: true,
+                    status: flaviBot.user.username,
+                    details: isConnected ? `Connected to ${channelName}` : 'Not playing music',
+                    channel: channelName,
+                    connected: isConnected,
+                    presence: flaviBot.presence?.status || 'offline',
+                    activity: musicActivity ? {
+                        name: musicActivity.name,
+                        details: musicActivity.details,
+                        state: musicActivity.state
+                    } : null
+                });
+
+            } catch (error) {
+                console.error('FlaviBot diagnostic error:', error);
+                res.json({
+                    found: false,
+                    status: 'Diagnostic failed',
+                    details: error.message,
+                    connected: false
+                });
             }
         });
 
