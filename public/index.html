@@ -784,6 +784,32 @@
             .logo-text {
                 font-size: 12px;
             }
+            
+            /* Mobile text improvements - make text black for better readability */
+            .card-title,
+            .card-text,
+            .form-group label,
+            .stat-label,
+            .stat-sublabel,
+            .detail-row,
+            .feature-description p,
+            .song-artist,
+            .song-title,
+            .song-status,
+            .monitoring-details,
+            .stats-grid,
+            h1, h2, h3, h4, h5, h6,
+            p, span, div {
+                color: #000000 !important;
+                text-shadow: 0 0 3px rgba(255,255,255,0.8) !important;
+            }
+            
+            /* Keep buttons readable */
+            .btn, .btn-primary, .btn-control {
+                background: rgba(255,255,255,0.9) !important;
+                color: #000000 !important;
+                border: 2px solid #000000 !important;
+            }
         }
     </style>
 </head>

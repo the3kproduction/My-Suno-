@@ -1,0 +1,58 @@
+==> Cloning from https://github.com/the3kproduction/My-Suno-
+==> Checking out commit 5d5915eb1b5a1857c5598534c8d062407caa16f0 in branch main
+==> Downloading cache...
+==> Transferred 342MB in 8s. Extraction took 7s.
+==> Using Ruby version 3.3.6 (default)
+==> Docs on specifying a Ruby version: https://render.com/docs/ruby-version
+==> Using Ruby version 3.3.6 (default)
+==> Docs on specifying a Ruby version: https://render.com/docs/ruby-version
+==> Running build command 'npm install'...
+==> Using Node.js version 22.14.0 (default)
+==> Docs on specifying a Node.js version: https://render.com/docs/node-version
+==> Using Bun version 1.1.0 (default)
+==> Docs on specifying a bun version: https://render.com/docs/bun-version
+up to date, audited 325 packages in 1s
+55 packages are looking for funding
+  run `npm fund` for details
+4 low severity vulnerabilities
+To address issues that do not require attention, run:
+  npm audit fix
+To address all issues (including breaking changes), run:
+  npm audit fix --force
+Run `npm audit` for details.
+==> Uploading build...
+==> Uploaded in 4.9s. Compression took 3.0s
+==> Build successful 🎉
+==> Deploying...
+==> Running 'node render_ready_bot.js'
+/opt/render/project/src/render_ready_bot.js:1
+const { Client, GatewayIntentBits, SlashCommandBuilder, EmbedBuilder, ChannelType, require('dotenv').config();
+                                                                                   ^^^^^^^
+SyntaxError: Invalid destructuring assignment target
+    at wrapSafe (node:internal/modules/cjs/loader:1486:18)
+    at Module._compile (node:internal/modules/cjs/loader:1528:20)
+    at Object..js (node:internal/modules/cjs/loader:1706:10)
+    at Module.load (node:internal/modules/cjs/loader:1289:32)
+    at Function._load (node:internal/modules/cjs/loader:1108:12)
+    at TracingChannel.traceSync (node:diagnostics_channel:322:14)
+    at wrapModuleLoad (node:internal/modules/cjs/loader:220:24)
+    at Function.executeUserEntryPoint [as runMain] (node:internal/modules/run_main:170:5)
+    at node:internal/main/run_main_module:36:49
+Node.js v22.14.0
+==> Exited with status 1
+==> Common ways to troubleshoot your deploy: https://render.com/docs/troubleshooting-deploys
+==> Running 'node render_ready_bot.js'
+/opt/render/project/src/render_ready_bot.js:1
+const { Client, GatewayIntentBits, SlashCommandBuilder, EmbedBuilder, ChannelType, require('dotenv').config();
+                                                                                   ^^^^^^^
+SyntaxError: Invalid destructuring assignment target
+    at wrapSafe (node:internal/modules/cjs/loader:1486:18)
+    at Module._compile (node:internal/modules/cjs/loader:1528:20)
+    at Object..js (node:internal/modules/cjs/loader:1706:10)
+    at Module.load (node:internal/modules/cjs/loader:1289:32)
+    at Function._load (node:internal/modules/cjs/loader:1108:12)
+    at TracingChannel.traceSync (node:diagnostics_channel:322:14)
+    at wrapModuleLoad (node:internal/modules/cjs/loader:220:24)
+    at Function.executeUserEntryPoint [as runMain] (node:internal/modules/run_main:170:5)
+    at node:internal/main/run_main_module:36:49
+Node.js v22.14.0
