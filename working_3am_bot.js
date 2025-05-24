@@ -234,49 +234,105 @@ class Working3AMBot {
     }
 
     startMusicMonitoring() {
-        console.log('🎵 Starting music monitoring for FlaviBot messages...');
+        console.log('🎵 Starting music monitoring...');
         
-        // Listen for messages from FlaviBot
-        this.client.on('messageCreate', (message) => {
-            // Check if it's from FlaviBot
-            if (message.author.username && 
-                (message.author.username.toLowerCase().includes('flavi') || 
-                 message.author.displayName?.toLowerCase().includes('flavi'))) {
-                
-                // Look for "Now playing" messages with embeds
-                if (message.embeds && message.embeds.length > 0) {
+        // Check music channel every 10 seconds for current playing song
+        setInterval(async () => {
+            await this.checkCurrentMusic();
+        }, 10000);
+        
+        // Initial check
+        this.checkCurrentMusic();
+    }
+
+    async checkCurrentMusic() {
+        try {
+            // Look for the music video channel
+            const musicChannelId = '1375615201990283303'; // MUSIC VIDEO channel
+            const musicChannel = this.client.channels.cache.get(musicChannelId);
+            
+            if (!musicChannel) {
+                console.log('Music channel not found, checking all channels...');
+                // Search all guilds for FlaviBot activity
+                for (const guild of this.client.guilds.cache.values()) {
+                    const channels = guild.channels.cache.filter(ch => ch.type === 0); // Text channels
+                    for (const channel of channels.values()) {
+                        const lastMessage = await this.getLastMusicMessage(channel);
+                        if (lastMessage) {
+                            this.updateCurrentSong(lastMessage);
+                            return;
+                        }
+                    }
+                }
+                return;
+            }
+
+            // Get the latest FlaviBot message with music info
+            const lastMessage = await this.getLastMusicMessage(musicChannel);
+            if (lastMessage) {
+                this.updateCurrentSong(lastMessage);
+            }
+            
+        } catch (error) {
+            console.error('Error checking current music:', error);
+        }
+    }
+
+    async getLastMusicMessage(channel) {
+        try {
+            const messages = await channel.messages.fetch({ limit: 50 });
+            
+            // Look for FlaviBot messages with embeds
+            for (const message of messages.values()) {
+                if (message.author.username && 
+                    message.author.username.toLowerCase().includes('flavi') &&
+                    message.embeds && message.embeds.length > 0) {
+                    
                     const embed = message.embeds[0];
                     
-                    // Check if it contains music info
-                    if (embed.title && embed.title.includes('Now playing')) {
-                        console.log('🎵 Found FlaviBot "Now playing" message:', embed);
-                        
-                        // Extract song info from embed
-                        let song = "Unknown Song";
-                        let artist = "Unknown Artist";
-                        
-                        if (embed.description) {
-                            // Parse format like "Lreds - Tide - 02:56"
-                            const parts = embed.description.split(' - ');
-                            if (parts.length >= 2) {
-                                artist = parts[0].trim();
-                                song = parts[1].trim();
-                            }
-                        }
-                        
-                        // Update current song
-                        this.currentSong = {
-                            artist: artist,
-                            song: song,
-                            source: "FlaviBot Player",
-                            lastUpdated: Date.now()
-                        };
-                        
-                        console.log(`🎵 Updated now playing: ${artist} - ${song}`);
+                    // Check if it's a music message (has song info)
+                    if (embed.description && 
+                        (embed.description.includes(' - ') || embed.title?.includes('Now playing'))) {
+                        return message;
                     }
                 }
             }
-        });
+            return null;
+        } catch (error) {
+            console.error('Error fetching messages:', error);
+            return null;
+        }
+    }
+
+    updateCurrentSong(message) {
+        const embed = message.embeds[0];
+        let song = "Unknown Song";
+        let artist = "Unknown Artist";
+        
+        if (embed.description) {
+            // Parse various formats: "Artist - Song - Duration" or "Artist - Song"
+            const description = embed.description.replace(/\*\*/g, ''); // Remove bold formatting
+            const parts = description.split(' - ');
+            
+            if (parts.length >= 2) {
+                artist = parts[0].trim();
+                song = parts[1].trim();
+                // Remove duration if present (like "02:56")
+                song = song.replace(/\s*\d{1,2}:\d{2}\s*$/, '').trim();
+            }
+        }
+        
+        // Only update if it's different from current
+        if (this.currentSong.artist !== artist || this.currentSong.song !== song) {
+            this.currentSong = {
+                artist: artist,
+                song: song,
+                source: "FlaviBot Player",
+                lastUpdated: Date.now()
+            };
+            
+            console.log(`🎵 Auto-detected now playing: ${artist} - ${song}`);
+        }
     }
 
     async postSunoToDiscord(title, url, description = '') {
