@@ -1,7 +1,6 @@
 const { Client, GatewayIntentBits, SlashCommandBuilder, EmbedBuilder, ChannelType, Routes } = require('discord.js');
 const { REST } = require('@discordjs/rest');
 const { joinVoiceChannel, createAudioPlayer, createAudioResource, AudioPlayerStatus, VoiceConnectionStatus } = require('@discordjs/voice');
-const ytdl = require('ytdl-core');
 const express = require('express');
 const axios = require('axios');
 const puppeteer = require('puppeteer');

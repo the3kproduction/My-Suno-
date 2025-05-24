@@ -1,9 +1,21 @@
-const { Client, GatewayIntentBits, EmbedBuilder, REST, Routes } = require('discord.js');
-const { joinVoiceChannel, createAudioPlayer, createAudioResource, AudioPlayerStatus, VoiceConnectionStatus } = require('@discordjs/voice');
-const ytdl = require('ytdl-core');
-const axios = require('axios');
-const express = require('express');
-const path = require('path');
+const {
+    Client,
+    GatewayIntentBits,
+    EmbedBuilder,
+    REST,
+    Routes,
+} = require("discord.js");
+const {
+    joinVoiceChannel,
+    createAudioPlayer,
+    createAudioResource,
+    AudioPlayerStatus,
+    VoiceConnectionStatus,
+} = require("@discordjs/voice");
+
+const axios = require("axios");
+const express = require("express");
+const path = require("path");
 
 // Enhanced Music Bot - Render Deployment Version
 class EnhancedMusicBot {
@@ -13,13 +25,13 @@ class EnhancedMusicBot {
                 GatewayIntentBits.Guilds,
                 GatewayIntentBits.GuildMessages,
                 GatewayIntentBits.GuildVoiceStates,
-                GatewayIntentBits.MessageContent
-            ]
+                GatewayIntentBits.MessageContent,
+            ],
         });
 
         this.app = express();
         this.app.use(express.json());
-        this.app.use(express.static('public'));
+        this.app.use(express.static("public"));
 
         // Playlist management for both channels
         this.currentPlaylists = {
@@ -28,245 +40,267 @@ class EnhancedMusicBot {
                 currentIndex: 0,
                 connection: null,
                 player: null,
-                isPlaying: false
+                isPlaying: false,
             },
             lyric: {
                 songs: [],
                 currentIndex: 0,
                 connection: null,
                 player: null,
-                isPlaying: false
-            }
+                isPlaying: false,
+            },
         };
 
         this.config = {
             discord: {
                 token: process.env.DISCORD_TOKEN,
-                musicVideoChannelId: '1375476962356887614',
-                lyricVideoChannelId: '1375476842261385289',
-                targetChannelId: process.env.DISCORD_CHANNEL_ID
+                musicVideoChannelId: "1375476962356887614",
+                lyricVideoChannelId: "1375476842261385289",
+                targetChannelId: process.env.DISCORD_CHANNEL_ID,
             },
             youtube: {
-                apiKey: process.env.YOUTUBE_API_KEY
+                apiKey: process.env.YOUTUBE_API_KEY,
             },
             suno: {
-                profileId: process.env.SUNO_PROFILE_ID
-            }
+                profileId: process.env.SUNO_PROFILE_ID,
+            },
         };
     }
 
     async start() {
-        console.log('🎵 Enhanced Music Bot starting...');
-        
+        console.log("🎵 Enhanced Music Bot starting...");
+
         this.setupEventHandlers();
         await this.registerSlashCommands();
         this.setupWebServer();
-        
+
         await this.client.login(this.config.discord.token);
-        console.log('🎵 Enhanced Music Bot logged in successfully');
+        console.log("🎵 Enhanced Music Bot logged in successfully");
     }
 
     setupEventHandlers() {
-        this.client.once('ready', () => {
-            console.log('🚀 Enhanced Music Bot ready!');
+        this.client.once("ready", () => {
+            console.log("🚀 Enhanced Music Bot ready!");
             console.log(`🎵 Bot logged in as ${this.client.user.tag}`);
         });
 
-        this.client.on('interactionCreate', async (interaction) => {
+        this.client.on("interactionCreate", async (interaction) => {
             if (!interaction.isChatInputCommand()) return;
             await this.handleSlashCommand(interaction);
         });
 
-        this.client.on('error', console.error);
+        this.client.on("error", console.error);
     }
 
     async registerSlashCommands() {
         const commands = [
             {
-                name: 'play',
-                description: 'Start playing music',
+                name: "play",
+                description: "Start playing music",
                 options: [
                     {
-                        name: 'channel',
-                        description: 'Choose music or lyric channel',
+                        name: "channel",
+                        description: "Choose music or lyric channel",
                         type: 3,
                         required: true,
                         choices: [
-                            { name: 'Music Videos', value: 'music' },
-                            { name: 'Lyric Videos', value: 'lyric' }
-                        ]
-                    }
-                ]
+                            { name: "Music Videos", value: "music" },
+                            { name: "Lyric Videos", value: "lyric" },
+                        ],
+                    },
+                ],
             },
             {
-                name: 'pause',
-                description: 'Pause music playback',
+                name: "pause",
+                description: "Pause music playback",
                 options: [
                     {
-                        name: 'channel',
-                        description: 'Choose music or lyric channel',
+                        name: "channel",
+                        description: "Choose music or lyric channel",
                         type: 3,
                         required: true,
                         choices: [
-                            { name: 'Music Videos', value: 'music' },
-                            { name: 'Lyric Videos', value: 'lyric' }
-                        ]
-                    }
-                ]
+                            { name: "Music Videos", value: "music" },
+                            { name: "Lyric Videos", value: "lyric" },
+                        ],
+                    },
+                ],
             },
             {
-                name: 'skip',
-                description: 'Skip to next song',
+                name: "skip",
+                description: "Skip to next song",
                 options: [
                     {
-                        name: 'channel',
-                        description: 'Choose music or lyric channel',
+                        name: "channel",
+                        description: "Choose music or lyric channel",
                         type: 3,
                         required: true,
                         choices: [
-                            { name: 'Music Videos', value: 'music' },
-                            { name: 'Lyric Videos', value: 'lyric' }
-                        ]
-                    }
-                ]
+                            { name: "Music Videos", value: "music" },
+                            { name: "Lyric Videos", value: "lyric" },
+                        ],
+                    },
+                ],
             },
             {
-                name: 'stop',
-                description: 'Stop music and leave voice channel',
+                name: "stop",
+                description: "Stop music and leave voice channel",
                 options: [
                     {
-                        name: 'channel',
-                        description: 'Choose music or lyric channel',
+                        name: "channel",
+                        description: "Choose music or lyric channel",
                         type: 3,
                         required: true,
                         choices: [
-                            { name: 'Music Videos', value: 'music' },
-                            { name: 'Lyric Videos', value: 'lyric' }
-                        ]
-                    }
-                ]
+                            { name: "Music Videos", value: "music" },
+                            { name: "Lyric Videos", value: "lyric" },
+                        ],
+                    },
+                ],
             },
             {
-                name: 'queue',
-                description: 'Show current playlist',
+                name: "queue",
+                description: "Show current playlist",
                 options: [
                     {
-                        name: 'channel',
-                        description: 'Choose music or lyric channel',
+                        name: "channel",
+                        description: "Choose music or lyric channel",
                         type: 3,
                         required: true,
                         choices: [
-                            { name: 'Music Videos', value: 'music' },
-                            { name: 'Lyric Videos', value: 'lyric' }
-                        ]
-                    }
-                ]
+                            { name: "Music Videos", value: "music" },
+                            { name: "Lyric Videos", value: "lyric" },
+                        ],
+                    },
+                ],
             },
             {
-                name: 'load',
-                description: 'Load YouTube playlist or single video',
+                name: "load",
+                description: "Load YouTube playlist or single video",
                 options: [
                     {
-                        name: 'url',
-                        description: 'YouTube playlist or video URL',
+                        name: "url",
+                        description: "YouTube playlist or video URL",
                         type: 3,
-                        required: true
+                        required: true,
                     },
                     {
-                        name: 'channel',
-                        description: 'Choose music or lyric channel',
+                        name: "channel",
+                        description: "Choose music or lyric channel",
                         type: 3,
                         required: true,
                         choices: [
-                            { name: 'Music Videos', value: 'music' },
-                            { name: 'Lyric Videos', value: 'lyric' }
-                        ]
-                    }
-                ]
-            }
+                            { name: "Music Videos", value: "music" },
+                            { name: "Lyric Videos", value: "lyric" },
+                        ],
+                    },
+                ],
+            },
         ];
 
-        const rest = new REST({ version: '10' }).setToken(this.config.discord.token);
+        const rest = new REST({ version: "10" }).setToken(
+            this.config.discord.token,
+        );
 
         try {
             // Wait for client to be ready before registering commands
             if (!this.client.application?.id) {
-                console.log('⏳ Waiting for Discord client to initialize...');
+                console.log("⏳ Waiting for Discord client to initialize...");
                 return;
             }
             await rest.put(
                 Routes.applicationCommands(this.client.application.id),
-                { body: commands }
+                { body: commands },
             );
 
-
-            console.log('🎯 Slash commands registered successfully!');
+            console.log("🎯 Slash commands registered successfully!");
         } catch (error) {
-            console.error('Error registering slash commands:', error);
+            console.error("Error registering slash commands:", error);
         }
     }
 
     async handleSlashCommand(interaction) {
         const { commandName, options } = interaction;
-        const channelType = options.getString('channel');
+        const channelType = options.getString("channel");
 
         try {
             switch (commandName) {
-                case 'play':
+                case "play":
                     if (this.currentPlaylists[channelType].songs.length === 0) {
-                        await interaction.reply('❌ No songs loaded. Use `/load` first!');
+                        await interaction.reply(
+                            "❌ No songs loaded. Use `/load` first!",
+                        );
                         return;
                     }
 
                     await this.joinVoiceChannel(channelType);
                     await this.playCurrentSong(channelType);
-                    await interaction.reply(`▶️ Playing music in ${channelType} channel!`);
+                    await interaction.reply(
+                        `▶️ Playing music in ${channelType} channel!`,
+                    );
                     break;
 
-                case 'pause':
+                case "pause":
                     this.pausePlayback(channelType);
                     await interaction.reply(`⏸️ Paused ${channelType} channel`);
                     break;
 
-                case 'skip':
+                case "skip":
                     await this.skipSong(channelType);
-                    const currentSong = this.currentPlaylists[channelType].songs[this.currentPlaylists[channelType].currentIndex];
-                    await interaction.reply(`⏭️ Skipped to: **${currentSong?.title || 'Unknown'}**`);
+                    const currentSong =
+                        this.currentPlaylists[channelType].songs[
+                            this.currentPlaylists[channelType].currentIndex
+                        ];
+                    await interaction.reply(
+                        `⏭️ Skipped to: **${currentSong?.title || "Unknown"}**`,
+                    );
                     break;
 
-                case 'stop':
+                case "stop":
                     this.stopPlayback(channelType);
                     this.leaveVoiceChannel(channelType);
-                    await interaction.reply(`⏹️ Stopped ${channelType} channel and left voice`);
+                    await interaction.reply(
+                        `⏹️ Stopped ${channelType} channel and left voice`,
+                    );
                     break;
 
-                case 'queue':
+                case "queue":
                     const queue = this.currentPlaylists[channelType];
                     if (queue.songs.length === 0) {
-                        await interaction.reply(`No songs in ${channelType} queue`);
+                        await interaction.reply(
+                            `No songs in ${channelType} queue`,
+                        );
                     } else {
-                        const queueList = queue.songs.slice(0, 10).map((song, index) => 
-                            `${index === queue.currentIndex ? '▶️' : `${index + 1}.`} ${song.title}`
-                        ).join('\n');
-                        await interaction.reply(`🎵 **${channelType} Queue:**\n\`\`\`${queueList}\`\`\``);
+                        const queueList = queue.songs
+                            .slice(0, 10)
+                            .map(
+                                (song, index) =>
+                                    `${index === queue.currentIndex ? "▶️" : `${index + 1}.`} ${song.title}`,
+                            )
+                            .join("\n");
+                        await interaction.reply(
+                            `🎵 **${channelType} Queue:**\n\`\`\`${queueList}\`\`\``,
+                        );
                     }
                     break;
 
-                case 'load':
-                    const url = options.getString('url');
+                case "load":
+                    const url = options.getString("url");
                     await interaction.deferReply();
-                    
+
                     try {
                         // Auto-join voice channel when loading content
                         await this.joinVoiceChannel(channelType);
-                        
+
                         let songs = [];
                         if (this.isPlaylistUrl(url)) {
                             songs = await this.getPlaylistSongs(url);
                         } else if (this.isYouTubeVideoUrl(url)) {
                             songs = await this.getSingleVideoData(url);
                         } else {
-                            await interaction.editReply('❌ Invalid YouTube URL');
+                            await interaction.editReply(
+                                "❌ Invalid YouTube URL",
+                            );
                             return;
                         }
 
@@ -276,34 +310,46 @@ class EnhancedMusicBot {
                         // Auto-start playing immediately after loading
                         try {
                             await this.playCurrentSong(channelType);
-                            const message = songs.length === 1 ? 
-                                `✅ Loaded song: **${songs[0].title}** and started playing! 🎵` : 
-                                `✅ Loaded **${songs.length} songs** and started playing! 🎵`;
+                            const message =
+                                songs.length === 1
+                                    ? `✅ Loaded song: **${songs[0].title}** and started playing! 🎵`
+                                    : `✅ Loaded **${songs.length} songs** and started playing! 🎵`;
                             await interaction.editReply(message);
                         } catch (playError) {
-                            const message = songs.length === 1 ? 
-                                `✅ Loaded song: **${songs[0].title}** in ${channelType} channel\n🎵 Bot joined voice channel and ready to play!` : 
-                                `✅ Loaded **${songs.length} songs** in ${channelType} channel\n🎵 Bot joined voice channel and ready to play!`;
+                            const message =
+                                songs.length === 1
+                                    ? `✅ Loaded song: **${songs[0].title}** in ${channelType} channel\n🎵 Bot joined voice channel and ready to play!`
+                                    : `✅ Loaded **${songs.length} songs** in ${channelType} channel\n🎵 Bot joined voice channel and ready to play!`;
                             await interaction.editReply(message);
                         }
                     } catch (error) {
-                        await interaction.editReply(`❌ Failed to load content: ${error.message}`);
+                        await interaction.editReply(
+                            `❌ Failed to load content: ${error.message}`,
+                        );
                     }
                     break;
             }
         } catch (error) {
-            console.error('Command error:', error);
+            console.error("Command error:", error);
             if (!interaction.replied) {
-                await interaction.reply('❌ An error occurred while processing your command.');
+                await interaction.reply(
+                    "❌ An error occurred while processing your command.",
+                );
             }
         }
     }
 
     setupWebServer() {
         // Enhanced dashboard route - FORCE ENHANCED VERSION
-        this.app.get('/', (req, res) => {
-            const currentMusicSong = this.currentPlaylists.music.songs[this.currentPlaylists.music.currentIndex];
-            const currentLyricSong = this.currentPlaylists.lyric.songs[this.currentPlaylists.lyric.currentIndex];
+        this.app.get("/", (req, res) => {
+            const currentMusicSong =
+                this.currentPlaylists.music.songs[
+                    this.currentPlaylists.music.currentIndex
+                ];
+            const currentLyricSong =
+                this.currentPlaylists.lyric.songs[
+                    this.currentPlaylists.lyric.currentIndex
+                ];
 
             const html = `<!DOCTYPE html>
 <html lang="en">
@@ -365,31 +411,39 @@ class EnhancedMusicBot {
                     <div class="video-container">
                         <h3 style="color: #374151; margin-bottom: 12px;">🎬 Music Videos</h3>
                         <div class="video-wrapper">
-                            ${currentMusicSong ? `
+                            ${
+                                currentMusicSong
+                                    ? `
                                 <iframe src="https://www.youtube.com/embed/${currentMusicSong.id}?autoplay=1&mute=1&controls=0&disablekb=1&rel=0&modestbranding=1"
                                         frameborder="0" allow="autoplay; encrypted-media"></iframe>
-                            ` : `
+                            `
+                                    : `
                                 <div class="no-video">
                                     <div class="placeholder">🎬</div>
                                     <p>No music video playing</p>
                                     <p class="subtitle">Use /load command in Discord to start streaming</p>
                                 </div>
-                            `}
+                            `
+                            }
                         </div>
                     </div>
                     <div class="video-container">
                         <h3 style="color: #374151; margin-bottom: 12px;">🎤 Lyric Videos</h3>
                         <div class="video-wrapper">
-                            ${currentLyricSong ? `
+                            ${
+                                currentLyricSong
+                                    ? `
                                 <iframe src="https://www.youtube.com/embed/${currentLyricSong.id}?autoplay=1&mute=1&controls=0&disablekb=1&rel=0&modestbranding=1"
                                         frameborder="0" allow="autoplay; encrypted-media"></iframe>
-                            ` : `
+                            `
+                                    : `
                                 <div class="no-video">
                                     <div class="placeholder">🎤</div>
                                     <p>No lyric video playing</p>
                                     <p class="subtitle">Use /load command in Discord to start streaming</p>
                                 </div>
-                            `}
+                            `
+                            }
                         </div>
                     </div>
                 </div>
@@ -399,13 +453,13 @@ class EnhancedMusicBot {
                 <div class="grid">
                     <div>
                         <h3>🎬 Music Videos (${this.currentPlaylists.music.songs.length} songs)</h3>
-                        <p><strong>Currently Playing:</strong> ${currentMusicSong?.title || 'None'}</p>
-                        <p><strong>Status:</strong> ${this.currentPlaylists.music.isPlaying ? '▶️ Playing' : '⏸️ Stopped'}</p>
+                        <p><strong>Currently Playing:</strong> ${currentMusicSong?.title || "None"}</p>
+                        <p><strong>Status:</strong> ${this.currentPlaylists.music.isPlaying ? "▶️ Playing" : "⏸️ Stopped"}</p>
                     </div>
                     <div>
                         <h3>🎤 Lyric Videos (${this.currentPlaylists.lyric.songs.length} songs)</h3>
-                        <p><strong>Currently Playing:</strong> ${currentLyricSong?.title || 'None'}</p>
-                        <p><strong>Status:</strong> ${this.currentPlaylists.lyric.isPlaying ? '▶️ Playing' : '⏸️ Stopped'}</p>
+                        <p><strong>Currently Playing:</strong> ${currentLyricSong?.title || "None"}</p>
+                        <p><strong>Status:</strong> ${this.currentPlaylists.lyric.isPlaying ? "▶️ Playing" : "⏸️ Stopped"}</p>
                     </div>
                 </div>
             </div>
@@ -427,31 +481,41 @@ class EnhancedMusicBot {
         });
 
         // Suno posting routes
-        this.app.post('/post-song', async (req, res) => {
+        this.app.post("/post-song", async (req, res) => {
             try {
-                const { url, description = '', hashtags = [] } = req.body;
-                
+                const { url, description = "", hashtags = [] } = req.body;
+
                 if (!url) {
-                    return res.status(400).json({ error: 'URL is required' });
+                    return res.status(400).json({ error: "URL is required" });
                 }
 
                 const songData = await this.extractSongData(url);
-                await this.postToDiscord(songData.title, url, description, hashtags);
-                
-                res.json({ success: true, message: 'Song posted successfully!' });
+                await this.postToDiscord(
+                    songData.title,
+                    url,
+                    description,
+                    hashtags,
+                );
+
+                res.json({
+                    success: true,
+                    message: "Song posted successfully!",
+                });
             } catch (error) {
-                console.error('Error posting song:', error);
-                res.status(500).json({ error: 'Failed to post song' });
+                console.error("Error posting song:", error);
+                res.status(500).json({ error: "Failed to post song" });
             }
         });
 
         // Load playlist or individual song
-        this.app.post('/load-content', async (req, res) => {
+        this.app.post("/load-content", async (req, res) => {
             try {
                 const { url, channelType } = req.body;
-                
+
                 if (!url || !channelType) {
-                    return res.status(400).json({ error: 'URL and channel type are required' });
+                    return res
+                        .status(400)
+                        .json({ error: "URL and channel type are required" });
                 }
 
                 let songs = [];
@@ -460,66 +524,73 @@ class EnhancedMusicBot {
                 } else if (this.isYouTubeVideoUrl(url)) {
                     songs = await this.getSingleVideoData(url);
                 } else {
-                    return res.status(400).json({ error: 'Invalid YouTube URL' });
+                    return res
+                        .status(400)
+                        .json({ error: "Invalid YouTube URL" });
                 }
 
                 this.currentPlaylists[channelType].songs = songs;
                 this.currentPlaylists[channelType].currentIndex = 0;
 
-                const message = songs.length === 1 ? 
-                    `Loaded song: ${songs[0].title}` : 
-                    `Loaded ${songs.length} songs for ${channelType} videos`;
+                const message =
+                    songs.length === 1
+                        ? `Loaded song: ${songs[0].title}`
+                        : `Loaded ${songs.length} songs for ${channelType} videos`;
 
-                res.json({ 
-                    success: true, 
+                res.json({
+                    success: true,
                     message,
-                    songs: songs.slice(0, 10)
+                    songs: songs.slice(0, 10),
                 });
             } catch (error) {
-                console.error('Error loading content:', error);
-                res.status(500).json({ error: 'Failed to load content' });
+                console.error("Error loading content:", error);
+                res.status(500).json({ error: "Failed to load content" });
             }
         });
 
         const PORT = process.env.PORT || 5000;
-        this.app.listen(PORT, '0.0.0.0', () => {
+        this.app.listen(PORT, "0.0.0.0", () => {
             console.log(`🌟 Web server running on port ${PORT}`);
         });
     }
 
     isPlaylistUrl(url) {
-        return url.includes('playlist?list=') || url.includes('&list=');
+        return url.includes("playlist?list=") || url.includes("&list=");
     }
 
     isYouTubeVideoUrl(url) {
-        return url.includes('youtube.com/watch') || url.includes('youtu.be/');
+        return url.includes("youtube.com/watch") || url.includes("youtu.be/");
     }
 
     async getSingleVideoData(url) {
         try {
             const videoId = this.extractVideoId(url);
             const videoUrl = `https://www.googleapis.com/youtube/v3/videos?part=snippet&id=${videoId}&key=${this.config.youtube.apiKey}`;
-            
+
             const response = await axios.get(videoUrl);
             const video = response.data.items[0];
-            
+
             if (!video) {
-                throw new Error('Video not found');
+                throw new Error("Video not found");
             }
 
-            return [{
-                id: videoId,
-                title: video.snippet.title,
-                url: `https://www.youtube.com/watch?v=${videoId}`
-            }];
+            return [
+                {
+                    id: videoId,
+                    title: video.snippet.title,
+                    url: `https://www.youtube.com/watch?v=${videoId}`,
+                },
+            ];
         } catch (error) {
-            console.error('Error fetching single video:', error);
-            throw new Error('Failed to fetch video data');
+            console.error("Error fetching single video:", error);
+            throw new Error("Failed to fetch video data");
         }
     }
 
     extractVideoId(url) {
-        const match = url.match(/(?:youtube\.com\/watch\?v=|youtu\.be\/)([^&\n?#]+)/);
+        const match = url.match(
+            /(?:youtube\.com\/watch\?v=|youtu\.be\/)([^&\n?#]+)/,
+        );
         return match ? match[1] : null;
     }
 
@@ -527,43 +598,78 @@ class EnhancedMusicBot {
         try {
             const playlistId = this.extractPlaylistId(playlistUrl);
             const apiUrl = `https://www.googleapis.com/youtube/v3/playlistItems?part=snippet&maxResults=50&playlistId=${playlistId}&key=${this.config.youtube.apiKey}`;
-            
+
             const response = await axios.get(apiUrl);
             const items = response.data.items;
-            
+
             const songs = items
-                .filter(item => item.snippet.title !== 'Private video' && item.snippet.title !== 'Deleted video')
-                .map(item => ({
+                .filter(
+                    (item) =>
+                        item.snippet.title !== "Private video" &&
+                        item.snippet.title !== "Deleted video",
+                )
+                .map((item) => ({
                     id: item.snippet.resourceId.videoId,
                     title: item.snippet.title,
-                    url: `https://www.youtube.com/watch?v=${item.snippet.resourceId.videoId}`
+                    url: `https://www.youtube.com/watch?v=${item.snippet.resourceId.videoId}`,
                 }))
-                .filter(song => this.isMusicContent(song));
+                .filter((song) => this.isMusicContent(song));
 
-            console.log(`Filtered out ${items.length - songs.length} non-music videos from playlist`);
+            console.log(
+                `Filtered out ${items.length - songs.length} non-music videos from playlist`,
+            );
             return songs;
         } catch (error) {
-            console.error('Error fetching playlist:', error);
-            throw new Error('Failed to fetch playlist');
+            console.error("Error fetching playlist:", error);
+            throw new Error("Failed to fetch playlist");
         }
     }
 
     isMusicContent(video) {
         const title = video.title.toLowerCase();
-        const description = video.description?.toLowerCase() || '';
-        
+        const description = video.description?.toLowerCase() || "";
+
         const musicKeywords = [
-            'music', 'song', 'audio', 'track', 'album', 'single', 'ep', 'mix', 'remix',
-            'official', 'lyric', 'instrumental', 'acoustic', 'live', 'cover', 'version',
-            'bass', 'beat', 'rap', 'hip hop', 'rock', 'pop', 'jazz', 'blues', 'classical',
-            'electronic', 'dance', 'house', 'techno', 'dubstep', 'trap', 'reggae'
+            "music",
+            "song",
+            "audio",
+            "track",
+            "album",
+            "single",
+            "ep",
+            "mix",
+            "remix",
+            "official",
+            "lyric",
+            "instrumental",
+            "acoustic",
+            "live",
+            "cover",
+            "version",
+            "bass",
+            "beat",
+            "rap",
+            "hip hop",
+            "rock",
+            "pop",
+            "jazz",
+            "blues",
+            "classical",
+            "electronic",
+            "dance",
+            "house",
+            "techno",
+            "dubstep",
+            "trap",
+            "reggae",
         ];
-        
-        const hasMusicKeywords = musicKeywords.some(keyword => 
-            title.includes(keyword) || description.includes(keyword)
+
+        const hasMusicKeywords = musicKeywords.some(
+            (keyword) =>
+                title.includes(keyword) || description.includes(keyword),
         );
 
-        const hasMusicPatterns = 
+        const hasMusicPatterns =
             /\b(ft\.?|feat\.?|featuring)\b/i.test(title) ||
             /\b\d{4}\b/.test(title) ||
             /\([^)]*\)/i.test(title) ||
@@ -579,13 +685,14 @@ class EnhancedMusicBot {
     }
 
     async joinVoiceChannel(channelType) {
-        const channelId = channelType === 'music' ? 
-            this.config.discord.musicVideoChannelId : 
-            this.config.discord.lyricVideoChannelId;
+        const channelId =
+            channelType === "music"
+                ? this.config.discord.musicVideoChannelId
+                : this.config.discord.lyricVideoChannelId;
 
         const channel = await this.client.channels.fetch(channelId);
         if (!channel) {
-            throw new Error('Voice channel not found');
+            throw new Error("Voice channel not found");
         }
 
         const connection = joinVoiceChannel({
@@ -602,11 +709,13 @@ class EnhancedMusicBot {
 
         // Auto-skip to next song when current one ends
         player.on(AudioPlayerStatus.Idle, () => {
-            console.log(`🎵 Song ended in ${channelType}, auto-skipping to next...`);
+            console.log(
+                `🎵 Song ended in ${channelType}, auto-skipping to next...`,
+            );
             this.skipSong(channelType);
         });
 
-        player.on('error', error => {
+        player.on("error", (error) => {
             console.error(`Audio player error in ${channelType}:`, error);
             this.skipSong(channelType);
         });
@@ -618,7 +727,7 @@ class EnhancedMusicBot {
 
     async playCurrentSong(channelType) {
         const playlist = this.currentPlaylists[channelType];
-        
+
         if (playlist.songs.length === 0) {
             console.log(`No songs in ${channelType} playlist`);
             return;
@@ -627,9 +736,13 @@ class EnhancedMusicBot {
         // Ensure we have a valid index
         if (playlist.currentIndex >= playlist.songs.length) {
             playlist.currentIndex = 0;
-            console.log(`🔄 Looping to song 1/${playlist.songs.length} in ${channelType} channel`);
+            console.log(
+                `🔄 Looping to song 1/${playlist.songs.length} in ${channelType} channel`,
+            );
         } else {
-            console.log(`🔄 Looping to song ${playlist.currentIndex + 1}/${playlist.songs.length} in ${channelType} channel`);
+            console.log(
+                `🔄 Looping to song ${playlist.currentIndex + 1}/${playlist.songs.length} in ${channelType} channel`,
+            );
         }
 
         const currentSong = playlist.songs[playlist.currentIndex];
@@ -639,17 +752,19 @@ class EnhancedMusicBot {
         }
 
         try {
-            const stream = ytdl(currentSong.url, { 
-                filter: 'audioonly',
-                quality: 'lowestaudio',
-                highWaterMark: 1 << 25
+            const stream = ytdl(currentSong.url, {
+                filter: "audioonly",
+                quality: "lowestaudio",
+                highWaterMark: 1 << 25,
             });
-            
+
             const resource = createAudioResource(stream);
             playlist.player.play(resource);
             playlist.isPlaying = true;
-            
-            console.log(`🎵 Playing: ${currentSong.title} in ${channelType} channel`);
+
+            console.log(
+                `🎵 Playing: ${currentSong.title} in ${channelType} channel`,
+            );
         } catch (error) {
             console.error(`Error playing song in ${channelType}:`, error);
             this.skipSong(channelType);
@@ -666,9 +781,10 @@ class EnhancedMusicBot {
 
     async skipSong(channelType) {
         const playlist = this.currentPlaylists[channelType];
-        
-        playlist.currentIndex = (playlist.currentIndex + 1) % playlist.songs.length;
-        
+
+        playlist.currentIndex =
+            (playlist.currentIndex + 1) % playlist.songs.length;
+
         if (playlist.connection && playlist.player) {
             await this.playCurrentSong(channelType);
         }
@@ -697,48 +813,61 @@ class EnhancedMusicBot {
             const response = await axios.get(url);
             const html = response.data;
             const titleMatch = html.match(/<title>(.*?)<\/title>/);
-            const title = titleMatch ? titleMatch[1].trim() : 'Unknown Song';
-            
+            const title = titleMatch ? titleMatch[1].trim() : "Unknown Song";
+
             return {
-                title: title.replace(' | Suno', '').trim(),
-                url: url
+                title: title.replace(" | Suno", "").trim(),
+                url: url,
             };
         } catch (error) {
-            console.error('Error extracting song data:', error);
+            console.error("Error extracting song data:", error);
             return {
-                title: 'Unknown Song',
-                url: url
+                title: "Unknown Song",
+                url: url,
             };
         }
     }
 
-    async postToDiscord(title, url, description = '', hashtags = []) {
+    async postToDiscord(title, url, description = "", hashtags = []) {
         try {
-            const channel = await this.client.channels.fetch(this.config.discord.targetChannelId);
+            const channel = await this.client.channels.fetch(
+                this.config.discord.targetChannelId,
+            );
             if (!channel) {
-                throw new Error('Target Discord channel not found');
+                throw new Error("Target Discord channel not found");
             }
 
             const embed = new EmbedBuilder()
-                .setTitle('🎵 New Suno Song')
-                .setDescription(`**${title}**\n\n${description}\n\n[Listen Here](${url})`)
-                .setColor('#FF6B6B')
+                .setTitle("🎵 New Suno Song")
+                .setDescription(
+                    `**${title}**\n\n${description}\n\n[Listen Here](${url})`,
+                )
+                .setColor("#FF6B6B")
                 .setTimestamp();
 
-            const hashtagText = hashtags.length > 0 ? `\n\n${hashtags.map(tag => `#${tag}`).join(' ')}` : '';
+            const hashtagText =
+                hashtags.length > 0
+                    ? `\n\n${hashtags.map((tag) => `#${tag}`).join(" ")}`
+                    : "";
             const message = `🎵 New Suno song: **${title}** — ${url}${hashtagText}`;
 
             await channel.send({ content: message, embeds: [embed] });
             console.log(`Posted song to Discord: ${title}`);
         } catch (error) {
-            console.error('Error posting to Discord:', error);
+            console.error("Error posting to Discord:", error);
             throw error;
         }
     }
 
     renderDashboard() {
-        const currentMusicSong = this.currentPlaylists.music.songs[this.currentPlaylists.music.currentIndex];
-        const currentLyricSong = this.currentPlaylists.lyric.songs[this.currentPlaylists.lyric.currentIndex];
+        const currentMusicSong =
+            this.currentPlaylists.music.songs[
+                this.currentPlaylists.music.currentIndex
+            ];
+        const currentLyricSong =
+            this.currentPlaylists.lyric.songs[
+                this.currentPlaylists.lyric.currentIndex
+            ];
 
         return `
         <!DOCTYPE html>
@@ -1007,7 +1136,9 @@ class EnhancedMusicBot {
                             <div class="video-container">
                                 <h3 style="color: #374151; margin-bottom: 12px;">🎬 Music Videos</h3>
                                 <div class="video-wrapper">
-                                    ${currentMusicSong ? `
+                                    ${
+                                        currentMusicSong
+                                            ? `
                                         <iframe 
                                             id="musicVideo"
                                             src="https://www.youtube.com/embed/${currentMusicSong.id}?autoplay=1&mute=1&controls=0&disablekb=1&rel=0&modestbranding=1&enablejsapi=0"
@@ -1022,13 +1153,15 @@ class EnhancedMusicBot {
                                                 <strong>${currentMusicSong.title}</strong>
                                             </div>
                                         </div>
-                                    ` : `
+                                    `
+                                            : `
                                         <div class="no-video">
                                             <div class="placeholder">🎬</div>
                                             <p>No music video playing</p>
                                             <p class="subtitle">Load a playlist to see live video</p>
                                         </div>
-                                    `}
+                                    `
+                                    }
                                 </div>
                             </div>
 
@@ -1036,7 +1169,9 @@ class EnhancedMusicBot {
                             <div class="video-container">
                                 <h3 style="color: #374151; margin-bottom: 12px;">🎤 Lyric Videos</h3>
                                 <div class="video-wrapper">
-                                    ${currentLyricSong ? `
+                                    ${
+                                        currentLyricSong
+                                            ? `
                                         <iframe 
                                             id="lyricVideo"
                                             src="https://www.youtube.com/embed/${currentLyricSong.id}?autoplay=1&mute=1&controls=0&disablekb=1&rel=0&modestbranding=1&enablejsapi=0"
@@ -1051,13 +1186,15 @@ class EnhancedMusicBot {
                                                 <strong>${currentLyricSong.title}</strong>
                                             </div>
                                         </div>
-                                    ` : `
+                                    `
+                                            : `
                                         <div class="no-video">
                                             <div class="placeholder">🎤</div>
                                             <p>No lyric video playing</p>
                                             <p class="subtitle">Load a playlist to see live video</p>
                                         </div>
-                                    `}
+                                    `
+                                    }
                                 </div>
                             </div>
                         </div>
@@ -1117,13 +1254,13 @@ class EnhancedMusicBot {
                         <div class="grid">
                             <div>
                                 <h3>🎬 Music Videos (${this.currentPlaylists.music.songs.length} songs)</h3>
-                                <p><strong>Currently Playing:</strong> ${currentMusicSong?.title || 'None'}</p>
-                                <p><strong>Status:</strong> ${this.currentPlaylists.music.isPlaying ? '▶️ Playing' : '⏸️ Paused'}</p>
+                                <p><strong>Currently Playing:</strong> ${currentMusicSong?.title || "None"}</p>
+                                <p><strong>Status:</strong> ${this.currentPlaylists.music.isPlaying ? "▶️ Playing" : "⏸️ Paused"}</p>
                             </div>
                             <div>
                                 <h3>🎤 Lyric Videos (${this.currentPlaylists.lyric.songs.length} songs)</h3>
-                                <p><strong>Currently Playing:</strong> ${currentLyricSong?.title || 'None'}</p>
-                                <p><strong>Status:</strong> ${this.currentPlaylists.lyric.isPlaying ? '▶️ Playing' : '⏸️ Paused'}</p>
+                                <p><strong>Currently Playing:</strong> ${currentLyricSong?.title || "None"}</p>
+                                <p><strong>Status:</strong> ${this.currentPlaylists.lyric.isPlaying ? "▶️ Playing" : "⏸️ Paused"}</p>
                             </div>
                         </div>
                     </div>

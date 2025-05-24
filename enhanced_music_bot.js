@@ -1,7 +1,6 @@
 const express = require('express');
 const { Client, GatewayIntentBits } = require('discord.js');
 const { joinVoiceChannel, createAudioPlayer, createAudioResource, VoiceConnectionStatus, AudioPlayerStatus, StreamType } = require('@discordjs/voice');
-const ytdl = require('ytdl-core');
 const axios = require('axios');
 
 // Configuration
