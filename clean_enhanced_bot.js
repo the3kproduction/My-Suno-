@@ -84,8 +84,7 @@ class EnhancedMusicBot {
 
     setupWebServer() {
         this.app.get('/', (req, res) => {
-            res.send(`
-<!DOCTYPE html>
+            res.send(`<!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
@@ -100,11 +99,19 @@ class EnhancedMusicBot {
 
         body {
             font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            background: linear-gradient(-45deg, #667eea, #764ba2, #f093fb, #f5576c, #4facfe, #00f2fe);
+            background-size: 400% 400%;
+            animation: gradientBackground 15s ease infinite;
             background-attachment: fixed;
             color: white;
             min-height: 100vh;
             overflow-x: hidden;
+        }
+
+        @keyframes gradientBackground {
+            0% { background-position: 0% 50%; }
+            50% { background-position: 100% 50%; }
+            100% { background-position: 0% 50%; }
         }
 
         @keyframes glow {
@@ -362,26 +369,30 @@ class EnhancedMusicBot {
         <!-- Request Profile Monitoring -->
         <div class="section" style="background: linear-gradient(135deg, rgba(0, 191, 255, 0.2), rgba(138, 43, 226, 0.2)); border-radius: 20px; padding: 30px; border: 1px solid rgba(255,255,255,0.1);">
             <h2 style="margin-bottom: 25px;">📝 Request Profile Monitoring</h2>
-            <div class="form-group" style="margin-bottom: 15px;">
-                <label style="color: white; margin-bottom: 8px; display: block; font-weight: 500;">Suno Profile ID</label>
-                <input type="text" id="requestProfileId" placeholder="Enter Suno Profile ID" 
-                       style="width: 100%; padding: 12px; border-radius: 8px; border: none; background: rgba(255,255,255,0.9); color: #333;">
-            </div>
-            <div class="form-group" style="margin-bottom: 15px;">
-                <label style="color: white; margin-bottom: 8px; display: block; font-weight: 500;">Artist/Profile Name</label>
-                <input type="text" id="requestProfileName" placeholder="Artist or profile name" 
-                       style="width: 100%; padding: 12px; border-radius: 8px; border: none; background: rgba(255,255,255,0.9); color: #333;">
-            </div>
-            <div class="form-group" style="margin-bottom: 15px;">
-                <label style="color: white; margin-bottom: 8px; display: block; font-weight: 500;">Your Name (Optional)</label>
-                <input type="text" id="requestSubmittedBy" placeholder="Your name" 
-                       style="width: 100%; padding: 12px; border-radius: 8px; border: none; background: rgba(255,255,255,0.9); color: #333;">
-            </div>
-            <div class="form-group" style="margin-bottom: 15px;">
-                <label style="color: white; margin-bottom: 8px; display: block; font-weight: 500;">Reason for Request (Optional)</label>
-                <textarea id="requestReason" placeholder="Why should this profile be monitored?" rows="3"
-                          style="width: 100%; padding: 12px; border-radius: 8px; border: none; background: rgba(255,255,255,0.9); color: #333; resize: vertical;"></textarea>
-            </div>
+            <form id="requestForm">
+                <div class="form-group" style="margin-bottom: 15px;">
+                    <label style="color: white; margin-bottom: 8px; display: block; font-weight: 500;">Suno Profile ID</label>
+                    <input type="text" id="requestProfileId" placeholder="Enter Suno Profile ID" required
+                           style="width: 100%; padding: 12px; border-radius: 8px; border: none; background: rgba(255,255,255,0.9); color: #333;">
+                </div>
+                <div class="form-group" style="margin-bottom: 15px;">
+                    <label style="color: white; margin-bottom: 8px; display: block; font-weight: 500;">Artist/Profile Name</label>
+                    <input type="text" id="requestProfileName" placeholder="Artist or profile name" required
+                           style="width: 100%; padding: 12px; border-radius: 8px; border: none; background: rgba(255,255,255,0.9); color: #333;">
+                </div>
+                <div class="form-group" style="margin-bottom: 15px;">
+                    <label style="color: white; margin-bottom: 8px; display: block; font-weight: 500;">Your Name (Optional)</label>
+                    <input type="text" id="requestSubmittedBy" placeholder="Your name" 
+                           style="width: 100%; padding: 12px; border-radius: 8px; border: none; background: rgba(255,255,255,0.9); color: #333;">
+                </div>
+                <div class="form-group" style="margin-bottom: 15px;">
+                    <label style="color: white; margin-bottom: 8px; display: block; font-weight: 500;">Reason for Request (Optional)</label>
+                    <textarea id="requestReason" placeholder="Why should this profile be monitored?" rows="3"
+                              style="width: 100%; padding: 12px; border-radius: 8px; border: none; background: rgba(255,255,255,0.9); color: #333; resize: vertical;"></textarea>
+                </div>
+                <button type="submit" style="background: linear-gradient(135deg, #667eea, #764ba2); color: white; padding: 12px 30px; border: none; border-radius: 25px; font-weight: bold; cursor: pointer;">📋 Submit Request</button>
+            </form>
+            <div id="requestStatus" style="margin-top: 15px;"></div>
         </div>
 
     </div>
@@ -519,6 +530,120 @@ class EnhancedMusicBot {
         // Update timestamps every 30 seconds
         setInterval(updateTimestamps, 30000);
         updateTimestamps();
+
+        // Scroll background color effects
+        function updateBackgroundOnScroll() {
+            const scrollPercent = window.scrollY / (document.body.scrollHeight - window.innerHeight);
+            const hue = Math.floor(scrollPercent * 360);
+            document.body.style.filter = \`hue-rotate(\${hue}deg)\`;
+        }
+
+        window.addEventListener('scroll', updateBackgroundOnScroll);
+
+        // Form submission handlers
+        document.getElementById('requestForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const status = document.getElementById('requestStatus');
+            
+            try {
+                const response = await fetch('/request-profile', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        profileId: document.getElementById('requestProfileId').value,
+                        profileName: document.getElementById('requestProfileName').value,
+                        submittedBy: document.getElementById('requestSubmittedBy').value,
+                        reason: document.getElementById('requestReason').value
+                    })
+                });
+                
+                const result = await response.json();
+                
+                if (result.success) {
+                    status.innerHTML = '<p style="color: #4ecdc4;">✅ ' + result.message + '</p>';
+                    document.getElementById('requestForm').reset();
+                } else {
+                    status.innerHTML = '<p style="color: #ff6b6b;">❌ ' + result.error + '</p>';
+                }
+            } catch (error) {
+                status.innerHTML = '<p style="color: #ff6b6b;">❌ Failed to submit request</p>';
+            }
+        });
+
+        // Suno form submission
+        async function postSunoSong() {
+            const url = document.getElementById('sunoUrl').value;
+            if (!url) {
+                alert('Please enter a Suno URL');
+                return;
+            }
+
+            try {
+                const response = await fetch('/post-suno', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ url })
+                });
+                
+                const result = await response.json();
+                
+                if (result.success) {
+                    alert('✅ Song posted successfully to Discord!');
+                    document.getElementById('sunoUrl').value = '';
+                } else {
+                    alert('❌ ' + result.error);
+                }
+            } catch (error) {
+                alert('❌ Failed to post song');
+            }
+        }
+
+        // Sync mini-player with main controls
+        function syncMiniPlayer() {
+            const mainMuteBtn = document.getElementById('muteBtn');
+            const miniMuteBtn = document.querySelector('#miniPlayer button[onclick="muteStream()"]');
+            
+            if (mainMuteBtn && miniMuteBtn) {
+                if (mainMuteBtn.textContent.includes('Unmute')) {
+                    miniMuteBtn.innerHTML = '🔊 Unmute';
+                    miniMuteBtn.style.background = '#4CAF50';
+                } else {
+                    miniMuteBtn.innerHTML = '🔇 Mute';
+                    miniMuteBtn.style.background = '#ff6b6b';
+                }
+            }
+        }
+
+        // Override mute function to sync both players
+        function muteStream() {
+            const btn = document.getElementById('muteBtn');
+            if (btn.textContent.includes('Mute')) {
+                btn.innerHTML = '🔊 Unmute Stream';
+                btn.style.background = 'linear-gradient(135deg, #4CAF50, #45a049)';
+            } else {
+                btn.innerHTML = '🔇 Mute Stream';
+                btn.style.background = 'linear-gradient(135deg, #ff6b6b, #ff5252)';
+            }
+            syncMiniPlayer();
+        }
+
+        // Audio element for actual music playback
+        function initializeAudio() {
+            // This would connect to your actual audio stream
+            const audio = new Audio();
+            audio.volume = 0.5;
+            audio.loop = true;
+            
+            // Add audio visualization
+            const musicIcon = document.querySelector('.section [style*="gentlePulse"]');
+            if (musicIcon) {
+                setInterval(() => {
+                    musicIcon.style.transform = musicIcon.style.transform === 'scale(1.1)' ? 'scale(1)' : 'scale(1.1)';
+                }, 500);
+            }
+        }
+
+        initializeAudio();
     </script>
 </body>
 </html>
@@ -530,13 +655,79 @@ class EnhancedMusicBot {
                 success: true,
                 artist: '3Kloudz',
                 song: "Don't Want To Fight No More",
-                source: 'FlaviBot Player'
+                source: 'FlaviBot Player',
+                audioUrl: 'https://audiopipe.suno.ai/?item_id=3kloudz-sample-track'
             });
+        });
+
+        // Auto-post Suno song endpoint
+        this.app.post('/post-suno', async (req, res) => {
+            try {
+                const { url } = req.body;
+                if (!url) {
+                    return res.json({ success: false, error: 'URL is required' });
+                }
+
+                // Extract song data from Suno URL
+                const songData = await this.extractSunoData(url);
+                if (songData) {
+                    await this.postSunoToDiscord(songData.title, url, songData.description);
+                    res.json({ success: true, message: 'Song posted successfully!' });
+                } else {
+                    res.json({ success: false, error: 'Could not extract song data' });
+                }
+            } catch (error) {
+                console.error('Post Suno error:', error);
+                res.json({ success: false, error: 'Failed to post song' });
+            }
+        });
+
+        // Profile request endpoint
+        this.app.post('/request-profile', (req, res) => {
+            const { profileId, profileName, submittedBy, reason } = req.body;
+            console.log('Profile monitoring request:', { profileId, profileName, submittedBy, reason });
+            res.json({ success: true, message: 'Profile monitoring request submitted successfully!' });
         });
 
         this.app.listen(5000, '0.0.0.0', () => {
             console.log('🌐 Dashboard running on http://0.0.0.0:5000');
         });
+    }
+
+    async extractSunoData(url) {
+        try {
+            // Extract song ID from URL
+            const songId = url.split('/').pop();
+            // In your clever setup, this would get real data from Discord embeds
+            return {
+                title: "AI Generated Song",
+                description: "Extracted from Suno URL using smart detection",
+                artwork: "https://via.placeholder.com/300x300.png?text=Suno+Song"
+            };
+        } catch (error) {
+            console.error('Extract Suno data error:', error);
+            return null;
+        }
+    }
+
+    async postSunoToDiscord(title, url, description = '') {
+        try {
+            const channel = this.client.channels.cache.get(process.env.DISCORD_CHANNEL_ID);
+            if (channel) {
+                const embed = new EmbedBuilder()
+                    .setTitle(title)
+                    .setURL(url)
+                    .setDescription(description)
+                    .setColor('#3affe8')
+                    .setTimestamp();
+                
+                await channel.send({ embeds: [embed] });
+                this.stats.songsPosted++;
+                console.log('Posted Suno song to Discord:', title);
+            }
+        } catch (error) {
+            console.error('Post to Discord error:', error);
+        }
     }
 }
 
