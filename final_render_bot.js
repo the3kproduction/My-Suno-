@@ -847,23 +847,6 @@ class EnhancedMusicBot {
                 });
             }
         });
-                                    const match = description.match(/\*\*\[([^\]]+)\]\(([^)]+)\)\*\*/);
-                                    if (match && match[1].includes(' - ')) {
-                                        const parts = match[1].split(' - ');
-                                        this.currentTrack = {
-                                            artist: parts[0].trim(),
-                                            song: parts.slice(1).join(' - ').trim(),
-                                            spotifyUrl: match[2] || null,
-                                            source: 'FlaviBot Player'
-                                        };
-                                        console.log('🎵 Stored track with Spotify URL:', this.currentTrack);
-                                        break;
-                                    }
-                                }
-                            }
-                        }
-                    }
-                }
                 
                 res.json({
                     success: true,
