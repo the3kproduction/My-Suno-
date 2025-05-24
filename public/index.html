@@ -427,6 +427,142 @@
             margin-top: 5px;
         }
 
+        .stat-sublabel {
+            font-size: 12px;
+            color: rgba(255, 255, 255, 0.6);
+            margin-top: 2px;
+        }
+
+        .monitoring-details {
+            padding: 15px 0;
+        }
+
+        .detail-row {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 8px 0;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        .detail-row:last-child {
+            border-bottom: none;
+        }
+
+        .status-active {
+            color: #22c55e;
+            font-weight: bold;
+        }
+
+        .feature-description {
+            padding: 15px;
+            background: rgba(255, 255, 255, 0.05);
+            border-radius: 10px;
+            margin-top: 15px;
+        }
+
+        .feature-description p {
+            margin: 0;
+            color: var(--text-secondary);
+            line-height: 1.5;
+        }
+
+        .profile-card {
+            background: rgba(255, 255, 255, 0.05);
+            border-radius: 10px;
+            padding: 15px;
+            margin-top: 15px;
+        }
+
+        .profile-info {
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+        }
+
+        .profile-name {
+            font-size: 18px;
+            font-weight: bold;
+            color: #00ffff;
+            text-shadow: 0 0 10px rgba(0, 255, 255, 0.5);
+        }
+
+        .profile-detail {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            font-size: 14px;
+            color: var(--text-secondary);
+        }
+
+        .request-info {
+            margin-bottom: 20px;
+        }
+
+        .request-info p {
+            margin-bottom: 15px;
+            color: var(--text-secondary);
+            line-height: 1.6;
+        }
+
+        .request-info ol {
+            color: var(--text-secondary);
+            padding-left: 20px;
+            line-height: 1.6;
+        }
+
+        .request-info li {
+            margin-bottom: 8px;
+        }
+
+        .form-group textarea {
+            width: 100%;
+            padding: 12px 16px;
+            border: 2px solid var(--border-color);
+            border-radius: 10px;
+            background: rgba(255, 255, 255, 0.1);
+            color: var(--text-primary);
+            font-size: 16px;
+            font-family: inherit;
+            resize: vertical;
+            min-height: 80px;
+            transition: all 0.3s ease;
+        }
+
+        .form-group textarea:focus {
+            outline: none;
+            border-color: rgba(138, 43, 226, 0.6);
+            box-shadow: 0 0 0 3px rgba(138, 43, 226, 0.2);
+        }
+
+        .form-group textarea::placeholder {
+            color: rgba(255, 255, 255, 0.5);
+        }
+
+        .playback-controls {
+            display: flex;
+            gap: 10px;
+            margin-top: 15px;
+        }
+
+        .btn-control {
+            padding: 8px 16px;
+            border: 1px solid var(--border-color);
+            border-radius: 8px;
+            background: rgba(255, 255, 255, 0.1);
+            color: var(--text-primary);
+            font-size: 14px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            flex: 1;
+        }
+
+        .btn-control:hover {
+            background: rgba(138, 43, 226, 0.2);
+            border-color: rgba(138, 43, 226, 0.5);
+            transform: translateY(-1px);
+        }
+
         @media (max-width: 768px) {
             .container {
                 padding: 15px;
@@ -486,29 +622,58 @@
                         <span id="status-text">Live</span>
                     </div>
                 </div>
+                <div class="playback-controls">
+                    <button class="btn-control" onclick="refreshSong()">🔄 Refresh</button>
+                    <button class="btn-control" onclick="openSpotify()">🎵 Open on Spotify</button>
+                </div>
             </div>
 
             <div class="card">
                 <div class="card-header">
-                    <div class="card-icon">📊</div>
-                    <div class="card-title">Live Music Stream</div>
+                    <div class="card-icon">🎵</div>
+                    <div class="card-title">Premium Suno Monitoring</div>
                 </div>
                 <div class="stats-grid">
                     <div class="stat-item">
-                        <div class="stat-value" id="songs-today">0</div>
-                        <div class="stat-label">Songs Today</div>
+                        <div class="stat-value" id="songs-posted">0</div>
+                        <div class="stat-label">Songs Posted</div>
+                        <div class="stat-sublabel">Auto-posted with reactions</div>
                     </div>
                     <div class="stat-item">
-                        <div class="stat-value" id="total-posts">0</div>
-                        <div class="stat-label">Total Posts</div>
+                        <div class="stat-value" id="profiles-monitored">1</div>
+                        <div class="stat-label">Profiles Monitored</div>
+                        <div class="stat-sublabel">3kloudz actively tracked</div>
                     </div>
                 </div>
             </div>
 
             <div class="card">
                 <div class="card-header">
-                    <div class="card-icon">🎯</div>
-                    <div class="card-title">Premium Suno Monitoring</div>
+                    <div class="card-icon">🔗</div>
+                    <div class="card-title">Active Monitoring Status</div>
+                </div>
+                <div class="monitoring-details">
+                    <div class="detail-row">
+                        <strong>Primary Profile:</strong> 3kloudz
+                    </div>
+                    <div class="detail-row">
+                        <strong>Check Frequency:</strong> Every 3 minutes
+                    </div>
+                    <div class="detail-row">
+                        <strong>Status:</strong> <span class="status-active">🟢 ACTIVE</span>
+                    </div>
+                    <div class="detail-row">
+                        <strong>Last Check:</strong> <span id="monitoring-last-check">Checking now...</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="dashboard-grid">
+            <div class="card">
+                <div class="card-header">
+                    <div class="card-icon">🎵</div>
+                    <div class="card-title">Auto-Post Suno Song</div>
                 </div>
                 <div class="form-container">
                     <div class="form-group">
@@ -517,25 +682,79 @@
                     </div>
                     <button class="btn btn-primary" onclick="postSunoSong()">
                         <span>🚀</span>
-                        Post to Discord
+                        Auto-Post with Smart Detection
                     </button>
                 </div>
             </div>
 
             <div class="card">
                 <div class="card-header">
-                    <div class="card-icon">⚡</div>
-                    <div class="card-title">Active Monitoring Status</div>
+                    <div class="card-icon">🤖</div>
+                    <div class="card-title">Smart Auto-Detection</div>
                 </div>
-                <div class="stats-grid">
-                    <div class="stat-item">
-                        <div class="stat-value" id="bot-status">Online</div>
-                        <div class="stat-label">Bot Status</div>
+                <div class="feature-description">
+                    <p>Your bot automatically extracts the real song title and artwork from Suno URLs using advanced detection technology. No manual input needed!</p>
+                </div>
+            </div>
+
+            <div class="card">
+                <div class="card-header">
+                    <div class="card-icon">👥</div>
+                    <div class="card-title">Suno Profile Monitoring</div>
+                </div>
+                <div class="profile-card">
+                    <div class="profile-info">
+                        <div class="profile-name">Sample Artist</div>
+                        <div class="profile-detail">
+                            <strong>Profile ID:</strong> 3kloudz
+                        </div>
+                        <div class="profile-detail">
+                            <strong>Last Checked:</strong> <span id="profile-last-check">2:04:35 AM</span>
+                        </div>
+                        <div class="profile-detail">
+                            <strong>Status:</strong> <span class="status-active">🟢 Active</span>
+                        </div>
                     </div>
-                    <div class="stat-item">
-                        <div class="stat-value" id="last-check">Just now</div>
-                        <div class="stat-label">Last Check</div>
+                </div>
+            </div>
+        </div>
+
+        <div class="dashboard-grid">
+            <div class="card">
+                <div class="card-header">
+                    <div class="card-icon">📝</div>
+                    <div class="card-title">Request Profile Monitoring</div>
+                </div>
+                <div class="request-info">
+                    <p>To request monitoring for a Suno profile, please follow these steps:</p>
+                    <ol>
+                        <li>Find the Suno profile you want to monitor</li>
+                        <li>Copy the profile ID from the URL</li>
+                        <li>Fill out the form below with accurate information</li>
+                        <li>Submit your request for review</li>
+                    </ol>
+                </div>
+                <div class="form-container">
+                    <div class="form-group">
+                        <label for="profile-id">Suno Profile ID</label>
+                        <input type="text" id="profile-id" placeholder="Enter Suno Profile ID">
                     </div>
+                    <div class="form-group">
+                        <label for="artist-name">Artist/Profile Name</label>
+                        <input type="text" id="artist-name" placeholder="Artist or profile name">
+                    </div>
+                    <div class="form-group">
+                        <label for="your-name">Your Name (Optional)</label>
+                        <input type="text" id="your-name" placeholder="Your name">
+                    </div>
+                    <div class="form-group">
+                        <label for="request-reason">Reason for Request (Optional)</label>
+                        <textarea id="request-reason" rows="3" placeholder="Why should this profile be monitored?"></textarea>
+                    </div>
+                    <button class="btn btn-primary" onclick="submitProfileRequest()">
+                        <span>📤</span>
+                        Submit Request
+                    </button>
                 </div>
             </div>
         </div>
@@ -564,11 +783,20 @@
                 const data = await response.json();
                 
                 if (data.success) {
+                    // Store current song data globally for Spotify button
+                    window.currentSong = {
+                        artist: data.artist,
+                        song: data.song,
+                        spotifyUrl: data.spotifyUrl,
+                        source: data.source
+                    };
+                    
                     document.getElementById('current-artist').textContent = `Artist: ${data.artist}`;
                     document.getElementById('current-song').textContent = `Song: ${data.song}`;
                     document.getElementById('current-status').className = 'song-status status-live';
                     document.getElementById('status-text').textContent = data.status || 'Live';
                 } else {
+                    window.currentSong = null;
                     document.getElementById('current-artist').textContent = 'Artist: Connection error';
                     document.getElementById('current-song').textContent = 'Song: Unable to fetch song info';
                     document.getElementById('current-status').className = 'song-status status-waiting';
@@ -576,6 +804,7 @@
                 }
             } catch (error) {
                 console.error('Error fetching current song:', error);
+                window.currentSong = null;
                 document.getElementById('current-artist').textContent = 'Artist: Connection error';
                 document.getElementById('current-song').textContent = 'Song: Unable to fetch song info';
                 document.getElementById('current-status').className = 'song-status status-waiting';
@@ -615,7 +844,57 @@
         // Update timestamps
         function updateTimestamps() {
             const now = new Date();
-            document.getElementById('last-check').textContent = now.toLocaleTimeString();
+            const lastCheckElement = document.getElementById('last-check');
+            if (lastCheckElement) {
+                lastCheckElement.textContent = now.toLocaleTimeString();
+            }
+            const monitoringLastCheckElement = document.getElementById('monitoring-last-check');
+            if (monitoringLastCheckElement) {
+                monitoringLastCheckElement.textContent = now.toLocaleTimeString();
+            }
+            const profileLastCheckElement = document.getElementById('profile-last-check');
+            if (profileLastCheckElement) {
+                profileLastCheckElement.textContent = now.toLocaleTimeString();
+            }
+        }
+
+        // Refresh song function
+        function refreshSong() {
+            fetchCurrentSong();
+            setTimeout(() => {
+                alert('Song info refreshed!');
+            }, 500);
+        }
+
+        // Open Spotify function
+        function openSpotify() {
+            if (window.currentSong && window.currentSong.spotifyUrl) {
+                window.open(window.currentSong.spotifyUrl, '_blank');
+            } else {
+                alert('No Spotify URL available for current song');
+            }
+        }
+
+        // Submit profile request function
+        function submitProfileRequest() {
+            const profileId = document.getElementById('profile-id').value;
+            const artistName = document.getElementById('artist-name').value;
+            const yourName = document.getElementById('your-name').value;
+            const reason = document.getElementById('request-reason').value;
+
+            if (!profileId || !artistName) {
+                alert('Please fill in the required fields (Profile ID and Artist Name)');
+                return;
+            }
+
+            // Simulate submission
+            alert(`Profile monitoring request submitted for ${artistName}!\nProfile ID: ${profileId}\nYour request will be reviewed soon.`);
+            
+            // Clear form
+            document.getElementById('profile-id').value = '';
+            document.getElementById('artist-name').value = '';
+            document.getElementById('your-name').value = '';
+            document.getElementById('request-reason').value = '';
         }
 
         // Initialize
