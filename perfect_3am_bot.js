@@ -466,7 +466,7 @@ class Enhanced3AMBot {
 
         async function updateLiveMusicInfo() {
             try {
-                const response = await fetch('/api/now-playing');
+                const response = await fetch('/now-playing');
                 const data = await response.json();
                 
                 if (data.isPlaying) {
@@ -617,7 +617,7 @@ class Enhanced3AMBot {
             res.send(htmlContent);
         });
 
-        this.app.get('/api/now-playing', async (req, res) => {
+        this.app.get('/now-playing', async (req, res) => {
             try {
                 // Get the Music Video channel where FlaviBot plays
                 const musicVideoChannelId = '1375615201990283303';
