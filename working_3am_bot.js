@@ -51,7 +51,10 @@ class Working3AMBot {
                 .addStringOption(option =>
                     option.setName('url')
                         .setDescription('Suno song URL')
-                        .setRequired(true))
+                        .setRequired(true)),
+            new SlashCommandBuilder()
+                .setName('website')
+                .setDescription('Access the 3AM VERIFIED music dashboard')
         ].map(command => command.toJSON());
 
         const rest = new REST({ version: '10' }).setToken(process.env.DISCORD_TOKEN);
@@ -78,6 +81,36 @@ class Working3AMBot {
                 const url = interaction.options.getString('url');
                 await this.postSunoToDiscord('Song Title', url, 'Auto-posted song');
                 await interaction.reply('✅ Song posted!');
+            }
+
+            if (interaction.commandName === 'website') {
+                const embed = {
+                    title: '🎵 3AM VERIFIED Music Dashboard',
+                    description: '**Access the ultimate music monitoring dashboard**\n\n🎧 **Live Music Detection**\n📱 **Mobile Optimized**\n🎵 **Suno Integration**\n💬 **Discord Connected**',
+                    color: 0x8A2BE2, // Purple color
+                    thumbnail: {
+                        url: 'https://cdn.discordapp.com/attachments/your-channel/your-attachment/3am-logo.png' // You can replace with actual logo URL
+                    },
+                    fields: [
+                        {
+                            name: '🌟 Features',
+                            value: '• Real-time music tracking\n• Auto-post Suno songs\n• Download music tools\n• Profile monitoring',
+                            inline: true
+                        },
+                        {
+                            name: '🔗 Quick Access',
+                            value: '[**Launch Dashboard**](http://localhost:5000)\n[**Join Discord**](https://discord.gg/JFwEY6mrnn)\n[**Visit Suno**](https://suno.com/@3kloudz)',
+                            inline: true
+                        }
+                    ],
+                    footer: {
+                        text: '3AM VERIFIED • Brought to you by 3Kloudz',
+                        icon_url: 'https://cdn.discordapp.com/attachments/your-channel/your-attachment/3kloudz-profile.jpg'
+                    },
+                    timestamp: new Date().toISOString()
+                };
+
+                await interaction.reply({ embeds: [embed] });
             }
         });
     }
