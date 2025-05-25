@@ -69,9 +69,38 @@ class Working3AMBot {
         }
     }
 
+    async registerSlashCommandsAfterReady() {
+        const commands = [
+            new SlashCommandBuilder()
+                .setName('suno')
+                .setDescription('Post a Suno song to Discord')
+                .addStringOption(option =>
+                    option.setName('url')
+                        .setDescription('Suno song URL')
+                        .setRequired(true)),
+            new SlashCommandBuilder()
+                .setName('website')
+                .setDescription('Access the 3AM VERIFIED music dashboard')
+        ].map(command => command.toJSON());
+
+        const rest = new REST({ version: '10' }).setToken(process.env.DISCORD_TOKEN);
+
+        try {
+            await rest.put(
+                Routes.applicationCommands(this.client.user.id),
+                { body: commands }
+            );
+            console.log('✅ Slash commands registered successfully');
+        } catch (error) {
+            console.error('Error registering commands:', error);
+        }
+    }
+
     setupDiscordEvents() {
-        this.client.on('ready', () => {
+        this.client.on('ready', async () => {
             console.log(`Logged in as ${this.client.user.tag}!`);
+            // Register commands after client is ready
+            await this.registerSlashCommandsAfterReady();
         });
 
         this.client.on('interactionCreate', async interaction => {
