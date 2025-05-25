@@ -128,7 +128,7 @@ class Working3AMBot {
                         },
                         {
                             name: '🔗 Quick Access',
-                            value: '[**🌐 Launch Dashboard**](http://localhost:5000)\n[**💬 Join Discord**](https://discord.gg/JFwEY6mrnn)\n[**🎵 Visit Suno**](https://suno.com/@3kloudz)',
+                            value: '[**🌐 Launch Dashboard**](http://localhost:5000)\n[**🎵 Visit Suno Profile**](https://suno.com/@3kloudz)\n[**📊 View Live Stats**](http://localhost:5000#monitoring)',
                             inline: true
                         }
                     ],
