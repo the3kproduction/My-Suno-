@@ -123,12 +123,12 @@ class Working3AMBot {
                     fields: [
                         {
                             name: '🌟 Interactive Features',
-                            value: '🎵 [**Real-time Music Tracking**](http://localhost:5000#now-playing)\n🚀 [**Auto-post Suno Songs**](http://localhost:5000#auto-post)\n⬇️ [**Download Music Tools**](http://localhost:5000#download)\n👤 [**Profile Monitoring**](http://localhost:5000#monitoring)',
+                            value: '🎵 [**Real-time Music Tracking**](https://my-suno.onrender.com#now-playing)\n🚀 [**Auto-post Suno Songs**](https://my-suno.onrender.com#auto-post)\n⬇️ [**Download Music Tools**](https://my-suno.onrender.com#download)\n👤 [**Profile Monitoring**](https://my-suno.onrender.com#monitoring)',
                             inline: true
                         },
                         {
                             name: '🔗 Quick Access',
-                            value: '[**🌐 Launch Dashboard**](http://localhost:5000)\n[**🎵 Visit Suno Profile**](https://suno.com/@3kloudz)\n[**📊 View Live Stats**](http://localhost:5000#monitoring)',
+                            value: '[**🌐 Launch Dashboard**](https://my-suno.onrender.com)\n[**🎵 Visit Suno Profile**](https://suno.com/@3kloudz)\n[**📊 View Live Stats**](https://my-suno.onrender.com#monitoring)',
                             inline: true
                         }
                     ],
@@ -146,25 +146,25 @@ class Working3AMBot {
                             type: 2, // Button
                             style: 5, // Link style
                             label: '🎵 Live Music',
-                            url: 'http://localhost:5000#now-playing'
+                            url: 'https://my-suno.onrender.com#now-playing'
                         },
                         {
                             type: 2,
                             style: 5,
                             label: '🚀 Auto-Post',
-                            url: 'http://localhost:5000#auto-post'
+                            url: 'https://my-suno.onrender.com#auto-post'
                         },
                         {
                             type: 2,
                             style: 5,
                             label: '⬇️ Download',
-                            url: 'http://localhost:5000#download'
+                            url: 'https://my-suno.onrender.com#download'
                         },
                         {
                             type: 2,
                             style: 5,
                             label: '👤 Monitor',
-                            url: 'http://localhost:5000#monitoring'
+                            url: 'https://my-suno.onrender.com#monitoring'
                         }
                     ]
                 };
