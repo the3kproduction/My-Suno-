@@ -118,17 +118,17 @@ class Working3AMBot {
                     description: '**Access the ultimate music monitoring dashboard**\n\n🎧 **Live Music Detection**\n📱 **Mobile Optimized**\n🎵 **Suno Integration**\n💬 **Discord Connected**',
                     color: 0x8A2BE2, // Purple color
                     thumbnail: {
-                        url: 'https://cdn.discordapp.com/attachments/your-channel/your-attachment/3am-logo.png' // You can replace with actual logo URL
+                        url: 'https://cdn.discordapp.com/attachments/your-channel/your-attachment/3am-logo.png'
                     },
                     fields: [
                         {
-                            name: '🌟 Features',
-                            value: '• Real-time music tracking\n• Auto-post Suno songs\n• Download music tools\n• Profile monitoring',
+                            name: '🌟 Interactive Features',
+                            value: '🎵 [**Real-time Music Tracking**](http://localhost:5000#now-playing)\n🚀 [**Auto-post Suno Songs**](http://localhost:5000#auto-post)\n⬇️ [**Download Music Tools**](http://localhost:5000#download)\n👤 [**Profile Monitoring**](http://localhost:5000#monitoring)',
                             inline: true
                         },
                         {
                             name: '🔗 Quick Access',
-                            value: '[**Launch Dashboard**](http://localhost:5000)\n[**Join Discord**](https://discord.gg/JFwEY6mrnn)\n[**Visit Suno**](https://suno.com/@3kloudz)',
+                            value: '[**🌐 Launch Dashboard**](http://localhost:5000)\n[**💬 Join Discord**](https://discord.gg/JFwEY6mrnn)\n[**🎵 Visit Suno**](https://suno.com/@3kloudz)',
                             inline: true
                         }
                     ],
@@ -139,7 +139,40 @@ class Working3AMBot {
                     timestamp: new Date().toISOString()
                 };
 
-                await interaction.reply({ embeds: [embed] });
+                const buttons = {
+                    type: 1, // Action Row
+                    components: [
+                        {
+                            type: 2, // Button
+                            style: 5, // Link style
+                            label: '🎵 Live Music',
+                            url: 'http://localhost:5000#now-playing'
+                        },
+                        {
+                            type: 2,
+                            style: 5,
+                            label: '🚀 Auto-Post',
+                            url: 'http://localhost:5000#auto-post'
+                        },
+                        {
+                            type: 2,
+                            style: 5,
+                            label: '⬇️ Download',
+                            url: 'http://localhost:5000#download'
+                        },
+                        {
+                            type: 2,
+                            style: 5,
+                            label: '👤 Monitor',
+                            url: 'http://localhost:5000#monitoring'
+                        }
+                    ]
+                };
+
+                await interaction.reply({ 
+                    embeds: [embed],
+                    components: [buttons]
+                });
             }
         });
     }
